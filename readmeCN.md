@@ -4,7 +4,7 @@
 
 ## 一：开发宗旨
     本着尽量少修改或不修改原有工程源代码的原则;
-    仅支持 Delphi Dll 窗体; PBox2 支持 VC、QT Dll 窗体
+    仅支持 Delphi Dll 窗体; [PBox2](https://github.com/dbyoung720/PBox2) 支持 VC、QT Dll 窗体
 
 ## 二：开发平台
     Delphi10.3.3、WIN10X64 下开发；

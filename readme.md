@@ -4,7 +4,7 @@
 
 ## I. Development purpose
     Based on the principle of minimizing or not modifying the original project source code;
-    Only Support Delphi Dll Form; PBox2 Support VC¡¢QT, Dll Form
+    Only Support Delphi Dll Form; [PBox2](https://github.com/dbyoung720/PBox2) Support VC¡¢QT, Dll Form
 
 ## II. Development platform
     Delphi10.3.3¡¢WIN10X64£»
