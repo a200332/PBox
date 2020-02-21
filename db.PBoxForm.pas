@@ -115,11 +115,8 @@ type
     procedure OnSubModuleListClick(Sender: TObject);
     { 获取垂直位置间隔 }
     function GetMaxInstance(const intCurrentIndex, intCount: Integer): Integer;
-  protected
-    { 销毁上一次创建的 Dll 窗体 }
-    procedure WMDESTORYPREDLLFORM(var msg: TMessage); message WM_DESTORYPREDLLFORM;
-    { 创建新的 DLL 窗体 }
-    procedure WMCREATENEWDLLFORM(var msg: TMessage); message WM_CREATENEWDLLFORM;
+    { 销毁 Dll 窗体 }
+    procedure DestoryDllForm;
   end;
 
 var
@@ -131,13 +128,27 @@ uses db.ConfigForm;
 
 {$R *.dfm}
 
+{ 销毁 Dll 窗体 }
+procedure TfrmPBox.DestoryDllForm;
+var
+  hDll: HMODULE;
+begin
+  if FDelphiDllForm = nil then
+    Exit;
+
+  hDll := FDelphiDllForm.Tag;
+  FDelphiDllForm.Free;
+  FDelphiDllForm := nil;
+  FreeLibrary(hDll);
+end;
+
 { 系统配置 }
 procedure TfrmPBox.OnSysConfig(Sender: TObject);
 begin
   if ShowConfigForm(FlstAllDll) then
   begin
     Hide;
-    SendMessage(Handle, WM_DESTORYPREDLLFORM, 0, 0);
+    DestoryDllForm;
     ReCreate;
     Show;
   end;
@@ -159,15 +170,15 @@ begin
   end;
 end;
 
-{ 创建新的 DLL 窗体 }
-procedure TfrmPBox.WMCREATENEWDLLFORM(var msg: TMessage);
+{ 创建新的 Dll 窗体 }
+procedure TfrmPBox.CreateDllForm;
 var
-  hDll                              : HMODULE;
-  ShowDllForm                       : Tdb_ShowDllForm_Plugins;
-  frm                               : TFormClass;
-  strParamModuleName, strModuleName : PAnsiChar;
-  strIconFileName                   : PAnsiChar;
-  strFileValue                      : String;
+  hDll                             : HMODULE;
+  ShowDllForm                      : Tdb_ShowDllForm_Plugins;
+  frm                              : TFormClass;
+  strParamModuleName, strModuleName: PAnsiChar;
+  strIconFileName                  : PAnsiChar;
+  strFileValue                     : String;
 begin
   if g_strCreateDllFileName = '' then
     Exit;
@@ -194,45 +205,6 @@ begin
   PBoxRun_DelphiDll(FDelphiDllForm, rzpgcntrlAll, tsDll, OnDelphiDllFormDestory);
 end;
 
-{ 创建新的 Dll 窗体 }
-procedure TfrmPBox.CreateDllForm;
-begin
-  PostMessage(Handle, WM_CREATENEWDLLFORM, 0, 0);
-end;
-
-{ 销毁上一次创建的 Dll 窗体 }
-procedure TfrmPBox.WMDESTORYPREDLLFORM(var msg: TMessage);
-var
-  hDll    : HMODULE;
-  hProcess: Cardinal;
-begin
-  { 是否是 EXE 窗体 }
-  if g_hEXEProcessID <> 0 then
-  begin
-    hProcess := OpenProcess(PROCESS_TERMINATE, False, g_hEXEProcessID);
-    TerminateProcess(hProcess, 0);
-    g_hEXEProcessID := 0;
-    if Visible then
-      CreateDllForm;
-
-    Exit;
-  end;
-
-  { 是否是 Delphi 创建的 Dll 窗体 }
-  if FDelphiDllForm <> nil then
-  begin
-    hDll := FDelphiDllForm.Tag;
-    FDelphiDllForm.Free;
-    FDelphiDllForm := nil;
-    FreeLibrary(hDll);
-
-    if Visible then
-      CreateDllForm;
-
-    Exit;
-  end;
-end;
-
 { 点击菜单 }
 procedure TfrmPBox.OnMenuItemClick(Sender: TObject);
 begin
@@ -245,7 +217,10 @@ begin
   g_strCreateDllFileName := FlstAllDll.Names[TMenuItem(Sender).Tag];
 
   { 销毁上一次创建的 Dll 窗体 }
-  PostMessage(Handle, WM_DESTORYPREDLLFORM, 0, 0);
+  DestoryDllForm;
+
+  { 创建新的 Dll 窗体 }
+  CreateDllForm;
 end;
 
 function TfrmPBox.GetExeFileIcon(const strFileName: String): Integer;
@@ -451,7 +426,7 @@ begin
         { 获取 Dll 参数 }
         ShowDllForm(frm, strPModuleName, strSModuleName, strIconFileName);
         intIconIndex := GetDllFileIcon(string(strPModuleName), string(strSModuleName), string(strIconFileName));
-        strInfo      := strDllFileName + '=' + string(strPModuleName) + ';' + string(strSModuleName) + ';' + string(strIconFileName) + ';' + IntToStr(intIconIndex);
+        strInfo      := strDllFileName + '=' + string(strPModuleName) + ';' + string(strSModuleName) + ';' + ';' + ';' + string(strIconFileName) + ';' + IntToStr(intIconIndex);
         FlstAllDll.Add(strInfo);
       finally
         FreeLibrary(hDll);

@@ -38,25 +38,18 @@ type
     { Public declarations }
   end;
 
-type
-  { 支持的文件类型 }
-  TSPFileType = (ftDelphiDll, ftVCDialogDll, ftVCMFCDll, ftQTDll, ftEXE);
-
-procedure db_ShowDllForm_Plugins(var frm: TFormClass; var ft: TSPFileType; var strParentModuleName, strModuleName, strClassName, strWindowName, strIconFileName: PAnsiChar; const bShow: Boolean = True); stdcall;
+procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strModuleName, strIconFileName: PAnsiChar); stdcall;
 
 implementation
 
 {$R *.dfm}
 
-procedure db_ShowDllForm_Plugins(var frm: TFormClass; var ft: TSPFileType; var strParentModuleName, strModuleName, strClassName, strWindowName, strIconFileName: PAnsiChar; const bShow: Boolean = True); stdcall;
+procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strModuleName, strIconFileName: PAnsiChar); stdcall;
 begin
   frm                     := TfrmSysSearch;
-  ft                      := ftDelphiDll;
   strParentModuleName     := '系统管理';
   strModuleName           := '系统搜索路径';
   strIconFileName         := '';
-  strClassName            := '';
-  strWindowName           := '';
   Application.Handle      := GetMainFormApplication.Handle;
   Application.Icon.Handle := GetMainFormApplication.Icon.Handle;
 end;

@@ -33,8 +33,6 @@ const
   c_strMsgTitle: PChar                        = '系统提示：';
   c_strAESKey                                 = 'dbyoung@sina.com';
   c_strDllExportName                          = 'db_ShowDllForm_Plugins';
-  WM_DESTORYPREDLLFORM                        = WM_USER + 1000;
-  WM_CREATENEWDLLFORM                         = WM_USER + 1001;
 
 { 只允许运行一个实例 }
 procedure OnlyOneRunInstance;
