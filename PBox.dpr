@@ -8,8 +8,6 @@ uses
   Vcl.Forms,
   db.uBaseForm in 'db.uBaseForm.pas',
   db.uCommon in 'db.uCommon.pas',
-  db.uHashCode in 'db.uHashCode.pas',
-  db.uNetworkManager in 'db.uNetworkManager.pas',
   db.uCreateDelphiDll in 'db.uCreateDelphiDll.pas',
   db.uCreateEXE in 'db.uCreateEXE.pas',
   db.PBoxForm in 'db.PBoxForm.pas' {frmPBox},

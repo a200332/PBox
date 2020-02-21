@@ -155,8 +155,6 @@
         </DelphiCompile>
         <DCCReference Include="db.uBaseForm.pas"/>
         <DCCReference Include="db.uCommon.pas"/>
-        <DCCReference Include="db.uHashCode.pas"/>
-        <DCCReference Include="db.uNetworkManager.pas"/>
         <DCCReference Include="db.uCreateDelphiDll.pas"/>
         <DCCReference Include="db.uCreateEXE.pas"/>
         <DCCReference Include="db.PBoxForm.pas">
