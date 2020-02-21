@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899-12-30 00:00:00.000.826,=E:\dbyoung\PBox2\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.760,E:\dbyoung\PBox2\Unit1.pas=E:\dbyoung\PBox2\db.uCreateVCMFCDll.pas</Transaction>
+    <Transaction>2020-02-21 15:46:29.577,E:\dbyoung\PBox\db.uCreateVCDialogDll.pas=</Transaction>
+    <Transaction>2020-02-21 15:48:02.442,E:\dbyoung\PBox\db.uCreateVCMFCDll.pas=</Transaction>
+  </Transactions>
+</BorlandProject>
