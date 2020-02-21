@@ -21,8 +21,6 @@
 * 示例：Module\SysSPath
 * Delphi 函数声明：
 ```
- type
- { 支持的文件类型 }
  procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strSubModuleName, strIconFileName: PAnsiChar); stdcall;
 ```
 

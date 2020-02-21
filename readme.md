@@ -21,7 +21,6 @@
 * Example: Module\SysSPath
 * Delphi function declaration:  
 ```
- type
  procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strSubModuleName, strIconFileName: PAnsiChar); stdcall;
 ```
 
