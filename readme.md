@@ -9,7 +9,6 @@
 ## II. Development platform
     Delphi10.3.3¡¢WIN10X64£»
     The code does not use any third-party controls£»
-    It refers to the OpenSource code Library£¬It is placed under the 3rdparty directory; directly referenced and does not need to be installed;
     WIN7X64¡¢WIN10X64 test pass£»Support X86¡¢X64;
     Email£ºdbyoung@sina.com
     QQ   £º101611228

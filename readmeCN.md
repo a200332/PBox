@@ -4,12 +4,11 @@
 
 ## 一：开发宗旨
     本着尽量少修改或不修改原有工程源代码的原则;
-    仅支持 Delphi 窗体; PBox2 支持 VC、QT 窗体
+    仅支持 Delphi Dll 窗体; PBox2 支持 VC、QT Dll 窗体
 
 ## 二：开发平台
     Delphi10.3.3、WIN10X64 下开发；
     代码没有使用任何第三方控件；
-    引用了一些开源库，统一放置在 3rdparty 目录下面；直接引用，无需安装;
     WIN7X64、WIN10X64下测试通过；支持X86、X64;
     邮箱：dbyoung@sina.com
     QQ群：101611228
