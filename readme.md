@@ -1,4 +1,4 @@
-# PBox is a modular development platform based on Dll Form
+# PBox is a modular development platform based on Delphi Dll Form
 
 - [¼òÌåÖÐÎÄ](readmeCN.md)
 
