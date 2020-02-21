@@ -103,7 +103,7 @@
         <AppDPIAwarenessMode>system</AppDPIAwarenessMode>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <DCC_UnitSearchPath>.\3rdparty\AES;.\3rdparty\HOOK;.\3rdparty\NtUtilsLibrary\Headers;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>.\3rdparty\AES;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_ExeOutput>.\bin\$(Platform)</DCC_ExeOutput>
         <Icon_MainIcon>02.ico</Icon_MainIcon>
         <DCC_DebugInfoInExe>false</DCC_DebugInfoInExe>
@@ -113,7 +113,7 @@
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <DCC_ExeOutput>.\bin\$(Platform)</DCC_ExeOutput>
-        <DCC_UnitSearchPath>.\3rdparty\AES;.\3rdparty\HOOK;.\3rdparty\NtUtilsLibrary\Headers;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>.\3rdparty\AES;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Icon_MainIcon>02.ico</Icon_MainIcon>
@@ -130,7 +130,7 @@
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
-        <DCC_UnitSearchPath>.\3rdparty\AES;.\3rdparty\HOOK;.\3rdparty\NtUtilsLibrary\Headers;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>.\3rdparty\AES;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_ExeOutput>.\bin\$(Platform)</DCC_ExeOutput>
@@ -143,7 +143,7 @@
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <DCC_ExeOutput>.\bin\$(Platform)</DCC_ExeOutput>
-        <DCC_UnitSearchPath>.\3rdparty\AES;.\3rdparty\HOOK;.\3rdparty\NtUtilsLibrary\Headers;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>.\3rdparty\AES;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Icon_MainIcon>02.ico</Icon_MainIcon>

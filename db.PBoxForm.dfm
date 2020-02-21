@@ -1,7 +1,7 @@
 object frmPBox: TfrmPBox
   Left = 0
   Top = 0
-  Caption = 'PBox '#24037#20855#31665' v2.0'
+  Caption = 'PBox '#24037#20855#31665' v1.0'
   ClientHeight = 723
   ClientWidth = 1127
   Color = clBtnFace
@@ -320,10 +320,6 @@ object frmPBox: TfrmPBox
     end
     object tsList: TTabSheet
       Caption = 'tsList'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object imgListBack: TImage
         Left = 0
         Top = 0
