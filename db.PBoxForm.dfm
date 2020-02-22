@@ -257,6 +257,10 @@ object frmPBox: TfrmPBox
     TabOrder = 2
     object tsButton: TTabSheet
       Caption = 'tsButton'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object imgButtonBack: TImage
         Left = 0
         Top = 0
@@ -320,6 +324,10 @@ object frmPBox: TfrmPBox
     end
     object tsList: TTabSheet
       Caption = 'tsList'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object imgListBack: TImage
         Left = 0
         Top = 0

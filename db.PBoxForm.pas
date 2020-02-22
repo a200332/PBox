@@ -128,20 +128,6 @@ uses db.ConfigForm;
 
 {$R *.dfm}
 
-{ 销毁 Dll 窗体 }
-procedure TfrmPBox.DestoryDllForm;
-var
-  hDll: HMODULE;
-begin
-  if FDelphiDllForm = nil then
-    Exit;
-
-  hDll := FDelphiDllForm.Tag;
-  FDelphiDllForm.Free;
-  FDelphiDllForm := nil;
-  FreeLibrary(hDll);
-end;
-
 { 系统配置 }
 procedure TfrmPBox.OnSysConfig(Sender: TObject);
 begin
@@ -151,6 +137,27 @@ begin
     DestoryDllForm;
     ReCreate;
     Show;
+  end;
+end;
+
+{ 销毁 Dll/EXE 窗体 }
+procedure TfrmPBox.DestoryDllForm;
+var
+  hProcess: Cardinal;
+begin
+  { 是否有 EXE 窗体存在 }
+  if g_hEXEProcessID <> 0 then
+  begin
+    hProcess := OpenProcess(PROCESS_TERMINATE, False, g_hEXEProcessID);
+    TerminateProcess(hProcess, 0);
+    g_hEXEProcessID := 0;
+  end;
+
+  { 是否有 Delphi Dll 窗体存在 }
+  if FDelphiDllForm <> nil then
+  begin
+    { 关闭窗体 }
+    CloseDelphiDllForm;
   end;
 end;
 
@@ -214,12 +221,11 @@ begin
   if (g_strCreateDllFileName <> '') and (g_strCreateDllFileName = FlstAllDll.Names[TMenuItem(Sender).Tag]) then
     Exit;
 
-  g_strCreateDllFileName := FlstAllDll.Names[TMenuItem(Sender).Tag];
-
   { 销毁上一次创建的 Dll 窗体 }
   DestoryDllForm;
 
   { 创建新的 Dll 窗体 }
+  g_strCreateDllFileName := FlstAllDll.Names[TMenuItem(Sender).Tag];
   CreateDllForm;
 end;
 
