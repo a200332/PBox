@@ -5,3 +5,5 @@ Win32
 /PBox.dproj.local
 *.identcache
 *.local
+/Module/PEInfo/PEInfo.identcache
+/Module/PEInfo/PEInfo.dproj.local
