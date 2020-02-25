@@ -1,0 +1,3 @@
+[submodule "3rdparty/DOSCommand"]
+	path = 3rdparty/DOSCommand
+	url = https://github.com/TurboPack/DOSCommand.git
