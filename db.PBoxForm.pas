@@ -560,7 +560,6 @@ procedure TfrmPBox.FillParamBlank;
 var
   I, J: Integer;
 begin
-  g_intVCDialogDllFormHandle := 0;
   g_strCreateDllFileName     := '';
   g_bExitProgram             := False;
   g_hEXEProcessID            := 0;

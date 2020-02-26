@@ -34,7 +34,7 @@ const
   c_strAESKey                                 = 'dbyoung@sina.com';
   c_strDllExportName                          = 'db_ShowDllForm_Plugins';
 
-{ 只允许运行一个实例 }
+  { 只允许运行一个实例 }
 procedure OnlyOneRunInstance;
 
 { 提升权限 }
@@ -118,12 +118,10 @@ procedure DelayTime(const intTime: Integer);
 procedure SetDllSearchPath;
 
 var
-  g_intVCDialogDllFormHandle: THandle = 0;
-  g_intVCMFCDllFormHandle   : THandle = 0;
-  g_strCreateDllFileName    : string  = '';
-  g_bExitProgram            : Boolean = False;
-  g_hEXEProcessID           : DWORD   = 0;
-  g_strCurrentLoginName     : string  = '';
+  g_strCreateDllFileName: string  = '';
+  g_bExitProgram        : Boolean = False;
+  g_hEXEProcessID       : DWORD   = 0;
+  g_strCurrentLoginName : string  = '';
 
 implementation
 
