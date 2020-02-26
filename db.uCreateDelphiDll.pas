@@ -7,7 +7,7 @@ interface
 
 uses Vcl.Forms, Winapi.Windows, Winapi.Messages, System.Classes, Vcl.Graphics, Vcl.ComCtrls, Vcl.Controls, Vcl.StdCtrls, db.uCommon;
 
-procedure PBoxRun_DelphiDll(var DllForm: TForm; Page: TPageControl; tsDllForm: TTabSheet; OnDelphiDllFormDestroy: TNotifyEvent);
+procedure PBoxRun_DelphiDll(var DllForm: TForm; const strPEFileName: String; Page: TPageControl; tsDllForm: TTabSheet; OnDelphiDllFormDestroy: TNotifyEvent);
 procedure CloseDelphiDllForm;
 
 implementation
@@ -46,7 +46,7 @@ begin
   end;
 end;
 
-procedure PBoxRun_DelphiDll(var DllForm: TForm; Page: TPageControl; tsDllForm: TTabSheet; OnDelphiDllFormDestroy: TNotifyEvent);
+procedure PBoxRun_DelphiDll(var DllForm: TForm; const strPEFileName: String; Page: TPageControl; tsDllForm: TTabSheet; OnDelphiDllFormDestroy: TNotifyEvent);
 var
   hDll                             : HMODULE;
   ShowDllForm                      : Tdb_ShowDllForm_Plugins;
@@ -54,7 +54,7 @@ var
   strParamModuleName, strModuleName: PAnsiChar;
   strIconFileName                  : PAnsiChar;
 begin
-  hDll        := LoadLibrary(PChar(g_strCreateDllFileName));
+  hDll        := LoadLibrary(PChar(strPEFileName));
   ShowDllForm := GetProcAddress(hDll, c_strDllExportName);
   ShowDllForm(frm, strParamModuleName, strModuleName, strIconFileName);
   DllForm                 := frm.Create(nil);

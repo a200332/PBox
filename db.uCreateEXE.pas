@@ -12,14 +12,13 @@ procedure PBoxRun_IMAGE_EXE(const strEXEFileName, strFileValue: String; pg: TPag
 implementation
 
 var
-  FstrFileValue              : string;
-  FstrEXEFormClassName       : string = '';
-  FstrEXEFormTitleName       : string = '';
-  FPageControl               : TPageControl;
-  FTabsheet                  : TTabSheet;
-  FlblInfo                   : TLabel;
-  FstrCreateDllFileNameBackUp: String;
-  FUIShowStyle               : TShowStyle;
+  FstrFileValue       : string;
+  FstrEXEFormClassName: string = '';
+  FstrEXEFormTitleName: string = '';
+  FPageControl        : TPageControl;
+  FTabsheet           : TTabSheet;
+  FlblInfo            : TLabel;
+  FUIShowStyle        : TShowStyle;
 
   { 进程是否关闭 }
 function CheckProcessExist(const intPID: DWORD): Boolean;
@@ -46,21 +45,18 @@ end;
 
 { 进程关闭后，变量复位 }
 procedure EndExeForm(hWnd: hWnd; uMsg, idEvent: UINT; dwTime: DWORD); stdcall;
+var
+  intPID: DWORD;
 begin
-  if CheckProcessExist(g_hEXEProcessID) then
+  intPID := Application.MainForm.Tag;
+  if intPID = 0 then
     Exit;
 
-  if FstrCreateDllFileNameBackUp <> g_strCreateDllFileName then
-  begin
-    g_hEXEProcessID := 0;
-  end
-  else
-  begin
-    FlblInfo.Caption            := '';
-    g_hEXEProcessID             := 0;
-    g_strCreateDllFileName      := '';
-    FstrCreateDllFileNameBackUp := '';
-  end;
+  if CheckProcessExist(intPID) then
+    Exit;
+
+  FlblInfo.Caption         := '';
+  Application.MainForm.Tag := 0;
 
   if FUIShowStyle = ssButton then
     FPageControl.ActivePageIndex := 0
@@ -74,11 +70,14 @@ end;
 procedure FindExeForm(hWnd: hWnd; uMsg, idEvent: UINT; dwTime: DWORD); stdcall;
 var
   hEXEFormHandle: THandle;
+  intPID        : DWORD;
 begin
   hEXEFormHandle := FindWindow(PChar(FstrEXEFormClassName), PChar(FstrEXEFormTitleName));
   if hEXEFormHandle <> 0 then
   begin
-    GetWindowThreadProcessId(hEXEFormHandle, g_hEXEProcessID);
+    GetWindowThreadProcessId(hEXEFormHandle, intPID);
+    Application.MainForm.Tag := intPID;
+
     SetWindowPos(hEXEFormHandle, FTabsheet.Handle, 0, 0, FTabsheet.Width, FTabsheet.Height, SWP_NOZORDER OR SWP_NOACTIVATE);                               // 最大化 Dll 子窗体
     Winapi.Windows.SetParent(hEXEFormHandle, FTabsheet.Handle);                                                                                            // 设置父窗体为 TabSheet
     RemoveMenu(GetSystemMenu(hEXEFormHandle, False), 0, MF_BYPOSITION);                                                                                    // 删除移动菜单
@@ -101,12 +100,11 @@ end;
 
 procedure PBoxRun_IMAGE_EXE(const strEXEFileName, strFileValue: String; pg: TPageControl; ts: TTabSheet; lblInfo: TLabel; const UIShowStyle: TShowStyle);
 begin
-  FPageControl                := pg;
-  FTabsheet                   := ts;
-  FlblInfo                    := lblInfo;
-  FstrFileValue               := strFileValue;
-  FstrCreateDllFileNameBackUp := g_strCreateDllFileName;
-  FUIShowStyle                := UIShowStyle;
+  FPageControl  := pg;
+  FTabsheet     := ts;
+  FlblInfo      := lblInfo;
+  FstrFileValue := strFileValue;
+  FUIShowStyle  := UIShowStyle;
 
   FstrEXEFormClassName := strFileValue.Split([';'])[2];
   FstrEXEFormTitleName := strFileValue.Split([';'])[3];

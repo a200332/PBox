@@ -117,12 +117,6 @@ procedure DelayTime(const intTime: Integer);
 { 设置 DLL 搜索路径 }
 procedure SetDllSearchPath;
 
-var
-  g_strCreateDllFileName: string  = '';
-  g_bExitProgram        : Boolean = False;
-  g_hEXEProcessID       : DWORD   = 0;
-  g_strCurrentLoginName : string  = '';
-
 implementation
 
 { 只允许运行一个实例 }

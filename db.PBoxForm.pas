@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, Winapi.ShellAPI, System.SysUtils, System.StrUtils, System.Classes, System.Types, System.IniFiles, System.Math, System.UITypes, System.ImageList,
   Vcl.Graphics, Vcl.Controls, Vcl.Buttons, Vcl.Forms, Vcl.ExtCtrls, Vcl.Menus, Vcl.ComCtrls, Vcl.StdCtrls, Vcl.ImgList, Vcl.ToolWin, Vcl.Imaging.jpeg,
-  db.uCommon, db.uBaseForm, db.uCreateDelphiDll, db.AddEXE, db.uCreateEXE;
+  db.uCommon, db.uBaseForm;
 
 type
   TfrmPBox = class(TUIBaseForm)
@@ -49,7 +49,6 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure tmrDateTimeTimer(Sender: TObject);
     procedure FormResize(Sender: TObject);
-    procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure mniTrayExitClick(Sender: TObject);
     procedure mniTrayShowFormClick(Sender: TObject);
     procedure imgSubModuleCloseClick(Sender: TObject);
@@ -74,7 +73,7 @@ type
     { 点击菜单 }
     procedure OnMenuItemClick(Sender: TObject);
     { 创建新的 Dll 窗体 }
-    procedure CreateDllForm;
+    procedure CreateDllForm(const strPEFileName: String);
     { 系统配置 }
     procedure OnSysConfig(Sender: TObject);
     { Delphi Dll Form 窗体关闭事件 }
@@ -124,7 +123,7 @@ var
 
 implementation
 
-uses db.ConfigForm;
+uses db.ConfigForm, db.uCreateDelphiDll, db.AddEXE, db.uCreateEXE;
 
 {$R *.dfm}
 
@@ -144,13 +143,15 @@ end;
 procedure TfrmPBox.DestoryDllForm;
 var
   hProcess: Cardinal;
+  intPID  : DWORD;
 begin
   { 是否有 EXE 窗体存在 }
-  if g_hEXEProcessID <> 0 then
+  intPID := Application.MainForm.Tag;
+  if intPID <> 0 then
   begin
-    hProcess := OpenProcess(PROCESS_TERMINATE, False, g_hEXEProcessID);
+    hProcess := OpenProcess(PROCESS_TERMINATE, False, intPID);
     TerminateProcess(hProcess, 0);
-    g_hEXEProcessID := 0;
+    Application.MainForm.Tag := 0;
   end;
 
   { 是否有 Delphi Dll 窗体存在 }
@@ -167,9 +168,8 @@ begin
   if FDelphiDllForm <> nil then
   begin
     FreeLibrary(FDelphiDllForm.Tag);
-    FDelphiDllForm         := nil;
-    g_strCreateDllFileName := '';
-    lblInfo.Caption        := '';
+    FDelphiDllForm  := nil;
+    lblInfo.Caption := '';
     if FUIShowStyle = ssButton then
       rzpgcntrlAll.ActivePageIndex := 0
     else if FUIShowStyle = ssList then
@@ -178,7 +178,7 @@ begin
 end;
 
 { 创建新的 Dll 窗体 }
-procedure TfrmPBox.CreateDllForm;
+procedure TfrmPBox.CreateDllForm(const strPEFileName: String);
 var
   hDll                             : HMODULE;
   ShowDllForm                      : Tdb_ShowDllForm_Plugins;
@@ -187,21 +187,21 @@ var
   strIconFileName                  : PAnsiChar;
   strFileValue                     : String;
 begin
-  if g_strCreateDllFileName = '' then
+  if strPEFileName = '' then
     Exit;
 
   SetDllSearchPath;
 
   { exe 文件 }
-  if (CompareText(ExtractFileExt(g_strCreateDllFileName), '.exe') = 0) or (CompareText(ExtractFileExt(g_strCreateDllFileName), '.msc') = 0) then
+  if (CompareText(ExtractFileExt(strPEFileName), '.exe') = 0) or (CompareText(ExtractFileExt(strPEFileName), '.msc') = 0) then
   begin
-    strFileValue := FlstAllDll.Values[g_strCreateDllFileName];
-    PBoxRun_IMAGE_EXE(g_strCreateDllFileName, strFileValue, rzpgcntrlAll, tsDll, lblInfo, FUIShowStyle);
+    strFileValue := FlstAllDll.Values[strPEFileName];
+    PBoxRun_IMAGE_EXE(strPEFileName, strFileValue, rzpgcntrlAll, tsDll, lblInfo, FUIShowStyle);
     Exit;
   end;
 
   { Dll 文件，获取文件类型 }
-  hDll := LoadLibrary(PChar(g_strCreateDllFileName));
+  hDll := LoadLibrary(PChar(strPEFileName));
   try
     ShowDllForm := GetProcAddress(hDll, c_strDllExportName);
     ShowDllForm(frm, strParamModuleName, strModuleName, strIconFileName);
@@ -209,24 +209,27 @@ begin
     FreeLibrary(hDll);
   end;
 
-  PBoxRun_DelphiDll(FDelphiDllForm, rzpgcntrlAll, tsDll, OnDelphiDllFormDestory);
+  PBoxRun_DelphiDll(FDelphiDllForm, strPEFileName, rzpgcntrlAll, tsDll, OnDelphiDllFormDestory);
 end;
 
 { 点击菜单 }
 procedure TfrmPBox.OnMenuItemClick(Sender: TObject);
+var
+  strTip: String;
 begin
-  lblInfo.Caption := TMenuItem(TMenuItem(Sender).Owner).Caption + ' - ' + TMenuItem(Sender).Caption;
+  strTip := TMenuItem(TMenuItem(Sender).Owner).Caption + ' - ' + TMenuItem(Sender).Caption;
 
   { 如果已经创建了，就不在重复创建了 }
-  if (g_strCreateDllFileName <> '') and (g_strCreateDllFileName = FlstAllDll.Names[TMenuItem(Sender).Tag]) then
+  if SameText(strTip, lblInfo.Caption) then
     Exit;
+
+  lblInfo.Caption := strTip;
 
   { 销毁上一次创建的 Dll 窗体 }
   DestoryDllForm;
 
   { 创建新的 Dll 窗体 }
-  g_strCreateDllFileName := FlstAllDll.Names[TMenuItem(Sender).Tag];
-  CreateDllForm;
+  CreateDllForm(FlstAllDll.Names[TMenuItem(Sender).Tag]);
 end;
 
 function TfrmPBox.GetExeFileIcon(const strFileName: String): Integer;
@@ -560,20 +563,17 @@ procedure TfrmPBox.FillParamBlank;
 var
   I, J: Integer;
 begin
-  g_strCreateDllFileName     := '';
-  g_bExitProgram             := False;
-  g_hEXEProcessID            := 0;
-  FUIShowStyle               := GetShowStyle;
-  FDelphiDllForm             := nil;
-  clbrPModule.Visible        := False;
-  pnlWeb.Visible             := False;
+  FUIShowStyle        := GetShowStyle;
+  FDelphiDllForm      := nil;
+  clbrPModule.Visible := False;
+  pnlWeb.Visible      := False;
+  lblInfo.Caption     := '';
+  tlbPModule.Images   := nil;
+  tlbPModule.Height   := 30;
+  tlbPModule.Menu     := nil;
+  FintBakRow          := 0;
   ilMainMenu.Clear;
   ilPModule.Clear;
-  lblInfo.Caption   := '';
-  tlbPModule.Images := nil;
-  tlbPModule.Height := 30;
-  tlbPModule.Menu   := nil;
-  FintBakRow        := 0;
 
   for I := tlbPModule.ButtonCount - 1 downto 0 do
   begin
@@ -615,10 +615,9 @@ procedure TfrmPBox.FormCreate(Sender: TObject);
 begin
   { 列表显示风格，关闭按钮状态 }
   LoadButtonBmp(imgSubModuleClose, 'Close', 0);
-  OnConfig         := OnSysConfig;
-  TrayIconPMenu    := pmTray;
-  FlstAllDll       := THashedStringList.Create;
-  lblLogin.Caption := g_strCurrentLoginName;
+  OnConfig      := OnSysConfig;
+  TrayIconPMenu := pmTray;
+  FlstAllDll    := THashedStringList.Create;
 
   { 显示 时间 }
   tmrDateTime.OnTimer(nil);
@@ -637,14 +636,9 @@ begin
     pnlDBLClick(nil);
 end;
 
-procedure TfrmPBox.FormClose(Sender: TObject; var Action: TCloseAction);
-begin
-  g_bExitProgram := True;
-  CloseDelphiDllForm;
-end;
-
 procedure TfrmPBox.FormDestroy(Sender: TObject);
 begin
+  DestoryDllForm;
   FlstAllDll.Free;
 end;
 

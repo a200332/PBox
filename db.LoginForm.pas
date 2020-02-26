@@ -77,7 +77,7 @@ begin
             { µÇÂ¼³É¹¦ }
             try
               SaveLoginInfo(IniFile);
-              g_strCurrentLoginName := edtUserName.Text;
+              TLabel(Application.MainForm.FindComponent('lblLogin')).Caption := edtUserName.Text;
               UpdateDataBaseScript(IniFile, FADOCNN, True);
             except
 
