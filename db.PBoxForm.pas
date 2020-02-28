@@ -638,6 +638,7 @@ end;
 
 procedure TfrmPBox.FormDestroy(Sender: TObject);
 begin
+  g_ADOCNN.Free;
   DestoryDllForm;
   FlstAllDll.Free;
 end;
