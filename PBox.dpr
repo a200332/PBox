@@ -29,7 +29,7 @@ begin
   ReportMemoryLeaksOnShutdown   := True;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TfrmPBox, frmPBox);
-  frmPBox.lblLogin.Caption := 'µÇÂ¼ÓÃ»§£º' + FstrLoginName;
+  frmPBox.lblLogin.Caption := FstrLoginName;
   Application.Run;
 
 end.

@@ -75,7 +75,7 @@ begin
         begin
           { 登录成功 }
           SaveLoginInfo(IniFile);
-          strLoginName := edtUserName.Text;
+          strLoginName :='登录用户：' + edtUserName.Text;
           try
             { 升级数据库 }
             UpdateDataBaseScript(IniFile, g_ADOCNN, True);
