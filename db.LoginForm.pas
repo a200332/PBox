@@ -33,7 +33,7 @@ type
     { Public declarations }
   end;
 
-procedure CheckLoginForm;
+procedure CheckLoginForm(var strLoginName: String);
 
 implementation
 
@@ -44,11 +44,12 @@ var
   FstrLoginName : string = '';
   FstrLoginPass : String = '';
 
-procedure CheckLoginForm;
+procedure CheckLoginForm(var strLoginName: String);
 var
   IniFile  : TIniFile;
   strLinkDB: String;
 begin
+  strLoginName   := '';
   g_ADOCNN       := TADOConnection.Create(nil);
   IniFile        := TIniFile.Create(ChangeFileExt(ParamStr(0), '.ini'));
   strLinkDB      := DecryptString(IniFile.ReadString(c_strIniDBSection, 'Name', ''), c_strAESKey);
@@ -74,7 +75,7 @@ begin
         begin
           { 登录成功 }
           SaveLoginInfo(IniFile);
-          TLabel(Application.MainForm.FindComponent('lblLogin')).Caption := edtUserName.Text;
+          strLoginName := edtUserName.Text;
           try
             { 升级数据库 }
             UpdateDataBaseScript(IniFile, g_ADOCNN, True);
