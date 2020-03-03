@@ -72,7 +72,11 @@ var
   hEXEFormHandle: THandle;
   intPID        : DWORD;
 begin
-  hEXEFormHandle := FindWindow(PChar(FstrEXEFormClassName), PChar(FstrEXEFormTitleName));
+  if Trim(FstrEXEFormClassName) = '' then
+    hEXEFormHandle := FindWindow(nil, PChar(FstrEXEFormTitleName))
+  else
+    hEXEFormHandle := FindWindow(PChar(FstrEXEFormClassName), PChar(FstrEXEFormTitleName));
+
   if hEXEFormHandle <> 0 then
   begin
     GetWindowThreadProcessId(hEXEFormHandle, intPID);
