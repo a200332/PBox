@@ -72,8 +72,10 @@ var
   hEXEFormHandle: THandle;
   intPID        : DWORD;
 begin
-  if Trim(FstrEXEFormClassName) = '' then
+  if (Trim(FstrEXEFormClassName) = '') and (Trim(FstrEXEFormTitleName) <> '') then
     hEXEFormHandle := FindWindow(nil, PChar(FstrEXEFormTitleName))
+  else if (Trim(FstrEXEFormClassName) <> '') and (Trim(FstrEXEFormTitleName) = '') then
+    hEXEFormHandle := FindWindow(PChar(FstrEXEFormClassName), nil)
   else
     hEXEFormHandle := FindWindow(PChar(FstrEXEFormClassName), PChar(FstrEXEFormTitleName));
 
