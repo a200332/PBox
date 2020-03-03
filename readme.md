@@ -37,8 +37,10 @@
 
 ## V. Features 
     The UI supports menu display, button (dialog box) display and list view display.  
-    PBox also supports the display of an EXE form program in our forms. And support the EXE program of dynamic change of form class name. 
-
+    PBox also supports the display of an EXE form program in our forms. 
+    Support the EXE program of dynamic change of form class name. 
+    Support x86 program to call x64 program, x64 program to call x86 program.
+    
 ## Vi. Next work:  
     Add database support (because I am not familiar with the database, the development is slow, and it is developed in my spare time)  
 
