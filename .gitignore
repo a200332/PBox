@@ -6,3 +6,5 @@ Win32
 *.local
 /Module/PEInfo/PEInfo.identcache
 /Module/PEInfo/PEInfo.dproj.local
+/bin/Win64/plugins/Notepad2/Notepad2.ini
+/bin/Win32/plugins/Notepad2/Notepad2.ini
