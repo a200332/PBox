@@ -142,8 +142,8 @@ object frmLogin: TfrmLogin
     OnClick = chkAutoLoginClick
   end
   object ilButton: TImageList
-    Left = 44
-    Top = 148
+    Left = 20
+    Top = 168
     Bitmap = {
       494C010102000800040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010

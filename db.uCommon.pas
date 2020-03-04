@@ -117,9 +117,6 @@ procedure DelayTime(const intTime: Integer);
 { 设置 DLL 搜索路径 }
 procedure SetDllSearchPath;
 
-var
-  g_ADOCNN: TADOConnection = nil;
-
 implementation
 
 { 只允许运行一个实例 }

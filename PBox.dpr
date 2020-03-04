@@ -7,29 +7,34 @@ program PBox;
 uses
   Vcl.Forms,
   Vcl.StdCtrls,
-  db.uBaseForm in 'db.uBaseForm.pas',
-  db.uCommon in 'db.uCommon.pas',
-  db.uCreateDelphiDll in 'db.uCreateDelphiDll.pas',
-  db.uCreateEXE in 'db.uCreateEXE.pas',
-  db.PBoxForm in 'db.PBoxForm.pas' {frmPBox} ,
-  db.ConfigForm in 'db.ConfigForm.pas' {frmConfig} ,
-  db.AddEXE in 'db.AddEXE.pas' {frmAddEXE} ,
-  db.DBConfig in 'db.DBConfig.pas' {DBConfig} ,
-  db.LoginForm in 'db.LoginForm.pas' {frmLogin};
+  Data.Win.ADODB,
+  DB.uBaseForm in 'db.uBaseForm.pas',
+  DB.uCommon in 'db.uCommon.pas',
+  DB.uCreateDelphiDll in 'db.uCreateDelphiDll.pas',
+  DB.uCreateEXE in 'db.uCreateEXE.pas',
+  DB.PBoxForm in 'db.PBoxForm.pas' {frmPBox} ,
+  DB.ConfigForm in 'db.ConfigForm.pas' {frmConfig} ,
+  DB.AddEXE in 'db.AddEXE.pas' {frmAddEXE} ,
+  DB.DBConfig in 'db.DBConfig.pas' {DBConfig} ,
+  DB.LoginForm in 'db.LoginForm.pas' {frmLogin};
 
 {$R *.res}
 
 var
-  FstrLoginName: string = '';
+  strLoginName: string         = '';
+  AdoCNN      : TADOConnection = nil;
 
 begin
   OnlyOneRunInstance;
-  CheckLoginForm(FstrLoginName);
+  AdoCNN := TADOConnection.Create(nil);
+  CheckLoginForm(strLoginName, AdoCNN);
   Application.Initialize;
   ReportMemoryLeaksOnShutdown   := True;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TfrmPBox, frmPBox);
-  frmPBox.lblLogin.Caption := FstrLoginName;
+  frmPBox.FAdoCNN          := AdoCNN;
+  frmPBox.lblLogin.Caption := strLoginName;
   Application.Run;
+  AdoCNN.Free;
 
 end.

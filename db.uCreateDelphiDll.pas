@@ -5,9 +5,9 @@ unit db.uCreateDelphiDll;
 
 interface
 
-uses Vcl.Forms, Winapi.Windows, Winapi.Messages, System.Classes, Vcl.Graphics, Vcl.ComCtrls, Vcl.Controls, Vcl.StdCtrls, db.uCommon;
+uses Vcl.Forms, Winapi.Windows, Winapi.Messages, System.Classes, Vcl.Graphics, Vcl.ComCtrls, Vcl.Controls, Vcl.StdCtrls, Data.Win.ADODB, Data.db, db.uCommon;
 
-procedure PBoxRun_DelphiDll(var DllForm: TForm; const strPEFileName: String; Page: TPageControl; tsDllForm: TTabSheet; OnDelphiDllFormDestroy: TNotifyEvent);
+procedure PBoxRun_DelphiDll(var DllForm: TForm; const strPEFileName: String; Page: TPageControl; tsDllForm: TTabSheet; ADOCNN: TADOConnection; OnDelphiDllFormDestroy: TNotifyEvent);
 procedure CloseDelphiDllForm;
 
 implementation
@@ -46,7 +46,22 @@ begin
   end;
 end;
 
-procedure PBoxRun_DelphiDll(var DllForm: TForm; const strPEFileName: String; Page: TPageControl; tsDllForm: TTabSheet; OnDelphiDllFormDestroy: TNotifyEvent);
+{ 挂接 ADOCNN }
+procedure CheckDllFormDatabase(DllForm: TForm; ADOCNN: TADOConnection);
+var
+  I: Integer;
+begin
+  if not ADOCNN.Connected then
+    Exit;
+
+  for I := 0 to DllForm.ComponentCount - 1 do
+  begin
+    if DllForm.Components[I] is TADOQuery then
+      TADOQuery(DllForm.Components[I]).Connection := ADOCNN;
+  end;
+end;
+
+procedure PBoxRun_DelphiDll(var DllForm: TForm; const strPEFileName: String; Page: TPageControl; tsDllForm: TTabSheet; ADOCNN: TADOConnection; OnDelphiDllFormDestroy: TNotifyEvent);
 var
   hDll                             : HMODULE;
   ShowDllForm                      : Tdb_ShowDllForm_Plugins;
@@ -66,6 +81,7 @@ begin
   DllForm.Tag             := hDll;                                                                                         // 将 hDll 放在 DllForm 的 tag 中，卸载时需要用到
   FhDelphiFormDll         := DllForm.Handle;                                                                               //
   FOnDelphiDllFormDestroy := OnDelphiDllFormDestroy;                                                                       //
+  CheckDllFormDatabase(DllForm, ADOCNN);                                                                                   // 数据库检查
   RemoveMenu(GetSystemMenu(DllForm.Handle, False), 0, MF_BYPOSITION);                                                      // 删除移动菜单
   RemoveMenu(GetSystemMenu(DllForm.Handle, False), 0, MF_BYPOSITION);                                                      // 删除大小菜单
   RemoveMenu(GetSystemMenu(DllForm.Handle, False), 0, MF_BYPOSITION);                                                      // 删除最小化菜单

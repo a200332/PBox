@@ -27,13 +27,14 @@ type
   private
     { Private declarations }
     FbResult: Boolean;
+    FAdoCNN : TADOConnection;
     procedure LoadLoginInfo(var ini: TIniFile);
     procedure SaveLoginInfo(var ini: TIniFile);
   public
     { Public declarations }
   end;
 
-procedure CheckLoginForm(var strLoginName: String);
+procedure CheckLoginForm(var strLoginName: String; var ADOCNN: TADOConnection);
 
 implementation
 
@@ -44,25 +45,25 @@ var
   FstrLoginName : string = '';
   FstrLoginPass : String = '';
 
-procedure CheckLoginForm(var strLoginName: String);
+procedure CheckLoginForm(var strLoginName: String; var ADOCNN: TADOConnection);
 var
   IniFile  : TIniFile;
   strLinkDB: String;
 begin
   strLoginName   := '';
-  g_ADOCNN       := TADOConnection.Create(nil);
   IniFile        := TIniFile.Create(ChangeFileExt(ParamStr(0), '.ini'));
   strLinkDB      := DecryptString(IniFile.ReadString(c_strIniDBSection, 'Name', ''), c_strAESKey);
   FstrLoginTable := IniFile.ReadString(c_strIniDBSection, 'LoginTable', '');
   FstrLoginName  := IniFile.ReadString(c_strIniDBSection, 'LoginNameField', '');
   FstrLoginPass  := IniFile.ReadString(c_strIniDBSection, 'LoginPassField', '');
-  if TryLinkDataBase(strLinkDB, g_ADOCNN) then
+  if TryLinkDataBase(strLinkDB, ADOCNN) then
   begin
     if (strLinkDB <> '') and (FstrLoginTable <> '') and (FstrLoginName <> '') and (FstrLoginPass <> '') then
     begin
       with TfrmLogin.Create(nil) do
       begin
         FbResult             := False;
+        FAdoCNN              := ADOCNN;
         imgLogo.Picture.Icon := Application.Icon;
         Position             := poScreenCenter;
         LoadLoginInfo(IniFile);
@@ -75,12 +76,12 @@ begin
         begin
           { 登录成功 }
           SaveLoginInfo(IniFile);
-          strLoginName :='登录用户：' + edtUserName.Text;
+          strLoginName := '登录用户：' + edtUserName.Text;
           try
             { 升级数据库 }
-            UpdateDataBaseScript(IniFile, g_ADOCNN, True);
+            UpdateDataBaseScript(IniFile, ADOCNN, True);
           except
-
+            strLoginName := '';
           end;
         end;
         Free;
@@ -162,11 +163,11 @@ begin
     Exit;
   end;
 
-  if (g_ADOCNN.Connected) and (FstrLoginTable <> '') and (FstrLoginName <> '') and (FstrLoginPass <> '') then
+  if (FAdoCNN.Connected) and (FstrLoginTable <> '') and (FstrLoginName <> '') and (FstrLoginPass <> '') then
   begin
     strSQL         := Format('select * from %s where %s=%s and %s=%s', [FstrLoginTable, FstrLoginName, QuotedStr(edtUserName.Text), FstrLoginPass, QuotedStr(EncDatabasePassword(edtUserPass.Text))]);
     qry            := TADOQuery.Create(nil);
-    qry.Connection := g_ADOCNN;
+    qry.Connection := FAdoCNN;
     qry.SQL.Text   := strSQL;
     qry.Open;
     if qry.RecordCount > 0 then

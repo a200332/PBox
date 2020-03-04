@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, Winapi.ShellAPI, System.SysUtils, System.StrUtils, System.Classes, System.Types, System.IniFiles, System.Math, System.UITypes, System.ImageList,
   Vcl.Graphics, Vcl.Controls, Vcl.Buttons, Vcl.Forms, Vcl.ExtCtrls, Vcl.Menus, Vcl.ComCtrls, Vcl.StdCtrls, Vcl.ImgList, Vcl.ToolWin, Vcl.Imaging.jpeg,
-  db.uCommon, db.uBaseForm;
+  db.uCommon, db.uBaseForm, Data.db, Data.Win.ADODB;
 
 type
   TfrmPBox = class(TUIBaseForm)
@@ -116,6 +116,8 @@ type
     function GetMaxInstance(const intCurrentIndex, intCount: Integer): Integer;
     { 销毁 Dll 窗体 }
     procedure DestoryDllForm;
+  public
+    FAdoCNN: TADOConnection;
   end;
 
 var
@@ -209,7 +211,7 @@ begin
     FreeLibrary(hDll);
   end;
 
-  PBoxRun_DelphiDll(FDelphiDllForm, strPEFileName, rzpgcntrlAll, tsDll, OnDelphiDllFormDestory);
+  PBoxRun_DelphiDll(FDelphiDllForm, strPEFileName, rzpgcntrlAll, tsDll, FAdoCNN, OnDelphiDllFormDestory);
 end;
 
 { 点击菜单 }
@@ -638,7 +640,6 @@ end;
 
 procedure TfrmPBox.FormDestroy(Sender: TObject);
 begin
-  g_ADOCNN.Free;
   DestoryDllForm;
   FlstAllDll.Free;
 end;
