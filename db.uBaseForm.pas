@@ -65,6 +65,12 @@ type
     procedure pnlDBLClick(Sender: TObject);
     procedure InitSysButton;
     procedure WMFORMSIZE(var msg: TMessage); message WM_FORMSIZE;
+    { 单个屏幕最大化时 }
+    procedure SingleScreenOnMax;
+    { 多个屏幕最大化时 }
+    procedure MultisScreenOnMax;
+    { 从最大化还原窗体大小 }
+    procedure FormRestoreSize;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -398,12 +404,22 @@ begin
     FintFormLeft   := Left;
     FintFormWidth  := Width;
     FintFormHeight := Height;
-    if (FMulScreenPos) and (Screen.MonitorCount > 1) then
+    if Screen.MonitorCount > 1 then
     begin
-      Height := Screen.Monitors[1].Height;
-      Width  := Screen.Monitors[1].Width;
-      Top    := 0;
-      Left   := Screen.Monitors[1].Left;
+      if Left > Screen.Monitors[0].Width div 2 then
+      begin
+        Height := Screen.Monitors[1].Height;
+        Width  := Screen.Monitors[1].Width;
+        Top    := 0;
+        Left   := Screen.Monitors[1].Left;
+      end
+      else
+      begin
+        Height := Screen.Height;
+        Width  := Screen.Width;
+        Top    := 0;
+        Left   := 0;
+      end;
     end
     else
     begin
@@ -434,11 +450,89 @@ begin
   end;
 end;
 
-procedure TUIBaseForm.WMFORMSIZE(var msg: TMessage);
+{ 单个屏幕最大化时 }
+procedure TUIBaseForm.SingleScreenOnMax;
 const
   c_intSpeedMax = 100;
 var
   intWidth: Integer;
+begin
+  Height := Screen.Height;
+  Top    := 0;
+  Left   := 0;
+  while True do
+  begin
+    Application.ProcessMessages;
+    intWidth := Width + c_intSpeedMax;
+    if intWidth < Screen.Width then
+    begin
+      Width := intWidth;
+    end
+    else
+    begin
+      Width := Screen.Width;
+      Break;
+    end;
+  end;
+end;
+
+{ 多个屏幕最大化时 }
+procedure TUIBaseForm.MultisScreenOnMax;
+const
+  c_intSpeedMax = 100;
+var
+  intWidth: Integer;
+begin
+  if Left < Screen.Width div 2 then
+  begin
+    SingleScreenOnMax;
+  end
+  else
+  begin
+    Height := Screen.Monitors[1].Height;
+    Top    := 0;
+    Left   := Screen.Monitors[0].Width;
+    while True do
+    begin
+      Application.ProcessMessages;
+      intWidth := Width + c_intSpeedMax;
+      if intWidth < Screen.Width then
+      begin
+        Width := intWidth;
+      end
+      else
+      begin
+        Width := Screen.Width;
+        Break;
+      end;
+    end;
+  end;
+end;
+
+{ 从最大化还原窗体大小 }
+procedure TUIBaseForm.FormRestoreSize;
+const
+  c_intSpeedMax = 100;
+var
+  intWidth: Integer;
+begin
+  while True do
+  begin
+    Application.ProcessMessages;
+    intWidth := Width - c_intSpeedMax;
+    if intWidth > FintFormWidth then
+    begin
+      Width := intWidth;
+    end
+    else
+    begin
+      Width := FintFormWidth;
+      Break;
+    end;
+  end;
+end;
+
+procedure TUIBaseForm.WMFORMSIZE(var msg: TMessage);
 begin
   if FbMaxForm then
   begin
@@ -446,22 +540,7 @@ begin
     Top       := FintFormTop;
     Left      := FintFormLeft;
     Height    := FintFormHeight;
-
-    while True do
-    begin
-      intWidth := Width - c_intSpeedMax;
-      if intWidth > FintFormWidth then
-      begin
-        Width := intWidth;
-      end
-      else
-      begin
-        Width := FintFormWidth;
-        Break;
-      end;
-      Application.ProcessMessages;
-    end;
-
+    FormRestoreSize;
     LoadButtonBmp(FbtnMax, 'MAX', 0);
     FbtnMax.Hint := '最大化';
   end
@@ -472,46 +551,10 @@ begin
     FintFormLeft   := Left;
     FintFormWidth  := Width;
     FintFormHeight := Height;
-    if (FMulScreenPos) and (Screen.MonitorCount > 1) then
-    begin
-      Height := Screen.Height;
-      Top    := 0;
-      Left   := Screen.Monitors[1].Left;
-      while True do
-      begin
-        intWidth := Width + c_intSpeedMax;
-        if intWidth < Screen.Width then
-        begin
-          Width := intWidth;
-        end
-        else
-        begin
-          Width := Screen.Width;
-          Break;
-        end;
-        Application.ProcessMessages;
-      end;
-    end
+    if Screen.MonitorCount = 1 then
+      SingleScreenOnMax
     else
-    begin
-      Height := Screen.Height;
-      Top    := 0;
-      Left   := 0;
-      while True do
-      begin
-        intWidth := Width + c_intSpeedMax;
-        if intWidth < Screen.Width then
-        begin
-          Width := intWidth;
-        end
-        else
-        begin
-          Width := Screen.Width;
-          Break;
-        end;
-        Application.ProcessMessages;
-      end;
-    end;
+      MultisScreenOnMax;
     LoadButtonBmp(FbtnMax, 'Restore', 0);
     FbtnMax.Hint := '还原';
   end;
