@@ -1,0 +1,7 @@
+Winhex 15 官方中文语言包
+
+官方的chinese.dat文件,这个是专家版(Forensics)使用的，注册的时候注意注册为专家版(Forensics)。
+
+这个是官方中文语言包。用于Winhex 15.0以上版本。
+
+把Chinese.dat和Chinese2.dat解压到WinHex目录下，在Help菜单的Setup里面设置即可。

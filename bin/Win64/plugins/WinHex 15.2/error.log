@@ -1,0 +1,11 @@
+2009-05-07, 16:36:23
+WinHex 15.2 SR-2 Error Report
+Windows 5.1.4100 SP 2 (NT)
+
+Sectors that were read last:
+8: 6293598-6293599 (NTFS, 69.6 GB)
+8: 6293672-6293673 (NTFS, 69.6 GB)
+8: 6293456-6294455 (NTFS, 69.6 GB)
+
+Exception type 216 occurred at memory offset 0055CF4C when I [please complete]...
+
