@@ -3,8 +3,8 @@ unit db.LoginForm;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, System.IniFiles, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
-  Data.db, Data.Win.ADODB, db.uCommon, Vcl.ExtCtrls, System.ImageList, Vcl.ImgList;
+  Winapi.Windows, System.SysUtils, System.Classes, System.IniFiles, System.ImageList, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ImgList,
+  Data.db, Data.Win.ADODB, db.uCommon;
 
 type
   TfrmLogin = class(TForm)
@@ -50,45 +50,52 @@ var
   IniFile  : TIniFile;
   strLinkDB: String;
 begin
-  strLoginName   := '';
-  IniFile        := TIniFile.Create(ChangeFileExt(ParamStr(0), '.ini'));
-  strLinkDB      := DecryptString(IniFile.ReadString(c_strIniDBSection, 'Name', ''), c_strAESKey);
-  FstrLoginTable := IniFile.ReadString(c_strIniDBSection, 'LoginTable', '');
-  FstrLoginName  := IniFile.ReadString(c_strIniDBSection, 'LoginNameField', '');
-  FstrLoginPass  := IniFile.ReadString(c_strIniDBSection, 'LoginPassField', '');
-  if TryLinkDataBase(strLinkDB, ADOCNN) then
-  begin
-    if (strLinkDB <> '') and (FstrLoginTable <> '') and (FstrLoginName <> '') and (FstrLoginPass <> '') then
+  strLoginName := '';
+  IniFile      := TIniFile.Create(ChangeFileExt(ParamStr(0), '.ini'));
+  try
+    strLinkDB := IniFile.ReadString(c_strIniDBSection, 'Name', '');
+    if Trim(strLinkDB) = '' then
+      Exit;
+
+    strLinkDB      := DecryptString(strLinkDB, c_strAESKey);
+    FstrLoginTable := IniFile.ReadString(c_strIniDBSection, 'LoginTable', '');
+    FstrLoginName  := IniFile.ReadString(c_strIniDBSection, 'LoginNameField', '');
+    FstrLoginPass  := IniFile.ReadString(c_strIniDBSection, 'LoginPassField', '');
+    if TryLinkDataBase(strLinkDB, ADOCNN) then
     begin
-      with TfrmLogin.Create(nil) do
+      if (strLinkDB <> '') and (FstrLoginTable <> '') and (FstrLoginName <> '') and (FstrLoginPass <> '') then
       begin
-        FbResult             := False;
-        FAdoCNN              := ADOCNN;
-        imgLogo.Picture.Icon := Application.Icon;
-        Position             := poScreenCenter;
-        LoadLoginInfo(IniFile);
-        ShowModal;
-        if not FbResult then
+        with TfrmLogin.Create(nil) do
         begin
-          Halt(0);
-        end
-        else
-        begin
-          { 登录成功 }
-          SaveLoginInfo(IniFile);
-          strLoginName := '登录用户：' + edtUserName.Text;
-          try
-            { 升级数据库 }
-            UpdateDataBaseScript(IniFile, ADOCNN, True);
-          except
-            strLoginName := '';
+          FbResult             := False;
+          FAdoCNN              := ADOCNN;
+          imgLogo.Picture.Icon := Application.Icon;
+          Position             := poScreenCenter;
+          LoadLoginInfo(IniFile);
+          ShowModal;
+          if not FbResult then
+          begin
+            Halt(0);
+          end
+          else
+          begin
+            { 登录成功 }
+            SaveLoginInfo(IniFile);
+            strLoginName := '登录用户：' + edtUserName.Text;
+            try
+              { 升级数据库 }
+              UpdateDataBaseScript(IniFile, ADOCNN, True);
+            except
+              strLoginName := '';
+            end;
           end;
-        end;
-        Free;
-      end
+          Free;
+        end
+      end;
     end;
+  finally
+    IniFile.Free;
   end;
-  IniFile.Free;
 end;
 
 procedure TfrmLogin.LoadLoginInfo(var ini: TIniFile);

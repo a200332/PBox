@@ -3,9 +3,9 @@ unit db.PBoxForm;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, Winapi.ShellAPI, System.SysUtils, System.StrUtils, System.Classes, System.Types, System.IniFiles, System.Math, System.UITypes, System.ImageList,
-  Vcl.Graphics, Vcl.Controls, Vcl.Buttons, Vcl.Forms, Vcl.ExtCtrls, Vcl.Menus, Vcl.ComCtrls, Vcl.StdCtrls, Vcl.ImgList, Vcl.ToolWin, Vcl.Imaging.jpeg,
-  db.uCommon, db.uBaseForm, Data.db, Data.Win.ADODB;
+  Winapi.Windows, Winapi.ShellAPI, System.SysUtils, System.StrUtils, System.Classes, System.Types, System.IniFiles, System.Math, System.UITypes, System.ImageList,
+  Vcl.Graphics, Vcl.Controls, Vcl.Buttons, Vcl.Forms, Vcl.ExtCtrls, Vcl.Menus, Vcl.ComCtrls, Vcl.StdCtrls, Vcl.ImgList, Vcl.ToolWin, Data.Win.ADODB,
+  db.uCommon, db.uBaseForm;
 
 type
   TfrmPBox = class(TUIBaseForm)
@@ -125,7 +125,7 @@ var
 
 implementation
 
-uses db.ConfigForm, db.uCreateDelphiDll, db.AddEXE, db.uCreateEXE;
+uses db.ConfigForm, db.uCreateDelphiDll, db.uCreateEXE;
 
 {$R *.dfm}
 

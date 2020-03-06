@@ -56,17 +56,13 @@ object DBConfig: TDBConfig
     Top = 8
     Width = 812
     Height = 437
-    ActivePage = ts7
+    ActivePage = tsCreateDBLink
     MultiLine = True
     TabHeight = 35
     TabOrder = 2
     TabWidth = 89
     object tsCreateDBLink: TTabSheet
       Caption = #36830#25509
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object btnCreateDBLink: TButton
         Left = 24
         Top = 24
@@ -222,9 +218,35 @@ object DBConfig: TDBConfig
       object lblTip: TLabel
         Left = 24
         Top = 160
-        Width = 708
+        Width = 51
         Height = 16
-        Caption = #37325#35201#65306#26412#26426#24517#39035#24320#21551#25991#20214#21644#25171#21360#26426#20849#20139#65292#36828#31243#26426#22120'('#23433#35013#25968#25454#24211#30340#26426#22120')'#24517#39035#20851#38381'360'#31561#23433#20840#36719#20214
+        Caption = #37325#35201#65306
+        Font.Charset = GB2312_CHARSET
+        Font.Color = clRed
+        Font.Height = -16
+        Font.Name = #23435#20307
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object lbl3: TLabel
+        Left = 72
+        Top = 177
+        Width = 255
+        Height = 16
+        Caption = #26412#26426#24517#39035#24320#21551#25991#20214#21644#25171#21360#26426#20849#20139#65307
+        Font.Charset = GB2312_CHARSET
+        Font.Color = clRed
+        Font.Height = -16
+        Font.Name = #23435#20307
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object lbl4: TLabel
+        Left = 72
+        Top = 201
+        Width = 621
+        Height = 16
+        Caption = #36828#31243#26426#22120'('#23433#35013#25968#25454#24211#30340#26426#22120')'#24517#39035#24320#21551' xp_cmdshell '#21151#33021#65292#24182#20851#38381'360'#31561#23433#20840#36719#20214
         Font.Charset = GB2312_CHARSET
         Font.Color = clRed
         Font.Height = -16
@@ -269,6 +291,28 @@ object DBConfig: TDBConfig
         ParentFont = False
         TabOrder = 2
       end
+      object mmo1: TMemo
+        Left = 72
+        Top = 228
+        Width = 624
+        Height = 137
+        Font.Charset = GB2312_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = #23435#20307
+        Font.Style = []
+        Lines.Strings = (
+          'sp_configure '#39'show advanced options'#39',1'
+          'reconfigure'
+          'go'
+          ''
+          'sp_configure '#39'xp_cmdshell'#39',1'
+          'reconfigure'
+          'go')
+        ParentFont = False
+        ReadOnly = True
+        TabOrder = 3
+      end
     end
     object ts6: TTabSheet
       Caption = #36824#21407
@@ -303,12 +347,38 @@ object DBConfig: TDBConfig
         Font.Style = [fsBold]
         ParentFont = False
       end
-      object Label3: TLabel
+      object lbl8: TLabel
         Left = 24
         Top = 160
-        Width = 708
+        Width = 51
         Height = 16
-        Caption = #37325#35201#65306#26412#26426#24517#39035#24320#21551#25991#20214#21644#25171#21360#26426#20849#20139#65292#36828#31243#26426#22120'('#23433#35013#25968#25454#24211#30340#26426#22120')'#24517#39035#20851#38381'360'#31561#23433#20840#36719#20214
+        Caption = #37325#35201#65306
+        Font.Charset = GB2312_CHARSET
+        Font.Color = clRed
+        Font.Height = -16
+        Font.Name = #23435#20307
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object lbl9: TLabel
+        Left = 72
+        Top = 177
+        Width = 255
+        Height = 16
+        Caption = #26412#26426#24517#39035#24320#21551#25991#20214#21644#25171#21360#26426#20849#20139#65307
+        Font.Charset = GB2312_CHARSET
+        Font.Color = clRed
+        Font.Height = -16
+        Font.Name = #23435#20307
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object lbl10: TLabel
+        Left = 72
+        Top = 201
+        Width = 621
+        Height = 16
+        Caption = #36828#31243#26426#22120'('#23433#35013#25968#25454#24211#30340#26426#22120')'#24517#39035#24320#21551' xp_cmdshell '#21151#33021#65292#24182#20851#38381'360'#31561#23433#20840#36719#20214
         Font.Charset = GB2312_CHARSET
         Font.Color = clRed
         Font.Height = -16
@@ -352,6 +422,28 @@ object DBConfig: TDBConfig
         Font.Style = [fsBold]
         ParentFont = False
         TabOrder = 2
+      end
+      object mmo2: TMemo
+        Left = 72
+        Top = 228
+        Width = 624
+        Height = 137
+        Font.Charset = GB2312_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = #23435#20307
+        Font.Style = []
+        Lines.Strings = (
+          'sp_configure '#39'show advanced options'#39',1'
+          'reconfigure'
+          'go'
+          ''
+          'sp_configure '#39'xp_cmdshell'#39',1'
+          'reconfigure'
+          'go')
+        ParentFont = False
+        ReadOnly = True
+        TabOrder = 3
       end
     end
     object ts7: TTabSheet

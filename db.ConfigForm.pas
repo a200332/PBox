@@ -3,7 +3,7 @@ unit db.ConfigForm;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, Winapi.ShellAPI, System.SysUtils, System.Variants, System.Classes, System.IniFiles, System.Win.Registry,
+  Winapi.Windows, Winapi.ShellAPI, System.SysUtils, System.Classes, System.IniFiles, System.Win.Registry,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtDlgs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.WinXCtrls, Vcl.Buttons, db.uCommon;
 
 type

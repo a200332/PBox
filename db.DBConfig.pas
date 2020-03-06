@@ -3,8 +3,8 @@ unit db.DBConfig;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.StrUtils, System.Variants, System.Classes, System.IniFiles, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.WinXCtrls, Vcl.Buttons, Vcl.ComCtrls, Data.Win.ADOConEd, Data.DB, Data.Win.ADODB, db.uCommon;
+  Winapi.Windows, System.SysUtils, System.StrUtils, System.Classes, System.IniFiles,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.WinXCtrls, Vcl.ComCtrls, Data.Win.ADOConEd, Data.db, Data.Win.ADODB, db.uCommon;
 
 type
   TDBConfig = class(TForm)
@@ -36,7 +36,6 @@ type
     Label2: TLabel;
     edtLoginPass2: TEdit;
     edtLoginName2: TEdit;
-    Label3: TLabel;
     chkAutoUpdateDB: TCheckBox;
     lblAutoUpdateDBSQLScriptFileNameDelete: TLabel;
     edtUpdateDBSqlScriptFileName: TEdit;
@@ -56,6 +55,13 @@ type
     lbl7: TLabel;
     cbbDllFunc: TComboBox;
     srchbxDecFuncFile: TSearchBox;
+    lbl3: TLabel;
+    lbl4: TLabel;
+    mmo1: TMemo;
+    lbl8: TLabel;
+    lbl9: TLabel;
+    lbl10: TLabel;
+    mmo2: TMemo;
     procedure btnCancelClick(Sender: TObject);
     procedure btnSaveClick(Sender: TObject);
     procedure btnCreateDBLinkClick(Sender: TObject);

@@ -3,7 +3,8 @@ unit db.uCommon;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, Winapi.ShellAPI, Winapi.IpRtrMib, Winapi.ImageHlp, System.SysUtils, System.Types, System.StrUtils, System.Classes, System.IniFiles, Vcl.Forms, Vcl.Graphics, Vcl.Controls, Data.Win.ADODB, System.IOUtils, IdIPWatch,
+  Winapi.Windows, Winapi.Messages, Winapi.ShellAPI, Winapi.IpRtrMib, Winapi.ImageHlp, System.SysUtils, System.Types, System.StrUtils, System.Classes, System.IniFiles, System.Math,
+  Vcl.Forms, Vcl.Graphics, Vcl.Controls, Data.Win.ADODB, System.IOUtils, IdIPWatch,
   db.uNetworkManager, FlyUtils.CnXXX.Common, FlyUtils.AES;
 
 type
@@ -162,12 +163,9 @@ begin
   OpenProcessToken(GetCurrentProcess, TOKEN_ADJUST_PRIVILEGES, hToken);
   TP.PrivilegeCount := 1;
   LookupPrivilegeValue(nil, PChar(PrivName), TP.Privileges[0].Luid);
-  if CanDebug then
-    TP.Privileges[0].Attributes := SE_PRIVILEGE_ENABLED
-  else
-    TP.Privileges[0].Attributes := 0;
-  Result                        := AdjustTokenPrivileges(hToken, False, TP, SizeOf(TP), nil, Dummy);
-  hToken                        := 0;
+  TP.Privileges[0].Attributes := Ifthen(CanDebug, SE_PRIVILEGE_ENABLED, 0);
+  Result                      := AdjustTokenPrivileges(hToken, False, TP, SizeOf(TP), nil, Dummy);
+  hToken                      := 0;
 end;
 
 { 获取本机IP }
@@ -344,10 +342,10 @@ var
   intFind       : Integer;
 begin
   strPlugInsPath := ExtractFilePath(ParamStr(0)) + 'plugins';
-  intFind        := FindFirst(strPlugInsPath + '\*.dll', faAnyFile, sr);
   if not DirectoryExists(strPlugInsPath) then
     Exit;
 
+  intFind := FindFirst(strPlugInsPath + '\*.dll', faAnyFile, sr);
   while intFind = 0 do
   begin
     if (sr.Name <> '.') and (sr.Name <> '..') and (sr.Attr <> faDirectory) then
@@ -477,7 +475,7 @@ begin
   Result := chrPCName;
 end;
 
-{ 备份数据库，支持远程备份 }
+{ 备份数据库，支持远程备份；数据库必须开启 xpshell }
 function BackupDataBase(ADOCNN: TADOConnection; const strNativePCLoginName, strNativePCLoginPassword: String; const strSaveFileName: String): Boolean;
 const
   c_strbackupDataBase =                                                    //
@@ -511,7 +509,7 @@ begin
   end;
 end;
 
-{ 恢复数据库，支持远程恢复 }
+{ 恢复数据库，支持远程恢复；数据库必须开启 xpshell }
 function RestoreDataBase(ADOCNN: TADOConnection; const strNativePCLoginName, strNativePCLoginPassword: String; const strDBFileName: String; var strErr: String): Boolean;
 const
   c_strbackupDataBase =                                                    //
@@ -1072,16 +1070,13 @@ var
   appHandle: THandle;
 begin
   Result    := nil;
-  appHandle := 0;
   Buffer[0] := GetCurrentProcessId;
   Buffer[1] := 0;
   EnumWindows(@_EnumApplicationProc, Integer(@Buffer));
   if Buffer[1] > 0 then
-    appHandle := Buffer[1];
-
-  if appHandle <> 0 then
   begin
-    Result := TApplication(GetInstanceFromhWnd(appHandle));
+    appHandle := Buffer[1];
+    Result    := TApplication(GetInstanceFromhWnd(appHandle));
   end;
 end;
 

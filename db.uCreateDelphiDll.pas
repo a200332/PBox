@@ -5,7 +5,7 @@ unit db.uCreateDelphiDll;
 
 interface
 
-uses Vcl.Forms, Winapi.Windows, Winapi.Messages, System.Classes, Vcl.Graphics, Vcl.ComCtrls, Vcl.Controls, Vcl.StdCtrls, Data.Win.ADODB, Data.db, db.uCommon;
+uses Winapi.Windows, Winapi.Messages, System.Classes, Vcl.Forms, Vcl.Graphics, Vcl.ComCtrls, Vcl.Controls, Data.Win.ADODB, db.uCommon;
 
 procedure PBoxRun_DelphiDll(var DllForm: TForm; const strPEFileName: String; Page: TPageControl; tsDllForm: TTabSheet; ADOCNN: TADOConnection; OnDelphiDllFormDestroy: TNotifyEvent);
 procedure CloseDelphiDllForm;
