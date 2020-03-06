@@ -117,6 +117,7 @@ begin
   SetTimer(Application.MainForm.Handle, $1000, 100, @FindExeForm);
 
   { 创建 EXE 进程，并隐藏窗体 }
+  CheckPlugInConfigSize;
   ShellExecute(Application.MainForm.Handle, 'Open', PChar(strEXEFileName), nil, nil, SW_HIDE);
 end;
 

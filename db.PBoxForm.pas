@@ -620,6 +620,7 @@ begin
   OnConfig      := OnSysConfig;
   TrayIconPMenu := pmTray;
   FlstAllDll    := THashedStringList.Create;
+  CheckPlugInConfigSize;
 
   { œ‘ æ  ±º‰ }
   tmrDateTime.OnTimer(nil);

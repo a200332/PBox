@@ -3,7 +3,7 @@ unit db.uCommon;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, Winapi.ShellAPI, Winapi.IpRtrMib, Winapi.ImageHlp, System.SysUtils, System.StrUtils, System.Classes, System.IniFiles, Vcl.Forms, Vcl.Graphics, Vcl.Controls, Data.Win.ADODB, IdIPWatch,
+  Winapi.Windows, Winapi.Messages, Winapi.ShellAPI, Winapi.IpRtrMib, Winapi.ImageHlp, System.SysUtils, System.Types, System.StrUtils, System.Classes, System.IniFiles, Vcl.Forms, Vcl.Graphics, Vcl.Controls, Data.Win.ADODB, System.IOUtils, IdIPWatch,
   db.uNetworkManager, FlyUtils.CnXXX.Common, FlyUtils.AES;
 
 type
@@ -116,6 +116,9 @@ procedure DelayTime(const intTime: Integer);
 
 { 设置 DLL 搜索路径 }
 procedure SetDllSearchPath;
+
+{ 删除插件配置文件中关于窗体位置的配置信息 }
+procedure CheckPlugInConfigSize;
 
 implementation
 
@@ -1115,6 +1118,25 @@ var
 begin
   strDllModulePath := ExtractFilePath(ParamStr(0)) + 'plugins';
   SetDllDirectory(PChar(strDllModulePath));
+end;
+
+{ 删除插件配置文件中关于窗体位置的配置信息 }
+procedure CheckPlugInConfigSize;
+var
+  strPlugInsPath: String;
+  lstFiles      : TStringDynArray;
+  strFileNameCFG: string;
+begin
+  strPlugInsPath := ExtractFilePath(ParamStr(0)) + 'plugins';
+  lstFiles       := TDirectory.GetFiles(strPlugInsPath, '*.cfg', TSearchOption.soAllDirectories);
+  for strFileNameCFG in lstFiles do
+  begin
+    with TIniFile.Create(strFileNameCFG) do
+    begin
+      DeleteKey('General', 'WinPos');
+      Free;
+    end;
+  end;
 end;
 
 end.
