@@ -132,7 +132,7 @@ uses db.ConfigForm, db.uCreateDelphiDll, db.uCreateEXE;
 { œµÕ≥≈‰÷√ }
 procedure TfrmPBox.OnSysConfig(Sender: TObject);
 begin
-  if ShowConfigForm(FlstAllDll) then
+  if ShowConfigForm(FlstAllDll, FAdoCNN) then
   begin
     Hide;
     DestoryDllForm;

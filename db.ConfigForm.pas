@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.ShellAPI, System.SysUtils, System.Classes, System.IniFiles, System.Win.Registry,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtDlgs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.WinXCtrls, Vcl.Buttons, db.uCommon;
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtDlgs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.WinXCtrls, Vcl.Buttons, Data.Win.ADODB, db.uCommon;
 
 type
   TfrmConfig = class(TForm)
@@ -61,7 +61,7 @@ type
     procedure btnPModuleIconClick(Sender: TObject);
     procedure lstSubModuleClick(Sender: TObject);
   private
-    { Private declarations }
+    FADOCNN      : TADOConnection;
     FmemIni      : TMemIniFile;
     FlstModuleAll: THashedStringList;
     FbResult     : Boolean;
@@ -73,7 +73,7 @@ type
     { Public declarations }
   end;
 
-function ShowConfigForm(var lstModuleAll: THashedStringList): Boolean;
+function ShowConfigForm(var lstModuleAll: THashedStringList; ADOCNN: TADOConnection): Boolean;
 
 implementation
 
@@ -81,11 +81,12 @@ uses db.DBConfig, db.AddEXE;
 
 {$R *.dfm}
 
-function ShowConfigForm(var lstModuleAll: THashedStringList): Boolean;
+function ShowConfigForm(var lstModuleAll: THashedStringList; ADOCNN: TADOConnection): Boolean;
 begin
   with TfrmConfig.Create(nil) do
   begin
     FbResult      := False;
+    FADOCNN       := ADOCNN;
     FlstModuleAll := lstModuleAll;
     ReadConfigFillUI;
     Position := poScreenCenter;
@@ -97,7 +98,7 @@ end;
 
 procedure TfrmConfig.btnDatabaseConfigClick(Sender: TObject);
 begin
-  ShowDBConfigForm(FmemIni);
+  ShowDBConfigForm(FmemIni, FADOCNN);
 end;
 
 { Ä£¿éÉÏÒÆ }

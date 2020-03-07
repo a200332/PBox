@@ -57,7 +57,9 @@ begin
   for I := 0 to DllForm.ComponentCount - 1 do
   begin
     if DllForm.Components[I] is TADOQuery then
+    begin
       TADOQuery(DllForm.Components[I]).Connection := ADOCNN;
+    end;
   end;
 end;
 

@@ -21,7 +21,6 @@ type
     ts8: TTabSheet;
     ts9: TTabSheet;
     btnCreateDBLink: TButton;
-    adoCNN: TADOConnection;
     btnCreateDB: TButton;
     btnZoomOut: TButton;
     btnSelectUpdataDB: TButton;
@@ -76,83 +75,57 @@ type
     procedure cbbLoginTableChange(Sender: TObject);
   private
     FmemIni: TMemIniFile;
-    function CheckLinkDB: Boolean;
+    FADOCNN: TADOConnection;
     procedure ReadConfigFillUI;
-    procedure LinkDBFromUDLFile(const strLinkDB: string);
-    procedure LinkDBFromString(const strLinkDB: string);
-    procedure CreateDataBase(adoCNN: TADOConnection);
+    procedure CreateDataBase(ADOCNN: TADOConnection);
     { 填充登录设置 }
     procedure FillLoginConfig;
   public
     { Public declarations }
   end;
 
-function ShowDBConfigForm(var memIni: TMemIniFile): Boolean;
+function ShowDBConfigForm(var memIni: TMemIniFile; ADOCNN: TADOConnection): Boolean;
 
 implementation
 
 {$R *.dfm}
 
-function ShowDBConfigForm(var memIni: TMemIniFile): Boolean;
+function ShowDBConfigForm(var memIni: TMemIniFile; ADOCNN: TADOConnection): Boolean;
 begin
   Result := True;
   with TDBConfig.Create(nil) do
   begin
     FmemIni := memIni;
+    FADOCNN := ADOCNN;
     ReadConfigFillUI;
     ShowModal;
     Free;
   end;
 end;
 
-procedure TDBConfig.LinkDBFromString(const strLinkDB: string);
-begin
-  adoCNN.ConnectionString := strLinkDB;
-end;
-
-procedure TDBConfig.LinkDBFromUDLFile(const strLinkDB: string);
-var
-  strFileName: String;
-  intIndex   : Integer;
-begin
-  intIndex    := Pos('FILE NAME=', strLinkDB);
-  strFileName := RightStr(strLinkDB, Length(strLinkDB) - intIndex - 9);
-
-  adoCNN.ConnectionString := strLinkDB;
-  adoCNN.Provider         := strFileName;
-end;
-
 { 连接数据库 }
 procedure TDBConfig.btnCreateDBLinkClick(Sender: TObject);
-var
-  strLinkDB: String;
-  intIndex : Integer;
 begin
-  CheckLinkDB;
-
-  { 断开数据库连接 }
-  adoCNN.Connected := False;
-  if not EditConnectionString(adoCNN) then
+  { 数据库连接已经存在，断开数据库连接 }
+  if FADOCNN.Connected then
   begin
-    { 重新进行数据库连接 }
-    CheckLinkDB;
-    Exit;
-  end;
+    FADOCNN.Connected := False;
 
-  strLinkDB := adoCNN.ConnectionString;
-  intIndex  := Pos('FILE NAME=', strLinkDB);
-  if intIndex > 0 then
-  begin
-    LinkDBFromUDLFile(strLinkDB);
-    FmemIni.WriteString(c_strIniDBSection, 'Name', EncryptString(adoCNN.Provider, c_strAESKey));
+    if EditConnectionString(FADOCNN) then
+    begin
+      { 创建进行数据库连接 }
+      TryLinkDataBase(FADOCNN.ConnectionString, FADOCNN);
+    end;
   end
   else
   begin
-    LinkDBFromString(strLinkDB);
-    FmemIni.WriteString(c_strIniDBSection, 'Name', EncryptString(strLinkDB, c_strAESKey));
+    if EditConnectionString(FADOCNN) then
+    begin
+      { 创建进行数据库连接 }
+      TryLinkDataBase(FADOCNN.ConnectionString, FADOCNN);
+    end;
   end;
 
-  adoCNN.Connected := True;
   FillLoginConfig;
 end;
 
@@ -161,6 +134,12 @@ procedure TDBConfig.btnRestoreDatabaseClick(Sender: TObject);
 var
   strErr: String;
 begin
+  if not FADOCNN.Connected then
+  begin
+    MessageBox(Application.MainForm.Handle, '先创建数据库连接，才能进行创建数据库', c_strTitle, MB_OK or MB_ICONERROR);
+    Exit;
+  end;
+
   if Trim(edtLoginPass2.Text) = '' then
   begin
     edtLoginPass2.SetFocus;
@@ -178,7 +157,7 @@ begin
     end;
 
     { 还原数据库 }
-    if RestoreDataBase(adoCNN, edtLoginName2.Text, edtLoginPass2.Text, FileName, strErr) then
+    if RestoreDataBase(FADOCNN, edtLoginName2.Text, edtLoginPass2.Text, FileName, strErr) then
       MessageBox(Handle, '数据库还原成功！', c_strTitle, MB_OK or MB_ICONINFORMATION)
     else
       MessageBox(Handle, PChar('数据库还原失败，' + strErr + '！'), c_strTitle, MB_OK or MB_ICONERROR);
@@ -188,42 +167,14 @@ end;
 
 { 创建数据库 }
 procedure TDBConfig.btnCreateDBClick(Sender: TObject);
-var
-  strConnection: String;
-  strTemp      : String;
-  I, J         : Integer;
-  adoCNNTemp   : TADOConnection;
 begin
-  strConnection := LowerCase(adoCNN.ConnectionString);
-  if Pos('initial catalog=', strConnection) > 0 then
-  begin
-    I       := Pos('initial catalog=', strConnection);
-    strTemp := RightStr(strConnection, Length(strConnection) - I - 16 + 1);
-    J       := Pos(';', strTemp);
-    if J = 0 then
-    begin
-      strTemp := LeftStr(strConnection, I - 1);
-    end
-    else
-    begin
-      strTemp := LeftStr(strConnection, I - 1);
-      strTemp := strTemp + RightStr(strConnection, Length(strConnection) - I - 16 - J + 1);
-    end;
-    adoCNNTemp := TADOConnection.Create(nil);
-    try
-      adoCNNTemp.LoginPrompt      := False;
-      adoCNNTemp.KeepConnection   := True;
-      adoCNNTemp.ConnectionString := strTemp;
-      adoCNNTemp.Connected        := True;
-      CreateDataBase(adoCNNTemp);
-    finally
-      adoCNNTemp.Free;
-    end;
-  end
-  else
-  begin
-    CreateDataBase(adoCNN);
-  end;
+  CreateDataBase(FADOCNN);
+end;
+
+{ 选择升级脚本 }
+procedure TDBConfig.btnSelectUpdataDBClick(Sender: TObject);
+begin
+  CreateDataBase(FADOCNN);
 end;
 
 { 备份数据库 }
@@ -231,6 +182,12 @@ procedure TDBConfig.btnBackupDatabaseClick(Sender: TObject);
 var
   strSaveFileName: String;
 begin
+  if not FADOCNN.Connected then
+  begin
+    MessageBox(Application.MainForm.Handle, '先创建数据库连接，才能进行创建数据库', c_strTitle, MB_OK or MB_ICONERROR);
+    Exit;
+  end;
+
   if Trim(edtLoginPass1.Text) = '' then
   begin
     edtLoginPass1.SetFocus;
@@ -256,7 +213,7 @@ begin
   end;
 
   { 备份数据库 }
-  if BackupDataBase(adoCNN, edtLoginName1.Text, edtLoginPass1.Text, strSaveFileName) then
+  if BackupDataBase(FADOCNN, edtLoginName1.Text, edtLoginPass1.Text, strSaveFileName) then
     MessageBox(Handle, '数据库备份成功！', c_strTitle, MB_OK or MB_ICONINFORMATION)
   else
     MessageBox(Handle, '数据库备份失败，请联系管理员！', c_strTitle, MB_OK or MB_ICONERROR);
@@ -269,25 +226,17 @@ end;
 
 procedure TDBConfig.btnSaveClick(Sender: TObject);
 begin
+  { 自动升级设置 }
   if (chkAutoUpdateDB.Checked) and (Trim(edtUpdateDBSqlScriptFileName.Text) = '') then
   begin
     MessageBox(Handle, '升级脚本文件名不能为空', c_strTitle, MB_OK or MB_ICONINFORMATION);
     edtUpdateDBSqlScriptFileName.SetFocus;
     Exit;
   end;
+  FmemIni.WriteBool(c_strIniDBSection, 'AutoUpdate', chkAutoUpdateDB.Checked);
+  FmemIni.WriteString(c_strIniDBSection, 'AutoUpdateFile', Ifthen(not chkAutoUpdateDB.Checked, '', edtUpdateDBSqlScriptFileName.Text));
 
-  if (not chkAutoUpdateDB.Checked) then
-  begin
-    FmemIni.WriteBool(c_strIniDBSection, 'AutoUpdate', False);
-    FmemIni.WriteString(c_strIniDBSection, 'AutoUpdateFile', '');
-  end;
-
-  if (chkAutoUpdateDB.Checked) and (Trim(edtUpdateDBSqlScriptFileName.Text) <> '') then
-  begin
-    FmemIni.WriteBool(c_strIniDBSection, 'AutoUpdate', True);
-    FmemIni.WriteString(c_strIniDBSection, 'AutoUpdateFile', edtUpdateDBSqlScriptFileName.Text);
-  end;
-
+  { 登录密码设置 }
   if not chkPassword.Checked then
   begin
     if (cbbLoginTable.Text <> '') and (cbbLoginName.Text <> '') and (cbbLoginPass.Text <> '') then
@@ -298,6 +247,12 @@ begin
       FmemIni.WriteBool(c_strIniDBSection, 'PasswordEnc', False);
       FmemIni.WriteString(c_strIniDBSection, 'PasswordEncDllFileName', '');
       FmemIni.WriteString(c_strIniDBSection, 'PasswordEncDllFuncName', '');
+    end
+    else
+    begin
+      MessageBox(Handle, '登录信息不完整，请选择登录表，以及登录名称和登录密码字段', c_strTitle, MB_OK or MB_ICONINFORMATION);
+      cbbLoginTable.SetFocus;
+      Exit;
     end;
   end
   else
@@ -310,18 +265,20 @@ begin
       FmemIni.WriteBool(c_strIniDBSection, 'PasswordEnc', True);
       FmemIni.WriteString(c_strIniDBSection, 'PasswordEncDllFileName', srchbxDecFuncFile.Text);
       FmemIni.WriteString(c_strIniDBSection, 'PasswordEncDllFuncName', cbbDllFunc.Text);
+    end
+    else
+    begin
+      MessageBox(Handle, '登录信息不完整，请选择登录表，以及登录名称、登录密码字段，和加密文件、加密函数', c_strTitle, MB_OK or MB_ICONINFORMATION);
+      cbbLoginTable.SetFocus;
+      Exit;
     end;
   end;
 
   FmemIni.WriteInteger(c_strIniDBSection, 'ActivePageIndex', pgcAll.ActivePageIndex);
-  FmemIni.UpdateFile;
-  Close;
-end;
+  if FADOCNN.Connected then
+    FmemIni.WriteString(c_strIniDBSection, 'Name', FADOCNN.ConnectionString);
 
-{ 选择升级脚本 }
-procedure TDBConfig.btnSelectUpdataDBClick(Sender: TObject);
-begin
-  CreateDataBase(adoCNN);
+  Close;
 end;
 
 { 收缩/压缩数据库 }
@@ -329,12 +286,18 @@ procedure TDBConfig.btnZoomOutClick(Sender: TObject);
 var
   strDBLibraryName: String;
 begin
-  strDBLibraryName := GetDBLibraryName(adoCNN.ConnectionString);
+  if not FADOCNN.Connected then
+  begin
+    MessageBox(Application.MainForm.Handle, '先创建数据库连接，才能进行创建数据库', c_strTitle, MB_OK or MB_ICONERROR);
+    Exit;
+  end;
+
+  strDBLibraryName := GetDBLibraryName(FADOCNN.ConnectionString);
   if Trim(strDBLibraryName) <> '' then
   begin
     with TADOQuery.Create(nil) do
     begin
-      Connection := adoCNN;
+      Connection := FADOCNN;
       sql.Add('DBCC SHRINKDATABASE (' + strDBLibraryName + ')');
       sql.Add('DBCC SHRINKFILE (' + strDBLibraryName + ',0,TRUNCATEONLY)');
       try
@@ -352,28 +315,19 @@ procedure TDBConfig.cbbLoginTableChange(Sender: TObject);
 var
   lstFields: TStringList;
 begin
-  if not adoCNN.Connected then
+  if not FADOCNN.Connected then
     Exit;
 
   cbbLoginName.Clear;
   cbbLoginPass.Clear;
   lstFields := TStringList.Create;
   try
-    adoCNN.GetFieldNames(cbbLoginTable.Text, lstFields);
+    FADOCNN.GetFieldNames(cbbLoginTable.Text, lstFields);
     cbbLoginName.Items.AddStrings(lstFields);
     cbbLoginPass.Items.AddStrings(lstFields);
   finally
     lstFields.Free;
   end;
-end;
-
-{ 连接数据库 }
-function TDBConfig.CheckLinkDB: Boolean;
-var
-  strLinkDB: String;
-begin
-  strLinkDB := DecryptString(FmemIni.ReadString(c_strIniDBSection, 'Name', ''), c_strAESKey);
-  Result    := TryLinkDataBase(strLinkDB, adoCNN);
 end;
 
 procedure TDBConfig.chkPasswordClick(Sender: TObject);
@@ -388,9 +342,9 @@ begin
   lblAutoUpdateDBSQLScriptFileNameDelete.Visible := chkAutoUpdateDB.Checked;
 end;
 
-procedure TDBConfig.CreateDataBase(adoCNN: TADOConnection);
+procedure TDBConfig.CreateDataBase(ADOCNN: TADOConnection);
 begin
-  if not adoCNN.Connected then
+  if not ADOCNN.Connected then
   begin
     MessageBox(Application.MainForm.Handle, '先创建数据库连接，才能进行创建数据库', c_strTitle, MB_OK or MB_ICONERROR);
     Exit;
@@ -401,7 +355,7 @@ begin
     Filter := 'SQL脚本(*.sql)|*.sql';
     if Execute(Application.MainForm.Handle) then
     begin
-      if ExeSql(FileName, adoCNN) then
+      if ExeSql(FileName, ADOCNN) then
         MessageBox(Application.MainForm.Handle, '创建数据库成功', c_strTitle, MB_OK or MB_ICONINFORMATION)
       else
         MessageBox(Application.MainForm.Handle, '创建数据库失败', c_strTitle, MB_OK or MB_ICONERROR);
@@ -418,15 +372,22 @@ var
   strLoginName, strLoginPass: String;
   lstFunc                   : TStringList;
 begin
-  if not adoCNN.Connected then
+  if not FADOCNN.Connected then
+  begin
+    btnCreateDBLink.Caption := '建立数据库连接';
+    cbbLoginTable.Items.Clear;
+    cbbLoginName.Items.Clear;
+    cbbLoginPass.Items.Clear;
     Exit;
+  end;
 
+  btnCreateDBLink.Caption := '断开数据库连接';
   cbbLoginTable.Items.Clear;
   cbbLoginName.Items.Clear;
   cbbLoginPass.Items.Clear;
   lstTables := TStringList.Create;
   try
-    adoCNN.GetTableNames(lstTables);
+    FADOCNN.GetTableNames(lstTables);
     cbbLoginTable.Items.AddStrings(lstTables);
   finally
     lstTables.Free;
@@ -441,7 +402,7 @@ begin
 
     lstFields := TStringList.Create;
     try
-      adoCNN.GetFieldNames(cbbLoginTable.Text, lstFields);
+      FADOCNN.GetFieldNames(cbbLoginTable.Text, lstFields);
       cbbLoginName.Items.AddStrings(lstFields);
       cbbLoginPass.Items.AddStrings(lstFields);
 
@@ -477,9 +438,6 @@ procedure TDBConfig.ReadConfigFillUI;
 var
   strAutoUpdateDBSQLFileName: String;
 begin
-  { 连接数据库 }
-  CheckLinkDB;
-
   pgcAll.ActivePageIndex     := FmemIni.ReadInteger(c_strIniDBSection, 'ActivePageIndex', 0);
   chkAutoUpdateDB.Checked    := FmemIni.ReadBool(c_strIniDBSection, 'AutoUpdate', False);
   strAutoUpdateDBSQLFileName := FmemIni.ReadString(c_strIniDBSection, 'AutoUpdateFile', '');
