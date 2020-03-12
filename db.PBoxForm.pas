@@ -77,7 +77,8 @@ type
     { 系统配置 }
     procedure OnSysConfig(Sender: TObject);
     { Delphi Dll Form 窗体关闭事件 }
-    procedure OnDelphiDllFormDestory(Sender: TObject);
+    procedure OnDelphiDllFormDestoryCallback(Sender: TObject);
+    procedure OnPEProcessDestroyCallback(Sender: TObject);
     { 获取 EXE 文件的图标 }
     function GetExeFileIcon(const strFileName: String): Integer; overload;
     function GetExeFileIcon(const strEXEInfo, strFileName: string): Integer; overload;
@@ -164,13 +165,25 @@ begin
   end;
 end;
 
+procedure TfrmPBox.OnPEProcessDestroyCallback(Sender: TObject);
+begin
+  Application.MainForm.Tag := 0;
+
+  lblInfo.Caption := '';
+  if FUIShowStyle = ssButton then
+    rzpgcntrlAll.ActivePageIndex := 0
+  else if FUIShowStyle = ssList then
+    rzpgcntrlAll.ActivePageIndex := 1;
+end;
+
 { Delphi Dll Form 窗体关闭事件 }
-procedure TfrmPBox.OnDelphiDllFormDestory(Sender: TObject);
+procedure TfrmPBox.OnDelphiDllFormDestoryCallback(Sender: TObject);
 begin
   if FDelphiDllForm <> nil then
   begin
     FreeLibrary(FDelphiDllForm.Tag);
-    FDelphiDllForm  := nil;
+    FDelphiDllForm := nil;
+
     lblInfo.Caption := '';
     if FUIShowStyle = ssButton then
       rzpgcntrlAll.ActivePageIndex := 0
@@ -198,7 +211,7 @@ begin
   if (CompareText(ExtractFileExt(strPEFileName), '.exe') = 0) or (CompareText(ExtractFileExt(strPEFileName), '.msc') = 0) then
   begin
     strFileValue := FlstAllDll.Values[strPEFileName];
-    PBoxRun_IMAGE_EXE(strPEFileName, strFileValue, rzpgcntrlAll, tsDll, lblInfo, FUIShowStyle);
+    PBoxRun_IMAGE_EXE(strPEFileName, strFileValue, tsDll, lblInfo, OnPEProcessDestroyCallback);
     Exit;
   end;
 
@@ -211,7 +224,8 @@ begin
     FreeLibrary(hDll);
   end;
 
-  PBoxRun_DelphiDll(FDelphiDllForm, strPEFileName, rzpgcntrlAll, tsDll, FAdoCNN, OnDelphiDllFormDestory);
+  { 运行 DELPHI DLL 窗体 }
+  PBoxRun_DelphiDll(FDelphiDllForm, strPEFileName, tsDll, FAdoCNN, OnDelphiDllFormDestoryCallback);
 end;
 
 { 点击菜单 }

@@ -5,45 +5,21 @@ unit db.uCreateEXE;
 
 interface
 
-uses Winapi.Windows, Winapi.ShellAPI, System.SysUtils, Vcl.Forms, Vcl.ComCtrls, Vcl.StdCtrls, Winapi.TlHelp32, db.uCommon;
+uses Winapi.Windows, Winapi.ShellAPI, System.SysUtils, System.Classes, Vcl.Forms, Vcl.ComCtrls, Vcl.StdCtrls, db.uCommon;
 
-procedure PBoxRun_IMAGE_EXE(const strEXEFileName, strFileValue: String; pg: TPageControl; ts: TTabSheet; lblInfo: TLabel; const UIShowStyle: TShowStyle);
+procedure PBoxRun_IMAGE_EXE(const strEXEFileName, strFileValue: String; ts: TTabSheet; lblInfo: TLabel; OnPEProcessDestroyCallback: TNotifyEvent);
 
 implementation
 
 var
-  FstrFileValue       : string;
-  FstrEXEFormClassName: string = '';
-  FstrEXEFormTitleName: string = '';
-  FPageControl        : TPageControl;
-  FTabsheet           : TTabSheet;
-  FlblInfo            : TLabel;
-  FUIShowStyle        : TShowStyle;
+  FstrFileValue              : string;
+  FstrEXEFormClassName       : string = '';
+  FstrEXEFormTitleName       : string = '';
+  FTabsheet                  : TTabSheet;
+  FlblInfo                   : TLabel;
+  FOnPEProcessDestroyCallback: TNotifyEvent;
 
-  { 进程是否关闭 }
-function CheckProcessExist(const intPID: DWORD): Boolean;
-var
-  hSnap: THandle;
-  vPE  : TProcessEntry32;
-begin
-  Result     := False;
-  hSnap      := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-  vPE.dwSize := SizeOf(TProcessEntry32);
-  if Process32First(hSnap, vPE) then
-  begin
-    while Process32Next(hSnap, vPE) do
-    begin
-      if vPE.th32ProcessID = intPID then
-      begin
-        Result := True;
-        Break;
-      end;
-    end;
-  end;
-  CloseHandle(hSnap);
-end;
-
-{ 进程关闭后，变量复位 }
+  { 进程关闭后，变量复位 }
 procedure EndExeForm(hWnd: hWnd; uMsg, idEvent: UINT; dwTime: DWORD); stdcall;
 var
   intPID: DWORD;
@@ -55,15 +31,8 @@ begin
   if CheckProcessExist(intPID) then
     Exit;
 
-  FlblInfo.Caption         := '';
-  Application.MainForm.Tag := 0;
-
-  if FUIShowStyle = ssButton then
-    FPageControl.ActivePageIndex := 0
-  else if FUIShowStyle = ssList then
-    FPageControl.ActivePageIndex := 1;
-
   KillTimer(Application.MainForm.Handle, $2000);
+  FOnPEProcessDestroyCallback(nil);
 end;
 
 { 查找 EXE 的主窗体是否成功创建 }
@@ -95,29 +64,30 @@ begin
     SetWindowLong(hEXEFormHandle, GWL_STYLE, Integer(WS_CAPTION OR WS_POPUP OR WS_VISIBLE OR WS_CLIPSIBLINGS OR WS_CLIPCHILDREN OR WS_SYSMENU));           // $96C80000);                                                                        // $96000000
     SetWindowLong(hEXEFormHandle, GWL_EXSTYLE, Integer(WS_EX_LEFT OR WS_EX_LTRREADING OR WS_EX_DLGMODALFRAME OR WS_EX_WINDOWEDGE OR WS_EX_CONTROLPARENT)); // $00010000);                                                                              // $00010101
     ShowWindow(hEXEFormHandle, SW_SHOWNORMAL);                                                                                                             // 显示窗体
-    Application.MainForm.Height := Application.MainForm.Height + 1;
-    Application.MainForm.Height := Application.MainForm.Height - 1;
-    FPageControl.ActivePage     := FTabsheet;
-    FlblInfo.Caption            := FstrFileValue.Split([';'])[0] + ' - ' + FstrFileValue.Split([';'])[1];
+    Application.MainForm.Height      := Application.MainForm.Height + 1;
+    Application.MainForm.Height      := Application.MainForm.Height - 1;
+    FTabsheet.PageControl.ActivePage := FTabsheet;
+    FlblInfo.Caption                 := FstrFileValue.Split([';'])[0] + ' - ' + FstrFileValue.Split([';'])[1];
     KillTimer(Application.MainForm.Handle, $1000);
     SetTimer(Application.MainForm.Handle, $2000, 100, @EndExeForm);
   end;
 end;
 
-procedure PBoxRun_IMAGE_EXE(const strEXEFileName, strFileValue: String; pg: TPageControl; ts: TTabSheet; lblInfo: TLabel; const UIShowStyle: TShowStyle);
+procedure PBoxRun_IMAGE_EXE(const strEXEFileName, strFileValue: String; ts: TTabSheet; lblInfo: TLabel; OnPEProcessDestroyCallback: TNotifyEvent);
 begin
-  FPageControl  := pg;
-  FTabsheet     := ts;
-  FlblInfo      := lblInfo;
-  FstrFileValue := strFileValue;
-  FUIShowStyle  := UIShowStyle;
+  FTabsheet                   := ts;
+  FlblInfo                    := lblInfo;
+  FstrFileValue               := strFileValue;
+  FOnPEProcessDestroyCallback := OnPEProcessDestroyCallback;
 
   FstrEXEFormClassName := strFileValue.Split([';'])[2];
   FstrEXEFormTitleName := strFileValue.Split([';'])[3];
   SetTimer(Application.MainForm.Handle, $1000, 100, @FindExeForm);
 
-  { 创建 EXE 进程，并隐藏窗体 }
+  { 删除插件配置文件中关于窗体位置的配置信息 }
   CheckPlugInConfigSize;
+
+  { 创建 EXE 进程，并隐藏窗体 }
   ShellExecute(Application.MainForm.Handle, 'Open', PChar(strEXEFileName), nil, nil, SW_HIDE);
 end;
 

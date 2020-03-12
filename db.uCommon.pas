@@ -3,7 +3,7 @@ unit db.uCommon;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, Winapi.ShellAPI, Winapi.IpRtrMib, Winapi.ImageHlp, System.SysUtils, System.Types, System.StrUtils, System.Classes, System.IniFiles, System.Math,
+  Winapi.Windows, Winapi.Messages, Winapi.ShellAPI, Winapi.IpRtrMib, Winapi.ImageHlp, Winapi.TlHelp32, System.SysUtils, System.Types, System.StrUtils, System.Classes, System.IniFiles, System.Math,
   Vcl.Forms, Vcl.Graphics, Vcl.Controls, Data.Win.ADODB, System.IOUtils, IdIPWatch,
   db.uNetworkManager, FlyUtils.CnXXX.Common, FlyUtils.AES;
 
@@ -120,6 +120,9 @@ procedure SetDllSearchPath;
 
 { 删除插件配置文件中关于窗体位置的配置信息 }
 procedure CheckPlugInConfigSize;
+
+{ 进程是否关闭 }
+function CheckProcessExist(const intPID: DWORD): Boolean;
 
 implementation
 
@@ -1132,6 +1135,29 @@ begin
       Free;
     end;
   end;
+end;
+
+{ 进程是否关闭 }
+function CheckProcessExist(const intPID: DWORD): Boolean;
+var
+  hSnap: THandle;
+  vPE  : TProcessEntry32;
+begin
+  Result     := False;
+  hSnap      := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+  vPE.dwSize := SizeOf(TProcessEntry32);
+  if Process32First(hSnap, vPE) then
+  begin
+    while Process32Next(hSnap, vPE) do
+    begin
+      if vPE.th32ProcessID = intPID then
+      begin
+        Result := True;
+        Break;
+      end;
+    end;
+  end;
+  CloseHandle(hSnap);
 end;
 
 end.

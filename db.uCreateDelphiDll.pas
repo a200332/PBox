@@ -1,22 +1,26 @@
 unit db.uCreateDelphiDll;
 {
-  创建 Delphi DLL窗体
+  创建 Delphi DLL 窗体
 }
 
 interface
 
 uses Winapi.Windows, Winapi.Messages, System.Classes, Vcl.Forms, Vcl.Graphics, Vcl.ComCtrls, Vcl.Controls, Data.Win.ADODB, db.uCommon;
 
-procedure PBoxRun_DelphiDll(var DllForm: TForm; const strPEFileName: String; Page: TPageControl; tsDllForm: TTabSheet; ADOCNN: TADOConnection; OnDelphiDllFormDestroy: TNotifyEvent);
+{ 运行 DELPHI DLL 窗体 }
+procedure PBoxRun_DelphiDll(var DllForm: TForm; const strPEFileName: String; tsDllForm: TTabSheet; ADOCNN: TADOConnection; OnDelphiDllFormDestroyCallback: TNotifyEvent);
+
+{ 关闭 DELPHI DLL 窗体 }
 procedure CloseDelphiDllForm;
 
 implementation
 
 var
-  FOnDelphiDllFormDestroy: TNotifyEvent = nil;
-  FhDelphiFormDll        : THandle      = 0;
-  FbCloseDelphiFormDll   : Boolean      = False;
+  FOnDelphiDllFormDestroyCallback: TNotifyEvent = nil;
+  FhDelphiFormDll                : THandle      = 0;
+  FbDelphiFormDllDestory         : Boolean      = False;
 
+  { 关闭 DELPHI DLL 窗体 }
 procedure CloseDelphiDllForm;
 begin
   if FhDelphiFormDll = 0 then
@@ -29,20 +33,20 @@ begin
   while True do
   begin
     Application.ProcessMessages;
-    if FbCloseDelphiFormDll then
+    if FbDelphiFormDllDestory then
       Break
   end;
 end;
 
 { Delphi Dll 窗体关闭后，变量复位 }
-procedure DelphiDllFormDestory(hWnd: hWnd; uMsg, idEvent: UINT; dwTime: DWORD); stdcall;
+procedure tmrCheckDelphiFormDllDestory(hWnd: hWnd; uMsg, idEvent: UINT; dwTime: DWORD); stdcall;
 begin
   if not IsWindowVisible(FhDelphiFormDll) then
   begin
     KillTimer(Application.MainForm.Handle, $3000);
-    FOnDelphiDllFormDestroy(nil);
-    FbCloseDelphiFormDll := True;
-    FhDelphiFormDll      := 0;
+    FOnDelphiDllFormDestroyCallback(nil);
+    FbDelphiFormDllDestory := True;
+    FhDelphiFormDll        := 0;
   end;
 end;
 
@@ -63,26 +67,27 @@ begin
   end;
 end;
 
-procedure PBoxRun_DelphiDll(var DllForm: TForm; const strPEFileName: String; Page: TPageControl; tsDllForm: TTabSheet; ADOCNN: TADOConnection; OnDelphiDllFormDestroy: TNotifyEvent);
+{ 运行 DELPHI DLL 窗体 }
+procedure PBoxRun_DelphiDll(var DllForm: TForm; const strPEFileName: String; tsDllForm: TTabSheet; ADOCNN: TADOConnection; OnDelphiDllFormDestroyCallback: TNotifyEvent);
 var
-  hDll                             : HMODULE;
+  hLib                             : HMODULE;
   ShowDllForm                      : Tdb_ShowDllForm_Plugins;
   frm                              : TFormClass;
   strParamModuleName, strModuleName: PAnsiChar;
   strIconFileName                  : PAnsiChar;
 begin
-  hDll        := LoadLibrary(PChar(strPEFileName));
-  ShowDllForm := GetProcAddress(hDll, c_strDllExportName);
+  hLib        := LoadLibrary(PChar(strPEFileName));
+  ShowDllForm := GetProcAddress(hLib, c_strDllExportName);
   ShowDllForm(frm, strParamModuleName, strModuleName, strIconFileName);
-  DllForm                 := frm.Create(nil);
-  DllForm.BorderIcons     := [biSystemMenu];
-  DllForm.Position        := poDesigned;
-  DllForm.BorderStyle     := bsSingle;
-  DllForm.Color           := clWhite;
-  DllForm.Anchors         := [akLeft, akTop, akRight, akBottom];
-  DllForm.Tag             := hDll;                                                                                         // 将 hDll 放在 DllForm 的 tag 中，卸载时需要用到
-  FhDelphiFormDll         := DllForm.Handle;                                                                               //
-  FOnDelphiDllFormDestroy := OnDelphiDllFormDestroy;                                                                       //
+  DllForm                         := frm.Create(nil);
+  DllForm.BorderIcons             := [biSystemMenu];
+  DllForm.Position                := poDesigned;
+  DllForm.BorderStyle             := bsSingle;
+  DllForm.Color                   := clWhite;
+  DllForm.Anchors                 := [akLeft, akTop, akRight, akBottom];
+  DllForm.Tag                     := hLib;                                                                                 // 将 hLib 放在 DllForm 的 tag 中，卸载时需要用到
+  FhDelphiFormDll                 := DllForm.Handle;                                                                       // 保存下窗体句柄
+  FOnDelphiDllFormDestroyCallback := OnDelphiDllFormDestroyCallback;                                                       // Dll 窗体销毁时，回调主窗体事件
   CheckDllFormDatabase(DllForm, ADOCNN);                                                                                   // 数据库检查
   RemoveMenu(GetSystemMenu(DllForm.Handle, False), 0, MF_BYPOSITION);                                                      // 删除移动菜单
   RemoveMenu(GetSystemMenu(DllForm.Handle, False), 0, MF_BYPOSITION);                                                      // 删除大小菜单
@@ -93,9 +98,9 @@ begin
   Winapi.Windows.SetParent(DllForm.Handle, tsDllForm.Handle);                                                              // 设置父窗体为 TabSheet
   RemoveMenu(GetSystemMenu(DllForm.Handle, False), 0, MF_BYPOSITION);                                                      // 删除移动菜单
   DllForm.Show;                                                                                                            // 显示 Dll 子窗体
-  Page.ActivePage      := tsDllForm;
-  FbCloseDelphiFormDll := False;
-  SetTimer(Application.MainForm.Handle, $3000, 100, @DelphiDllFormDestory);
+  tsDllForm.PageControl.ActivePage := tsDllForm;                                                                           // 激活窗口
+  FbDelphiFormDllDestory           := False;                                                                               // Delphi DLL 窗体是否销毁了
+  SetTimer(Application.MainForm.Handle, $3000, 100, @tmrCheckDelphiFormDllDestory);                                        // 定时检查 Delphi DLL 窗体是否被销毁了
 end;
 
 end.
