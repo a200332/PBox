@@ -113,8 +113,8 @@ type
     procedure OnSubModuleMouseLeave(Sender: TObject);
     { 创建子模块 DLL 模块 }
     procedure OnSubModuleListClick(Sender: TObject);
-    { 获取垂直位置间隔 }
-    function GetMaxInstance(const intCurrentIndex, intCount: Integer): Integer;
+    { 获取垂直位置最大间隔 }
+    function GetMaxInstance: Integer;
     { 销毁 Dll 窗体 }
     procedure DestoryDllForm;
   public
@@ -986,23 +986,30 @@ begin
   end;
 end;
 
-{ 获取垂直位置间隔 }
-function TfrmPBox.GetMaxInstance(const intCurrentIndex, intCount: Integer): Integer;
+function TfrmPBox.GetMaxInstance: Integer;
+{ 获取垂直位置最大间隔 }
 var
-  intMax: Integer;
-  arrInt: array of Integer;
-  I     : Integer;
+  intMax               : Integer;
+  arrInt               : array of Integer;
+  I                    : Integer;
+  intLabelPModuleHeight: Integer;
+  intLabelSModuleHeight: Integer;
 begin
+  { 取最多行的模块个数 }
   SetLength(arrInt, mmMainMenu.Items.Count);
   for I := 0 to mmMainMenu.Items.Count - 1 do
   begin
     arrInt[I] := mmMainMenu.Items.Items[I].Count;
   end;
   intMax := MaxIntValue(arrInt);
+
+  intLabelPModuleHeight := GetLabelHeight('宋体', 16);
+  intLabelSModuleHeight := GetLabelHeight('宋体', 12);
+
   if intMax mod 3 = 0 then
-    Result := 35 * (0 + intMax div 3)
+    Result := (intLabelSModuleHeight + c_intBetweenVerticalDistance * 2) * (0 + intMax div 3) + intLabelPModuleHeight
   else
-    Result := 35 * (1 + intMax div 3);
+    Result := (intLabelSModuleHeight + c_intBetweenVerticalDistance * 2) * (1 + intMax div 3) + intLabelPModuleHeight;
 end;
 
 { 分栏式风格 }
@@ -1018,16 +1025,12 @@ var
   J                     : Integer;
 begin
   intRow := IfThen(MaxForm or FullForm, 5, 3);
-  if FintBakRow <> intRow then
-  begin
-    { 销毁分栏式界面 }
-    FreeListViewSubModule;
-    FintBakRow := intRow;
-  end
-  else
-  begin
+  if FintBakRow = intRow then
     Exit;
-  end;
+
+  { 销毁分栏式界面 }
+  FreeListViewSubModule;
+  FintBakRow := intRow;
 
   clbrPModule.Visible := False;
   if bActivePage then
@@ -1051,7 +1054,7 @@ begin
     arrParentModuleLabel[I].Font.Style := [fsBold];
     arrParentModuleLabel[I].Font.Color := RGB(0, 174, 29);
     arrParentModuleLabel[I].Left       := 40 + 400 * (I mod intRow);
-    arrParentModuleLabel[I].Top        := 10 + GetMaxInstance(I, intRow) * (I div intRow);
+    arrParentModuleLabel[I].Top        := GetMaxInstance * (I div intRow);
 
     { 创建父模块图标 }
     arrParentModuleImage[I]         := TImage.Create(tsList);
@@ -1085,7 +1088,7 @@ begin
         arrSubModuleLabel[I, J].Left := arrParentModuleLabel[I].Left + 2
       else
         arrSubModuleLabel[I, J].Left       := arrSubModuleLabel[I, J - 1].Left + arrSubModuleLabel[I, J - 1].Width + 10;
-      arrSubModuleLabel[I, J].Top          := arrParentModuleLabel[I].Top + 24 + 20 * (J div 3);
+      arrSubModuleLabel[I, J].Top          := arrParentModuleLabel[I].Top + GetLabelHeight('宋体', 16) + c_intBetweenVerticalDistance + (GetLabelHeight('宋体', 12) + c_intBetweenVerticalDistance) * (J div 3);
       arrSubModuleLabel[I, J].Tag          := mmMainMenu.Items[I].Items[J].Tag;
       arrSubModuleLabel[I, J].OnMouseEnter := OnSubModuleMouseEnter;
       arrSubModuleLabel[I, J].OnMouseLeave := OnSubModuleMouseLeave;

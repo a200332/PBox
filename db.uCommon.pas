@@ -34,6 +34,7 @@ const
   c_strMsgTitle: PChar                        = '系统提示：';
   c_strAESKey                                 = 'dbyoung@sina.com';
   c_strDllExportName                          = 'db_ShowDllForm_Plugins';
+  c_intBetweenVerticalDistance                = 5;
 
   { 只允许运行一个实例 }
 procedure OnlyOneRunInstance;
@@ -123,6 +124,9 @@ procedure CheckPlugInConfigSize;
 
 { 进程是否关闭 }
 function CheckProcessExist(const intPID: DWORD): Boolean;
+
+{ 获取控件高度 }
+function GetLabelHeight(const strFontName: string; const intFontSize: Integer): Integer;
 
 implementation
 
@@ -1158,6 +1162,31 @@ begin
     end;
   end;
   CloseHandle(hSnap);
+end;
+
+{ 获取控件高度 }
+function GetLabelHeight(const strFontName: string; const intFontSize: Integer): Integer;
+const
+  c_strName = '记事本';
+var
+  DC      : HDC;
+  Font    : TFont;
+  hSavFont: HFont;
+  Size    : TSize;
+begin
+  DC   := GetDC(0);
+  Font := TFont.Create;
+  try
+    Font.Name := strFontName;
+    Font.Size := intFontSize;
+    hSavFont  := SelectObject(DC, Font.Handle);
+    GetTextExtentPoint32(DC, PChar(c_strName), Length(c_strName), Size);
+    SelectObject(DC, hSavFont);
+    Result := Size.cy;
+  finally
+    ReleaseDC(0, DC);
+    Font.Free;
+  end;
 end;
 
 end.
