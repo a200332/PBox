@@ -148,7 +148,7 @@ begin
     Exit;
 
   hMainForm := FindWindow('TfrmPBox', PChar(strTitle));
-  if hMainForm <> 0 then
+  if hMainForm <> INVALID_HANDLE_VALUE then
   begin
     MessageBox(0, '程序已经运行，无需重复运行', '系统提示：', MB_OK OR MB_ICONERROR);
     if IsIconic(hMainForm) then

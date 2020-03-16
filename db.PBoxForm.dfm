@@ -319,10 +319,6 @@ object frmPBox: TfrmPBox
     end
     object tsList: TTabSheet
       Caption = 'tsList'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object imgListBack: TImage
         Left = 0
         Top = 0
@@ -393,5 +389,25 @@ object frmPBox: TfrmPBox
     Width = 32
     Left = 96
     Top = 100
+  end
+  object pmFuncMenu: TPopupMenu
+    AutoHotkeys = maManual
+    Left = 100
+    Top = 383
+    object mniFuncMenuConfig: TMenuItem
+      Caption = #37197#32622
+      OnClick = mniFuncMenuConfigClick
+    end
+    object mniFuncMenuMoney: TMenuItem
+      Caption = #25424#21161
+      OnClick = mniFuncMenuMoneyClick
+    end
+    object mniFuncMenuLine01: TMenuItem
+      Caption = '-'
+    end
+    object mniFuncMenuAbout: TMenuItem
+      Caption = #20851#20110
+      OnClick = mniFuncMenuAboutClick
+    end
   end
 end

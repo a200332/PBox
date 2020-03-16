@@ -238,6 +238,23 @@ object DBConfig: TDBConfig
         Font.Style = [fsBold]
         ParentFont = False
       end
+      object lbl11: TLabel
+        Left = 72
+        Top = 231
+        Width = 621
+        Height = 135
+        Caption = 
+          #24320#21551' xp_cmdshell '#21151#33021#65306#13#10'sp_configure '#39'show advanced options'#39',1'#13#10'reco' +
+          'nfigure'#13#10'go'#13#10#13#10'sp_configure '#39'xp_cmdshell'#39',1'#13#10'reconfigure'#13#10'go'#13#10
+        Color = clBlue
+        Font.Charset = GB2312_CHARSET
+        Font.Color = clBlue
+        Font.Height = -15
+        Font.Name = #23435#20307
+        Font.Style = []
+        ParentColor = False
+        ParentFont = False
+      end
       object btnBackupDatabase: TButton
         Left = 24
         Top = 24
@@ -274,28 +291,6 @@ object DBConfig: TDBConfig
         Font.Style = [fsBold]
         ParentFont = False
         TabOrder = 2
-      end
-      object mmo1: TMemo
-        Left = 72
-        Top = 228
-        Width = 624
-        Height = 137
-        Font.Charset = GB2312_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -13
-        Font.Name = #23435#20307
-        Font.Style = []
-        Lines.Strings = (
-          'sp_configure '#39'show advanced options'#39',1'
-          'reconfigure'
-          'go'
-          ''
-          'sp_configure '#39'xp_cmdshell'#39',1'
-          'reconfigure'
-          'go')
-        ParentFont = False
-        ReadOnly = True
-        TabOrder = 3
       end
     end
     object ts6: TTabSheet
@@ -366,6 +361,23 @@ object DBConfig: TDBConfig
         Font.Style = [fsBold]
         ParentFont = False
       end
+      object lbl12: TLabel
+        Left = 72
+        Top = 231
+        Width = 621
+        Height = 135
+        Caption = 
+          #24320#21551' xp_cmdshell '#21151#33021#65306#13#10'sp_configure '#39'show advanced options'#39',1'#13#10'reco' +
+          'nfigure'#13#10'go'#13#10#13#10'sp_configure '#39'xp_cmdshell'#39',1'#13#10'reconfigure'#13#10'go'#13#10
+        Color = clBlue
+        Font.Charset = GB2312_CHARSET
+        Font.Color = clBlue
+        Font.Height = -15
+        Font.Name = #23435#20307
+        Font.Style = []
+        ParentColor = False
+        ParentFont = False
+      end
       object btnRestoreDatabase: TButton
         Left = 24
         Top = 24
@@ -402,28 +414,6 @@ object DBConfig: TDBConfig
         Font.Style = [fsBold]
         ParentFont = False
         TabOrder = 2
-      end
-      object mmo2: TMemo
-        Left = 72
-        Top = 228
-        Width = 624
-        Height = 137
-        Font.Charset = GB2312_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -13
-        Font.Name = #23435#20307
-        Font.Style = []
-        Lines.Strings = (
-          'sp_configure '#39'show advanced options'#39',1'
-          'reconfigure'
-          'go'
-          ''
-          'sp_configure '#39'xp_cmdshell'#39',1'
-          'reconfigure'
-          'go')
-        ParentFont = False
-        ReadOnly = True
-        TabOrder = 3
       end
     end
     object ts7: TTabSheet

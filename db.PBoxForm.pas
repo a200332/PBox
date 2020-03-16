@@ -44,6 +44,11 @@ type
     bvlModule02: TBevel;
     pnlLogin: TPanel;
     lblLogin: TLabel;
+    pmFuncMenu: TPopupMenu;
+    mniFuncMenuConfig: TMenuItem;
+    mniFuncMenuMoney: TMenuItem;
+    mniFuncMenuLine01: TMenuItem;
+    mniFuncMenuAbout: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -54,6 +59,9 @@ type
     procedure imgSubModuleCloseClick(Sender: TObject);
     procedure imgSubModuleCloseMouseEnter(Sender: TObject);
     procedure imgSubModuleCloseMouseLeave(Sender: TObject);
+    procedure mniFuncMenuConfigClick(Sender: TObject);
+    procedure mniFuncMenuAboutClick(Sender: TObject);
+    procedure mniFuncMenuMoneyClick(Sender: TObject);
   private
     FlstAllDll    : THashedStringList;
     FUIShowStyle  : TShowStyle;
@@ -126,12 +134,22 @@ var
 
 implementation
 
-uses db.ConfigForm, db.uCreateDelphiDll, db.uCreateEXE;
+uses db.ConfigForm, db.DonateForm, db.AboutForm, db.uCreateDelphiDll, db.uCreateEXE;
 
 {$R *.dfm}
 
+procedure TfrmPBox.mniFuncMenuMoneyClick(Sender: TObject);
+begin
+  ShowDonateForm;
+end;
+
+procedure TfrmPBox.mniFuncMenuAboutClick(Sender: TObject);
+begin
+  ShowAboutForm;
+end;
+
 { 系统配置 }
-procedure TfrmPBox.OnSysConfig(Sender: TObject);
+procedure TfrmPBox.mniFuncMenuConfigClick(Sender: TObject);
 begin
   if ShowConfigForm(FlstAllDll, FAdoCNN) then
   begin
@@ -140,6 +158,18 @@ begin
     ReCreate;
     Show;
   end;
+end;
+
+{ 系统功能菜单 }
+procedure TfrmPBox.OnSysConfig(Sender: TObject);
+var
+  img: TImage;
+  pt : TPoint;
+begin
+  img  := TImage(Sender);
+  pt.X := Left + img.Left + 8;
+  pt.Y := Top + img.Top + img.Height;
+  pmFuncMenu.Popup(pt.X, pt.Y);
 end;
 
 { 销毁 Dll/EXE 窗体 }
@@ -437,7 +467,7 @@ begin
     begin
       strDllFileName := lstTemp.Strings[I];
       hDll           := LoadLibrary(PChar(strDllFileName));
-      if hDll = 0 then
+      if hDll = INVALID_HANDLE_VALUE then
         Continue;
 
       try

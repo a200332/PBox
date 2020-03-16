@@ -388,7 +388,7 @@ end;
 procedure TUIBaseForm.OnConfigClick(Sender: TObject);
 begin
   if Assigned(FOnConfig) then
-    FOnConfig(Self);
+    FOnConfig(FbtnConfig);
 end;
 
 procedure TUIBaseForm.OnFullClick(Sender: TObject);

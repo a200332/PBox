@@ -57,9 +57,9 @@ type
     procedure btnSubUpClick(Sender: TObject);
     procedure btnSubDownClick(Sender: TObject);
     procedure btnAddEXEClick(Sender: TObject);
-    procedure btnSubModuleIconClick(Sender: TObject);
-    procedure btnPModuleIconClick(Sender: TObject);
     procedure lstSubModuleClick(Sender: TObject);
+    procedure imgPModuleIconClick(Sender: TObject);
+    procedure imgSModuleIconClick(Sender: TObject);
   private
     FADOCNN      : TADOConnection;
     FmemIni      : TMemIniFile;
@@ -163,25 +163,15 @@ end;
 
 procedure EnableAutoRun(const bAutoRun: Boolean = False);
 begin
-  if not bAutoRun then
+  with TRegistry.Create do
   begin
-    with TRegistry.Create do
-    begin
-      RootKey := HKEY_LOCAL_MACHINE;
-      OpenKey('SOFTWARE\Microsoft\Windows\CurrentVersion\Run', True);
-      DeleteValue('PBox');
-      Free;
-    end;
-  end
-  else
-  begin
-    with TRegistry.Create do
-    begin
-      RootKey := HKEY_LOCAL_MACHINE;
-      OpenKey('SOFTWARE\Microsoft\Windows\CurrentVersion\Run', True);
+    RootKey := HKEY_LOCAL_MACHINE;
+    OpenKey('SOFTWARE\Microsoft\Windows\CurrentVersion\Run', True);
+    if not bAutoRun then
+      DeleteValue('PBox')
+    else
       WriteString('PBox', ParamStr(0));
-      Free;
-    end;
+    Free;
   end;
 end;
 
@@ -334,7 +324,7 @@ begin
 end;
 
 { 设置父模块显示图标 }
-procedure TfrmConfig.btnPModuleIconClick(Sender: TObject);
+procedure TfrmConfig.imgPModuleIconClick(Sender: TObject);
 var
   strIconFilePath: String;
 begin
@@ -367,7 +357,7 @@ begin
 end;
 
 { 设置子模块显示图标 }
-procedure TfrmConfig.btnSubModuleIconClick(Sender: TObject);
+procedure TfrmConfig.imgSModuleIconClick(Sender: TObject);
 var
   strIconFilePath               : String;
   strPModuleName, strSModuleName: String;

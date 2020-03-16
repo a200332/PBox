@@ -38,7 +38,7 @@ begin
   end;
 end;
 
-{ Delphi Dll 窗体关闭后，变量复位 }
+{ 时时检查，Delphi Dll 窗体是否关闭了，如果关闭了，变量复位 }
 procedure tmrCheckDelphiFormDllDestory(hWnd: hWnd; uMsg, idEvent: UINT; dwTime: DWORD); stdcall;
 begin
   if not IsWindowVisible(FhDelphiFormDll) then

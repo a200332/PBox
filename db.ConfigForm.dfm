@@ -252,16 +252,22 @@ object frmConfig: TfrmConfig
       Top = 114
       Width = 32
       Height = 32
+      Cursor = crHandPoint
+      ParentShowHint = False
+      ShowHint = False
       Stretch = True
-      OnDblClick = btnPModuleIconClick
+      OnClick = imgPModuleIconClick
     end
     object imgSModuleIcon: TImage
       Left = 420
       Top = 114
       Width = 32
       Height = 32
+      Cursor = crHandPoint
+      ParentShowHint = False
+      ShowHint = False
       Stretch = True
-      OnDblClick = btnSubModuleIconClick
+      OnClick = imgSModuleIconClick
     end
     object lblPModule: TLabel
       Left = 20
@@ -362,12 +368,13 @@ object frmConfig: TfrmConfig
       Top = 73
       Width = 53
       Height = 25
+      Hint = #36873#25321#22270#26631#65292#24517#39035#26159' 32'#215'32 '#30340' ico '#22270#29255
       Anchors = [akRight, akBottom]
       Caption = #22270#26631
       ParentShowHint = False
       ShowHint = True
       TabOrder = 6
-      OnClick = btnSubModuleIconClick
+      OnClick = imgSModuleIconClick
     end
     object chkGray: TCheckBox
       Left = 414
@@ -384,13 +391,13 @@ object frmConfig: TfrmConfig
       Top = 73
       Width = 53
       Height = 25
-      Hint = #24517#39035#26159' 32'#215'32 '#30340' bmp,ico,png '#22270#29255
+      Hint = #36873#25321#22270#26631#65292#24517#39035#26159' 32'#215'32 '#30340' ico '#22270#29255
       Anchors = [akRight, akBottom]
       Caption = #22270#26631
       ParentShowHint = False
       ShowHint = True
       TabOrder = 8
-      OnClick = btnPModuleIconClick
+      OnClick = imgPModuleIconClick
     end
     object btnAddEXE: TButton
       Left = 409

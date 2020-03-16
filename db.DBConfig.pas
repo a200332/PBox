@@ -56,11 +56,11 @@ type
     srchbxDecFuncFile: TSearchBox;
     lbl3: TLabel;
     lbl4: TLabel;
-    mmo1: TMemo;
     lbl8: TLabel;
     lbl9: TLabel;
     lbl10: TLabel;
-    mmo2: TMemo;
+    lbl11: TLabel;
+    lbl12: TLabel;
     procedure btnCancelClick(Sender: TObject);
     procedure btnSaveClick(Sender: TObject);
     procedure btnCreateDBLinkClick(Sender: TObject);
