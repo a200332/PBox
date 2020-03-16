@@ -1033,7 +1033,7 @@ begin
   end;
   intMax := MaxIntValue(arrInt);
 
-  intLabelPModuleHeight := GetLabelHeight('宋体', 16);
+  intLabelPModuleHeight := GetLabelHeight('宋体', 17);
   intLabelSModuleHeight := GetLabelHeight('宋体', 12);
 
   if intMax mod 3 = 0 then
@@ -1080,7 +1080,7 @@ begin
     arrParentModuleLabel[I].Parent     := tsList;
     arrParentModuleLabel[I].Caption    := mmMainMenu.Items[I].Caption;
     arrParentModuleLabel[I].Font.Name  := '宋体';
-    arrParentModuleLabel[I].Font.Size  := 16;
+    arrParentModuleLabel[I].Font.Size  := 17;
     arrParentModuleLabel[I].Font.Style := [fsBold];
     arrParentModuleLabel[I].Font.Color := RGB(0, 174, 29);
     arrParentModuleLabel[I].Left       := 40 + 400 * (I mod intRow);
@@ -1093,7 +1093,7 @@ begin
     arrParentModuleImage[I].Width   := 32;
     arrParentModuleImage[I].Stretch := True;
     arrParentModuleImage[I].Left    := arrParentModuleLabel[I].Left - 40;
-    arrParentModuleImage[I].Top     := arrParentModuleLabel[I].Top - 5;
+    arrParentModuleImage[I].Top     := arrParentModuleLabel[I].Top - 2;
     with TIniFile.Create(ChangeFileExt(ParamStr(0), '.ini')) do
     begin
       strPModuleIconFilePath := ReadString(c_strIniModuleSection, arrParentModuleLabel[I].Caption + '_ICON', '');
@@ -1118,7 +1118,7 @@ begin
         arrSubModuleLabel[I, J].Left := arrParentModuleLabel[I].Left + 2
       else
         arrSubModuleLabel[I, J].Left       := arrSubModuleLabel[I, J - 1].Left + arrSubModuleLabel[I, J - 1].Width + 10;
-      arrSubModuleLabel[I, J].Top          := arrParentModuleLabel[I].Top + GetLabelHeight('宋体', 16) + c_intBetweenVerticalDistance + (GetLabelHeight('宋体', 12) + c_intBetweenVerticalDistance) * (J div 3);
+      arrSubModuleLabel[I, J].Top          := arrParentModuleLabel[I].Top + GetLabelHeight('宋体', 17) + c_intBetweenVerticalDistance + (GetLabelHeight('宋体', 12) + c_intBetweenVerticalDistance) * (J div 3);
       arrSubModuleLabel[I, J].Tag          := mmMainMenu.Items[I].Items[J].Tag;
       arrSubModuleLabel[I, J].OnMouseEnter := OnSubModuleMouseEnter;
       arrSubModuleLabel[I, J].OnMouseLeave := OnSubModuleMouseLeave;

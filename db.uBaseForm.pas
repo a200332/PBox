@@ -457,9 +457,9 @@ const
 var
   intWidth: Integer;
 begin
-  Height := Screen.Height;
-  Top    := 0;
-  Left   := 0;
+  Height     := Screen.Height;
+  Top        := 0;
+  Left       := 0;
   while True do
   begin
     Application.ProcessMessages;
