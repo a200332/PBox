@@ -26,7 +26,7 @@ begin
   if FhDelphiFormDll = 0 then
     Exit;
 
-  { 关闭 Delphi Dll 窗体 }
+  { 发送关闭 Delphi Dll 窗体消息 }
   PostMessage(FhDelphiFormDll, WM_SYSCOMMAND, SC_CLOSE, 0);
 
   { 等待窗体关闭 }

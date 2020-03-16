@@ -268,7 +268,7 @@ begin
   FbtnConfig.Top          := 1;
   FbtnConfig.AutoSize     := True;
   FbtnConfig.Stretch      := False;
-  FbtnConfig.Hint         := '≈‰÷√';
+  FbtnConfig.Hint         := '≤Àµ•';
   FbtnConfig.ShowHint     := True;
   FbtnConfig.OnClick      := OnConfigClick;
   FbtnConfig.Anchors      := [akTop, akRight];
