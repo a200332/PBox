@@ -10,3 +10,24 @@ Win32
 /bin/Win32/plugins/Notepad2/Notepad2.ini
 /bin/Win64/plugins/x64dbg/release/x64/x64dbg.ini
 /bin/Win32/plugins/x64dbg/release/x32/x32dbg.ini
+/bin/Win64/plugins/smsniff-x64/IPNetInfo.cfg
+/bin/Win64/plugins/uninstallview-x64/UninstallView.cfg
+/bin/Win64/plugins/smsniff-x64/smsniff.cfg
+/bin/Win64/plugins/cports-x64/IPNetInfo.cfg
+/bin/Win64/plugins/driverview-x64/DriverView.cfg
+/bin/Win64/plugins/WinHex 15.2/WinHex dbyoung.cfg
+/bin/Win64/plugins/WinHex 15.2/WinHex SYSTEM.cfg
+/bin/Win64/plugins/cports-x64/cports.cfg
+/bin/Win64/plugins/ofview-x64/OpenedFilesView.cfg
+/bin/Win64/plugins/shmnview-x64/shmnview.cfg
+/bin/Win64/plugins/shexview-x64/shexview.cfg
+/bin/Win32/plugins/cports-x64/IPNetInfo.cfg
+/bin/Win32/plugins/driverview-x64/DriverView.cfg
+/bin/Win32/plugins/uninstallview/UninstallView.cfg
+/bin/Win32/plugins/smsniff-x64/smsniff.cfg
+/bin/Win32/plugins/WinHex 15.2/WinHex dbyoung.cfg
+/bin/Win32/plugins/WinHex 15.2/WinHex SYSTEM.cfg
+/bin/Win32/plugins/cports-x64/cports.cfg
+/bin/Win32/plugins/ofview-x64/OpenedFilesView.cfg
+/bin/Win32/plugins/shmnview-x64/shmnview.cfg
+/bin/Win32/plugins/shexview-x64/shexview.cfg
