@@ -1,0 +1,35 @@
+{
+    "homepage": "https://github.com/BurntSushi/ripgrep",
+    "description": "Recursively searches directories for a regex pattern.",
+    "license": "MIT",
+    "version": "12.0.1",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/BurntSushi/ripgrep/releases/download/12.0.1/ripgrep-12.0.1-x86_64-pc-windows-msvc.zip",
+            "hash": "f44d178f37cfb1edb28fa1fffbf203ef64db8470175ae29489720ac2d17bccf0",
+            "extract_dir": "ripgrep-12.0.1-x86_64-pc-windows-msvc"
+        },
+        "32bit": {
+            "url": "https://github.com/BurntSushi/ripgrep/releases/download/12.0.1/ripgrep-12.0.1-i686-pc-windows-msvc.zip",
+            "hash": "8f25fca0c0508ceae8c8d4d427b1ce2c3de4921a1b588261e79ae1f5a30389a4",
+            "extract_dir": "ripgrep-12.0.1-i686-pc-windows-msvc"
+        }
+    },
+    "bin": "rg.exe",
+    "checkver": "github",
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/BurntSushi/ripgrep/releases/download/$version/ripgrep-$version-x86_64-pc-windows-msvc.zip",
+                "extract_dir": "ripgrep-$version-x86_64-pc-windows-msvc"
+            },
+            "32bit": {
+                "url": "https://github.com/BurntSushi/ripgrep/releases/download/$version/ripgrep-$version-i686-pc-windows-msvc.zip",
+                "extract_dir": "ripgrep-$version-i686-pc-windows-msvc"
+            }
+        }
+    },
+    "suggest": {
+        "vcredist": "extras/vcredist2015"
+    }
+}

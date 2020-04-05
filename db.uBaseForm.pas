@@ -3,7 +3,7 @@ unit db.uBaseForm;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, System.iniFiles, Vcl.Menus, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.ExtCtrls, db.uCommon;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, System.iniFiles, System.Types, Vcl.Menus, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.ExtCtrls, db.uCommon;
 
 const
   WM_FORMSIZE = WM_USER + $1000;
@@ -71,6 +71,7 @@ type
     procedure MultisScreenOnMax;
     { 从最大化还原窗体大小 }
     procedure FormRestoreSize;
+    // procedure WMNCHITTEST(var msg: TWMNCHITTEST); message WM_NCHITTEST;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -457,9 +458,9 @@ const
 var
   intWidth: Integer;
 begin
-  Height     := Screen.Height;
-  Top        := 0;
-  Left       := 0;
+  Height := Screen.Height;
+  Top    := 0;
+  Left   := 0;
   while True do
   begin
     Application.ProcessMessages;
@@ -559,6 +560,32 @@ begin
     FbtnMax.Hint := '还原';
   end;
 end;
+
+// procedure TUIBaseForm.WMNCHITTEST(var msg: TWMNCHITTEST);
+// const
+// cOffset = 10;
+// var
+// vPoint: TPoint;
+// begin
+// inherited;
+// vPoint := ScreenToClient(Point(msg.XPos, msg.YPos));
+// if PtInRect(Rect(0, 0, cOffset, cOffset), vPoint) then
+// msg.Result := HTTOPLEFT
+// else if PtInRect(Rect(Width - cOffset, Height - cOffset, Width, Height), vPoint) then
+// msg.Result := HTBOTTOMRIGHT
+// else if PtInRect(Rect(Width - cOffset, 0, Width, cOffset), vPoint) then
+// msg.Result := HTTOPRIGHT
+// else if PtInRect(Rect(0, Height - cOffset, cOffset, Height), vPoint) then
+// msg.Result := HTBOTTOMLEFT
+// else if PtInRect(Rect(cOffset, 0, Width - cOffset, cOffset), vPoint) then
+// msg.Result := HTTOP
+// else if PtInRect(Rect(0, cOffset, cOffset, Height - cOffset), vPoint) then
+// msg.Result := HTLEFT
+// else if PtInRect(Rect(Width - cOffset, cOffset, Width, Height - cOffset), vPoint) then
+// msg.Result := HTRIGHT
+// else if PtInRect(Rect(cOffset, Height - cOffset, Width - cOffset, Height), vPoint) then
+// msg.Result := HTBOTTOM;
+// end;
 
 procedure TUIBaseForm.OnMaxClick(Sender: TObject);
 begin

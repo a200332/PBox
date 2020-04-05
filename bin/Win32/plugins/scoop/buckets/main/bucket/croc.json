@@ -1,0 +1,33 @@
+{
+    "version": "8.0.5",
+    "description": "Easily and securely send things from one computer to another.",
+    "homepage": "https://schollz.com/software/croc6",
+    "license": "MIT",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/schollz/croc/releases/download/v8.0.5/croc_8.0.5_Windows-64bit.zip",
+            "hash": "ff0b01df34f5814a3441ee147ecd925a2e1e2002bb030f3d464b48c78ca62255"
+        },
+        "32bit": {
+            "url": "https://github.com/schollz/croc/releases/download/v8.0.5/croc_8.0.5_Windows-32bit.zip",
+            "hash": "73a53e3fb881c6afded43daaeedfc56eefba3d1f4a22ea76b767eb7d90f11347"
+        }
+    },
+    "bin": "croc.exe",
+    "checkver": {
+        "github": "https://github.com/schollz/croc"
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/schollz/croc/releases/download/v$version/croc_$version_Windows-64bit.zip"
+            },
+            "32bit": {
+                "url": "https://github.com/schollz/croc/releases/download/v$version/croc_$version_Windows-32bit.zip"
+            }
+        },
+        "hash": {
+            "url": "$baseurl/croc_$version_checksums.txt"
+        }
+    }
+}

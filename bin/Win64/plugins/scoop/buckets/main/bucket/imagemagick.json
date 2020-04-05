@@ -1,0 +1,50 @@
+{
+    "homepage": "https://imagemagick.org/",
+    "description": "Create, edit, compose, and convert 200+ of bitmap images formats.",
+    "license": "ImageMagick",
+    "version": "7.0.10-3",
+    "architecture": {
+        "64bit": {
+            "url": "https://www.imagemagick.org/download/binaries/ImageMagick-7.0.10-3-portable-Q16-x64.zip",
+            "hash": "caa2843cfb371b73d326612afffd801c6aa59cce8f5ba90a96b0faaa3a2cdb05"
+        },
+        "32bit": {
+            "url": "https://www.imagemagick.org/download/binaries/ImageMagick-7.0.10-3-portable-Q16-x86.zip",
+            "hash": "ff7df11a26e252b2cf24dfbdd1bbcb8e9d605b16bafe81c4262d30fbd9318177"
+        }
+    },
+    "depends": "ffmpeg",
+    "bin": [
+        "compare.exe",
+        "composite.exe",
+        "conjure.exe",
+        "convert.exe",
+        [
+            "convert.exe",
+            "imconvert"
+        ],
+        "dcraw.exe",
+        "hp2xx.exe",
+        "identify.exe",
+        "IMDisplay.exe",
+        "magick.exe",
+        "mogrify.exe",
+        "montage.exe",
+        "stream.exe"
+    ],
+    "checkver": "The current release is ImageMagick <a.*?>([0-9\\.p-]+)</a>",
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://www.imagemagick.org/download/binaries/ImageMagick-$version-portable-Q16-x64.zip"
+            },
+            "32bit": {
+                "url": "https://www.imagemagick.org/download/binaries/ImageMagick-$version-portable-Q16-x86.zip"
+            }
+        },
+        "hash": {
+            "mode": "rdf",
+            "url": "https://www.imagemagick.org/download/binaries/digest.rdf"
+        }
+    }
+}

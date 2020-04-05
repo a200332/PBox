@@ -2,11 +2,11 @@ object frmPBox: TfrmPBox
   Left = 0
   Top = 0
   Caption = 'PBox '#24037#20855#31665' v1.0'
-  ClientHeight = 723
-  ClientWidth = 1127
+  ClientHeight = 800
+  ClientWidth = 1200
   Color = clBtnFace
-  Constraints.MinHeight = 649
-  Constraints.MinWidth = 1020
+  Constraints.MinHeight = 800
+  Constraints.MinWidth = 1216
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -24,8 +24,8 @@ object frmPBox: TfrmPBox
   TextHeight = 13
   object pnlBottom: TPanel
     Left = 0
-    Top = 698
-    Width = 1127
+    Top = 775
+    Width = 1200
     Height = 25
     Align = alBottom
     BevelOuter = bvNone
@@ -37,7 +37,7 @@ object frmPBox: TfrmPBox
     ShowCaption = False
     TabOrder = 0
     object pnlInfo: TPanel
-      Left = 213
+      Left = 286
       Top = 0
       Width = 235
       Height = 25
@@ -82,7 +82,7 @@ object frmPBox: TfrmPBox
       end
     end
     object pnlTime: TPanel
-      Left = 903
+      Left = 976
       Top = 0
       Width = 224
       Height = 25
@@ -111,7 +111,7 @@ object frmPBox: TfrmPBox
       end
     end
     object pnlIP: TPanel
-      Left = 750
+      Left = 823
       Top = 0
       Width = 153
       Height = 25
@@ -148,7 +148,7 @@ object frmPBox: TfrmPBox
       end
     end
     object pnlWeb: TPanel
-      Left = 448
+      Left = 521
       Top = 0
       Width = 302
       Height = 25
@@ -217,7 +217,7 @@ object frmPBox: TfrmPBox
   object clbrPModule: TCoolBar
     Left = 0
     Top = 0
-    Width = 1127
+    Width = 1200
     Height = 28
     AutoSize = True
     Bands = <
@@ -225,12 +225,12 @@ object frmPBox: TfrmPBox
         Control = tlbPModule
         ImageIndex = -1
         MinHeight = 24
-        Width = 1121
+        Width = 1194
       end>
     object tlbPModule: TToolBar
       Left = 11
       Top = 0
-      Width = 1112
+      Width = 1185
       Height = 24
       ButtonHeight = 24
       ButtonWidth = 43
@@ -248,8 +248,8 @@ object frmPBox: TfrmPBox
   object rzpgcntrlAll: TPageControl
     Left = 0
     Top = 28
-    Width = 1127
-    Height = 670
+    Width = 1200
+    Height = 747
     ActivePage = tsDll
     Align = alClient
     Style = tsButtons
@@ -258,13 +258,13 @@ object frmPBox: TfrmPBox
       Caption = 'tsButton'
       ExplicitLeft = 0
       ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 1119
+      ExplicitHeight = 639
       object imgButtonBack: TImage
         Left = 0
         Top = 0
-        Width = 1119
-        Height = 639
+        Width = 1192
+        Height = 716
         Align = alClient
         Stretch = True
         ExplicitLeft = 272
@@ -325,13 +325,13 @@ object frmPBox: TfrmPBox
       Caption = 'tsList'
       ExplicitLeft = 0
       ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 1119
+      ExplicitHeight = 639
       object imgListBack: TImage
         Left = 0
         Top = 0
-        Width = 1119
-        Height = 639
+        Width = 1192
+        Height = 716
         Align = alClient
         Stretch = True
         ExplicitLeft = 272
@@ -345,14 +345,12 @@ object frmPBox: TfrmPBox
       object imgDllFormBack: TImage
         Left = 0
         Top = 0
-        Width = 1119
-        Height = 639
+        Width = 1192
+        Height = 716
         Align = alClient
         Stretch = True
-        ExplicitLeft = 272
-        ExplicitTop = 128
-        ExplicitWidth = 105
-        ExplicitHeight = 105
+        ExplicitWidth = 1200
+        ExplicitHeight = 639
       end
     end
   end

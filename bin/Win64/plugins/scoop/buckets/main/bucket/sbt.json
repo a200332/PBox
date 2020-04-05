@@ -1,0 +1,17 @@
+{
+    "version": "1.3.9",
+    "description": "A build tool for Scala, Java, and more",
+    "homepage": "https://www.scala-sbt.org",
+    "license": "BSD-3-Clause",
+    "url": "https://github.com/sbt/sbt/releases/download/v1.3.9/sbt-1.3.9.zip",
+    "hash": "58edd05bd236868ed469310825ff74247e8a9503ce4dc047210b10a4175c455b",
+    "extract_dir": "sbt",
+    "bin": "bin\\sbt.bat",
+    "checkver": {
+        "github": "https://github.com/sbt/sbt"
+    },
+    "autoupdate": {
+        "url": "https://github.com/sbt/sbt/releases/download/v$version/sbt-$version.zip",
+        "extract_dir": "sbt"
+    }
+}
