@@ -132,7 +132,7 @@ object frmPBox: TfrmPBox
       TabOrder = 2
       OnClick = pnlIPClick
       object lblIP: TLabel
-        Left = 4
+        Left = 6
         Top = 4
         Width = 8
         Height = 15
@@ -327,6 +327,10 @@ object frmPBox: TfrmPBox
     end
     object tsList: TTabSheet
       Caption = 'tsList'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object imgListBack: TImage
         Left = 0
         Top = 0

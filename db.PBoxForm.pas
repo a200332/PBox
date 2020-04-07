@@ -793,7 +793,6 @@ begin
 
   { œ‘ æ IP }
   lblIP.Caption := GetCurrentAdapterIP;
-  lblIP.Left    := (lblIP.Parent.Width - lblIP.Width) div 2;
 
   ReCreate;
 end;

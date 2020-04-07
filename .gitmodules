@@ -1,0 +1,6 @@
+[submodule "3rdparty/SynEdit"]
+	path = 3rdparty/SynEdit
+	url = https://github.com/SynEdit/SynEdit.git
+[submodule "3rdparty/DOSCommand"]
+	path = 3rdparty/DOSCommand
+	url = https://github.com/TurboPack/DOSCommand.git
