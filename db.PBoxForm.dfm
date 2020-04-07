@@ -126,6 +126,7 @@ object frmPBox: TfrmPBox
       ParentFont = False
       ShowCaption = False
       TabOrder = 2
+      OnClick = pnlIPClick
       object lblIP: TLabel
         Left = 4
         Top = 4
@@ -137,6 +138,7 @@ object frmPBox: TfrmPBox
         Font.Name = #23435#20307
         Font.Style = []
         ParentFont = False
+        OnClick = pnlIPClick
       end
       object bvlIP: TBevel
         Left = 151
@@ -256,10 +258,6 @@ object frmPBox: TfrmPBox
     TabOrder = 2
     object tsButton: TTabSheet
       Caption = 'tsButton'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 1119
-      ExplicitHeight = 639
       object imgButtonBack: TImage
         Left = 0
         Top = 0
@@ -323,10 +321,6 @@ object frmPBox: TfrmPBox
     end
     object tsList: TTabSheet
       Caption = 'tsList'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 1119
-      ExplicitHeight = 639
       object imgListBack: TImage
         Left = 0
         Top = 0
@@ -415,5 +409,11 @@ object frmPBox: TfrmPBox
       Caption = #20851#20110
       OnClick = mniFuncMenuAboutClick
     end
+  end
+  object pmAdapterList: TPopupMenu
+    AutoHotkeys = maManual
+    OwnerDraw = True
+    Left = 100
+    Top = 455
   end
 end

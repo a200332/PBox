@@ -3,7 +3,7 @@ unit db.uCommon;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, Winapi.ShellAPI, Winapi.IpRtrMib, Winapi.ImageHlp, Winapi.TlHelp32, System.SysUtils, System.Types, System.StrUtils, System.Classes, System.IniFiles, System.Math,
+  Winapi.Windows, Winapi.Messages, Winapi.ShellAPI, Winapi.IpRtrMib, Winapi.ImageHlp, Winapi.TlHelp32, Winapi.IpHlpApi, Winapi.IpTypes, Winapi.WinSock, System.SysUtils, System.Types, System.StrUtils, System.Classes, System.IniFiles, System.Math,
   Vcl.Forms, Vcl.Graphics, Vcl.Controls, Data.Win.ADODB, System.IOUtils, IdIPWatch,
   db.uNetworkManager, FlyUtils.CnXXX.Common, FlyUtils.AES;
 
@@ -44,6 +44,12 @@ function EnableDebugPrivilege(PrivName: string; CanDebug: Boolean): Boolean;
 
 { 获取本机IP }
 function GetNativeIP: String;
+
+{ 获取本机IP列表 }
+function GetNativeIPList(var IpList: TStringList): Integer;
+
+{ 获取本机网卡列表信息 }
+function GetAdapterInfo(var lst: TList): Boolean;
 
 { 排序模块 }
 procedure SortModuleList(var lstModuleList: THashedStringList);
@@ -173,20 +179,6 @@ begin
   TP.Privileges[0].Attributes := Ifthen(CanDebug, SE_PRIVILEGE_ENABLED, 0);
   Result                      := AdjustTokenPrivileges(hToken, False, TP, SizeOf(TP), nil, Dummy);
   hToken                      := 0;
-end;
-
-{ 获取本机IP }
-function GetNativeIP: String;
-var
-  IdIPWatch: TIdIPWatch;
-begin
-  IdIPWatch := TIdIPWatch.Create(nil);
-  try
-    IdIPWatch.HistoryEnabled := False;
-    Result                   := IdIPWatch.LocalIP;
-  finally
-    IdIPWatch.Free;
-  end;
 end;
 
 { 排序父模块 }
@@ -1186,6 +1178,112 @@ begin
   finally
     ReleaseDC(0, DC);
     Font.Free;
+  end;
+end;
+
+{ 获取本机IP }
+function GetNativeIP: String;
+var
+  IdIPWatch: TIdIPWatch;
+begin
+  IdIPWatch := TIdIPWatch.Create(nil);
+  try
+    IdIPWatch.HistoryEnabled := False;
+    Result                   := IdIPWatch.LocalIP;
+  finally
+    IdIPWatch.Free;
+  end;
+end;
+
+{ 获取本机IP列表 }
+function GetNativeIPList(var IpList: TStringList): Integer;
+type
+  TaPInAddr = array [0 .. 10] of PInAddr;
+  PaPInAddr = ^TaPInAddr;
+var
+  HostName : array [0 .. MAX_PATH] of AnsiChar;
+  NameLen  : Integer;
+  WSData   : TWSAData;
+  lpHostEnt: PHostEnt;
+  I        : Integer;
+  pptr     : PaPInAddr;
+  strIP    : string;
+begin
+  Result := 0;
+
+  if WSAStartup(MakeWord(2, 0), WSData) <> 0 then
+    Exit;
+
+  try
+    NameLen := SizeOf(HostName);
+    FillChar(HostName, NameLen, 0);
+    NameLen := GetHostName(HostName, NameLen);
+    if NameLen = SOCKET_ERROR then
+      Exit;
+
+    lpHostEnt := GetHostByName(HostName);
+    if lpHostEnt = Nil then
+      Exit;
+
+    I    := 0;
+    pptr := PaPInAddr(lpHostEnt^.h_addr_list);
+    IpList.Clear;
+    while pptr^[I] <> nil do
+    begin
+      strIP := string(inet_ntoa(pptr^[I]^));
+      IpList.Add(strIP);
+      Inc(I);
+    end;
+    Result := IpList.Count;
+  finally
+    WSACleanup;
+  end;
+end;
+
+{ 获取本机网卡列表信息 }
+function GetAdapterInfo(var lst: TList): Boolean;
+var
+  Adapters, Work: PIP_ADAPTER_INFO;
+  BufLen        : ULONG;
+  Ret           : DWORD;
+begin
+  Result := False;
+
+  BufLen := 1024 * 15;
+  GetMem(Adapters, BufLen);
+  try
+    repeat
+      Ret := GetAdaptersInfo(Adapters, BufLen);
+      case Ret of
+        ERROR_SUCCESS:
+          begin
+            if BufLen = 0 then
+              Exit;
+            Break;
+          end;
+
+        ERROR_NOT_SUPPORTED, ERROR_NO_DATA:
+          Exit;
+
+        ERROR_BUFFER_OVERFLOW:
+          ReallocMem(Adapters, BufLen);
+      else
+        SetLastError(Ret);
+        RaiseLastOSError;
+      end;
+    until False;
+
+    if Ret = ERROR_SUCCESS then
+    begin
+      Work := Adapters;
+      repeat
+        lst.Add(Work);
+        Work := Work^.Next;
+      until (Work = nil);
+      Result := True;
+    end;
+  finally
+    FreeMem(Adapters);
   end;
 end;
 

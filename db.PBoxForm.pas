@@ -3,7 +3,7 @@ unit db.PBoxForm;
 interface
 
 uses
-  Winapi.Windows, Winapi.ShellAPI, System.SysUtils, System.StrUtils, System.Classes, System.Types, System.IniFiles, System.Math, System.UITypes, System.ImageList,
+  Winapi.Windows, Winapi.ShellAPI, Winapi.IpTypes, System.SysUtils, System.StrUtils, System.Classes, System.Types, System.IniFiles, System.Math, System.UITypes, System.ImageList,
   Vcl.Graphics, Vcl.Controls, Vcl.Buttons, Vcl.Forms, Vcl.ExtCtrls, Vcl.Menus, Vcl.ComCtrls, Vcl.StdCtrls, Vcl.ImgList, Vcl.ToolWin, Data.Win.ADODB,
   db.uCommon, db.uBaseForm;
 
@@ -49,6 +49,7 @@ type
     mniFuncMenuMoney: TMenuItem;
     mniFuncMenuLine01: TMenuItem;
     mniFuncMenuAbout: TMenuItem;
+    pmAdapterList: TPopupMenu;
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -62,6 +63,7 @@ type
     procedure mniFuncMenuConfigClick(Sender: TObject);
     procedure mniFuncMenuAboutClick(Sender: TObject);
     procedure mniFuncMenuMoneyClick(Sender: TObject);
+    procedure pnlIPClick(Sender: TObject);
   private
     FlstAllDll    : THashedStringList;
     FUIShowStyle  : TShowStyle;
@@ -125,6 +127,9 @@ type
     function GetMaxInstance: Integer;
     { 销毁 Dll 窗体 }
     procedure DestoryDllForm;
+    procedure OnAdapterDrawItem(Sender: TObject; ACanvas: TCanvas; ARect: TRect; Selected: Boolean);
+    procedure OnAdapterIPClick(Sender: TObject);
+    function GetCurrentAdapterIP: String;
   public
     FAdoCNN: TADOConnection;
   end;
@@ -170,6 +175,117 @@ begin
   pt.X := Left + img.Left + 8;
   pt.Y := Top + img.Top + img.Height;
   pmFuncMenu.Popup(pt.X, pt.Y);
+end;
+
+procedure TfrmPBox.OnAdapterDrawItem(Sender: TObject; ACanvas: TCanvas; ARect: TRect; Selected: Boolean);
+begin
+  ACanvas.Font.Name := '宋体';
+  ACanvas.Font.Size := 11;
+  ACanvas.TextOut(ARect.Left, ARect.Top, (Sender as TMenuItem).Caption);
+end;
+
+procedure TfrmPBox.OnAdapterIPClick(Sender: TObject);
+var
+  strText       : string;
+  strIP         : String;
+  strName       : String;
+  strIniFileName: String;
+begin
+  strText       := (Sender as TMenuItem).Caption;
+  strIP         := Trim(LeftStr(strText, 19));
+  strIP         := RightStr(strIP, Length(strIP) - 3);
+  lblIP.Caption := strIP;
+
+  strName        := Trim(RightStr(strText, Length(strText) - 42));
+  strName        := RightStr(strName, Length(strName) - 6);
+  strIniFileName := ChangeFileExt(ParamStr(0), '.ini');
+  with TIniFile.Create(strIniFileName) do
+  begin
+    WriteString('Network', 'AdapterName', strName);
+    Free;
+  end;
+end;
+
+procedure TfrmPBox.pnlIPClick(Sender: TObject);
+var
+  lstAdapter : TList;
+  I          : Integer;
+  AdapterInfo: PIP_ADAPTER_INFO;
+  strIP      : String;
+  strGate    : String;
+  strName    : String;
+  mmItem     : TMenuItem;
+  pt         : TPoint;
+begin
+  lstAdapter := TList.Create;
+  try
+    GetAdapterInfo(lstAdapter);
+    if lstAdapter.Count > 0 then
+    begin
+      pmAdapterList.Items.Clear;
+      for I := 0 to lstAdapter.Count - 1 do
+      begin
+        AdapterInfo       := PIP_ADAPTER_INFO(lstAdapter.Items[I]);
+        strIP             := string(AdapterInfo^.IpAddressList.IpAddress.S);
+        strGate           := string(AdapterInfo^.GatewayList.IpAddress.S);
+        strName           := string(AdapterInfo^.Description);
+        mmItem            := TMenuItem.Create(pmAdapterList);
+        mmItem.Caption    := Format('IP: ' + '%-16s Gate: %-16s Name: %-80s', [strIP, strGate, strName]);
+        mmItem.OnDrawItem := OnAdapterDrawItem;
+        mmItem.OnClick    := OnAdapterIPClick;
+        pmAdapterList.Items.Add(mmItem);
+      end;
+      if pmAdapterList.Items.Count > 1 then
+      begin
+        pt.X := pnlIP.Left + Left;
+        pt.Y := Top + Height + 2;
+        pmAdapterList.Popup(pt.X, pt.Y);
+      end;
+    end;
+  finally
+    lstAdapter.Free;
+  end;
+end;
+
+function TfrmPBox.GetCurrentAdapterIP: String;
+var
+  strName       : String;
+  strIniFileName: String;
+  I             : Integer;
+  lstAdapter    : TList;
+  AdapterInfo   : PIP_ADAPTER_INFO;
+begin
+  strIniFileName := ChangeFileExt(ParamStr(0), '.ini');
+  with TIniFile.Create(strIniFileName) do
+  begin
+    strName := ReadString('Network', 'AdapterName', strName);
+    Free;
+  end;
+
+  if Trim(strName) = '' then
+  begin
+    Result := GetNativeIP;
+    Exit;
+  end;
+
+  lstAdapter := TList.Create;
+  try
+    GetAdapterInfo(lstAdapter);
+    if lstAdapter.Count > 0 then
+    begin
+      for I := 0 to lstAdapter.Count - 1 do
+      begin
+        AdapterInfo := PIP_ADAPTER_INFO(lstAdapter.Items[I]);
+        if SameText(string(AdapterInfo^.Description), strName) then
+        begin
+          Result := string(AdapterInfo^.IpAddressList.IpAddress.S);
+          Break;
+        end;
+      end;
+    end;
+  finally
+    lstAdapter.Free;
+  end;
 end;
 
 { 销毁 Dll/EXE 窗体 }
@@ -670,7 +786,7 @@ begin
   tmrDateTime.OnTimer(nil);
 
   { 显示 IP }
-  lblIP.Caption := GetNativeIP;
+  lblIP.Caption := GetCurrentAdapterIP;
   lblIP.Left    := (lblIP.Parent.Width - lblIP.Width) div 2;
 
   ReCreate;
