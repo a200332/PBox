@@ -64,6 +64,7 @@ type
     procedure mniFuncMenuAboutClick(Sender: TObject);
     procedure mniFuncMenuMoneyClick(Sender: TObject);
     procedure pnlIPClick(Sender: TObject);
+    procedure pnlTimeClick(Sender: TObject);
   private
     FlstAllDll    : THashedStringList;
     FUIShowStyle  : TShowStyle;
@@ -247,6 +248,11 @@ begin
   end;
 end;
 
+procedure TfrmPBox.pnlTimeClick(Sender: TObject);
+begin
+  WinExec(PAnsiChar('rundll32.exe Shell32.dll,Control_RunDLL intl.cpl,,/p:"date"'), SW_SHOW);
+end;
+
 function TfrmPBox.GetCurrentAdapterIP: String;
 var
   strName       : String;
@@ -264,7 +270,7 @@ begin
 
   if Trim(strName) = '' then
   begin
-    Result := GetNativeIP;
+    Result         := GetNativeIP;
     Exit;
   end;
 
@@ -673,7 +679,7 @@ const
 var
   strWebDownSpeed, strWebUpSpeed: String;
 begin
-  lblTime.Caption := FormatDateTime('YYYY-MM-DD hh:mm:ss', Now) + ' ' + WeekDay[DayOfWeek(Now)];
+  lblTime.Caption := DateTimeToStr(Now) + ' ' + WeekDay[DayOfWeek(Now)];
   GetWebSpeed(strWebDownSpeed, strWebUpSpeed);
   lblWeb.Caption := Format('ÏÂÔØ¡ý£º%s  ÉÏ´«¡ü£º%s', [strWebDownSpeed, strWebUpSpeed]);
 end;

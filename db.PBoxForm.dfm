@@ -97,6 +97,7 @@ object frmPBox: TfrmPBox
       ParentFont = False
       ShowCaption = False
       TabOrder = 1
+      OnClick = pnlTimeClick
       object lblTime: TLabel
         Left = 8
         Top = 4
@@ -108,6 +109,9 @@ object frmPBox: TfrmPBox
         Font.Name = #23435#20307
         Font.Style = []
         ParentFont = False
+        ParentShowHint = False
+        ShowHint = False
+        OnClick = pnlTimeClick
       end
     end
     object pnlIP: TPanel
@@ -138,6 +142,8 @@ object frmPBox: TfrmPBox
         Font.Name = #23435#20307
         Font.Style = []
         ParentFont = False
+        ParentShowHint = False
+        ShowHint = False
         OnClick = pnlIPClick
       end
       object bvlIP: TBevel
