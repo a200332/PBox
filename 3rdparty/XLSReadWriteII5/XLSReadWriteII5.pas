@@ -38,7 +38,7 @@ interface
 
 {.$define SHAREWARE}
 
-uses Classes, SysUtils,
+uses Classes, SysUtils, Contnrs,
 {$ifdef DEMO_TIMELIMIT}
      Forms,
 {$endif}
