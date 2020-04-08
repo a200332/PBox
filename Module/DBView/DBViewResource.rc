@@ -1,0 +1,2 @@
+UNCHECK BITMAP "01.bmp"
+CHECK BITMAP "02.bmp"

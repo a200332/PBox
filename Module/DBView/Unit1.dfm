@@ -76,10 +76,13 @@ object frmDBView: TfrmDBView
           Caption = #25968#25454#31867#22411
           Width = 90
         end>
+      OwnerDraw = True
       ReadOnly = True
       RowSelect = True
       TabOrder = 0
       ViewStyle = vsReport
+      OnClick = lvFieldTypeClick
+      OnDrawItem = lvFieldTypeDrawItem
     end
   end
   object lvData: TListView

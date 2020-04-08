@@ -4,10 +4,12 @@ library DBView;
 {$RTTI EXPLICIT METHODS([]) PROPERTIES([]) FIELDS([])}
 {$IFEND}
 
+{$R *.dres}
+
 uses
   System.SysUtils,
   System.Classes,
-  Unit1 in 'Unit1.pas' {frmDBView} ,
+  Unit1 in 'Unit1.pas' {frmDBView},
   Unit2 in 'Unit2.pas' {frmSQL};
 
 {$R *.res}

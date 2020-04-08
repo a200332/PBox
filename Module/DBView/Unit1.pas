@@ -7,11 +7,6 @@ uses
   XLSReadWriteII5, Xc12Utils5, XLSUtils5, Xc12DataStyleSheet5, DB.uCommon;
 
 type
-  TListView = class(Vcl.ComCtrls.TListView)
-
-  end;
-
-type
   TfrmDBView = class(TForm)
     btnDBLink: TButton;
     grpTables: TGroupBox;
@@ -34,6 +29,8 @@ type
     procedure lvDataData(Sender: TObject; Item: TListItem);
     procedure btnExportExcelClick(Sender: TObject);
     procedure btnQueryClick(Sender: TObject);
+    procedure lvFieldTypeDrawItem(Sender: TCustomListView; Item: TListItem; Rect: TRect; State: TOwnerDrawState);
+    procedure lvFieldTypeClick(Sender: TObject);
   private
     procedure ReadDBFromConfig(ADOCNN: TADOConnection);
     procedure GetTableFieldType(const strTableName: string);
@@ -285,6 +282,12 @@ begin
 
   strTableName     := lstTables.Items.Strings[lstTables.ItemIndex];
   strDisplayFields := GetDisplayFields(strTableName);
+  if strDisplayFields = '' then
+  begin
+    MessageBox(Handle, '至少选择一个字段用来显示', '系统提示：', MB_OK or MB_ICONWARNING);
+    Exit;
+  end;
+
   strChineseFields := GetChineseFields(strTableName, strDisplayFields);
   CreateColumnField(strChineseFields);
 
@@ -320,6 +323,48 @@ begin
       Item.SubItems.Add('')
     else
       Item.SubItems.Add(qryData.Fields[I].AsString);
+  end;
+end;
+
+procedure TfrmDBView.lvFieldTypeClick(Sender: TObject);
+begin
+  if lvFieldType.ItemIndex = -1 then
+    Exit;
+
+  if lvFieldType.Items[lvFieldType.ItemIndex].Caption = '1' then
+    lvFieldType.Items[lvFieldType.ItemIndex].Caption := '0'
+  else
+    lvFieldType.Items[lvFieldType.ItemIndex].Caption := '1';
+end;
+
+procedure TfrmDBView.lvFieldTypeDrawItem(Sender: TCustomListView; Item: TListItem; Rect: TRect; State: TOwnerDrawState);
+var
+  bDisplay: Boolean;
+  bmpCheck: TBitmap;
+  rct     : TRect;
+  strTmp  : String;
+  I       : Integer;
+begin
+  bDisplay := Item.Caption = '1';
+  rct      := Item.DisplayRect(drBounds);
+
+  bmpCheck := TBitmap.Create;
+  try
+    bmpCheck.PixelFormat := pf24bit;
+    bmpCheck.Width       := 15;
+    bmpCheck.Height      := 15;
+    bmpCheck.LoadFromResourceName(HInstance, IfThen(bDisplay, 'CHECK', 'UNCHECK'));
+    TListView(Sender).Canvas.Draw(rct.Left + 4, rct.Top, bmpCheck);
+  finally
+    bmpCheck.Free;
+  end;
+
+  for I := 0 to Item.SubItems.Count - 1 do
+  begin
+    strTmp    := Item.SubItems.Strings[I];
+    rct.Left  := rct.Left + lvFieldType.Column[I + 0].Width + 2;
+    rct.Right := rct.Left + lvFieldType.Column[I + 1].Width;
+    TListView(Sender).Canvas.TextRect(rct, strTmp, [tfLeft, tfSingleLine, tfVerticalCenter]);
   end;
 end;
 
