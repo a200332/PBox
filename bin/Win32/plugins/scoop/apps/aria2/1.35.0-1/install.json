@@ -1,4 +1,4 @@
 {
-    "architecture": "64bit",
-    "bucket": "main"
+    "bucket": "main",
+    "architecture": "64bit"
 }
