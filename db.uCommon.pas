@@ -36,6 +36,69 @@ const
   c_strDllExportName                          = 'db_ShowDllForm_Plugins';
   c_intBetweenVerticalDistance                = 5;
 
+  PARTITION_IFS                         = $07;
+  BUF_LEN                               = 500 * 1024;
+  USN_DELETE_FLAG_DELETE                = $00000001;
+  c_UInt64Root                          = 1407374883553285;
+  c_arrFields: array [0 .. 6] of string = ('ID', 'FileID', 'FilePID', 'FileName', 'CreateTime', 'ModifyTime', 'FullPath');
+
+type
+  PARTITION_INFORMATION = record
+    StartingOffset: LARGE_INTEGER;
+    PartitionLength: LARGE_INTEGER;
+    HiddenSectors: Cardinal;
+    PartitionNumber: Cardinal;
+    PartitionType: Byte;
+    BootIndicator: Boolean;
+    RecognizedPartition: Boolean;
+    RewritePartition: Boolean;
+  end;
+
+  CREATE_USN_JOURNAL_DATA = record
+    MaximumSize: UInt64;
+    AllocationDelta: UInt64;
+  end;
+
+  USN_JOURNAL_DATA = record
+    UsnJournalID: UInt64;
+    FirstUsn: Int64;
+    NextUsn: Int64;
+    LowestValidUsn: Int64;
+    MaxUsn: Int64;
+    MaximumSize: UInt64;
+    AllocationDelta: UInt64;
+  end;
+
+  MFT_ENUM_DATA = record
+    StartFileReferenceNumber: UInt64;
+    LowUsn: Int64;
+    HighUsn: Int64;
+  end;
+
+  PUSN = ^USN;
+
+  USN = record
+    RecordLength: Cardinal;
+    MajorVersion: Word;
+    MinorVersion: Word;
+    FileReferenceNumber: UInt64;
+    ParentFileReferenceNumber: UInt64;
+    USN: Int64;
+    TimeStamp: LARGE_INTEGER;
+    Reason: Cardinal;
+    SourceInfo: Cardinal;
+    SecurityId: Cardinal;
+    FileAttributes: Cardinal;
+    FileNameLength: Word;
+    FileNameOffset: Word;
+    FileName: PWideChar;
+  end;
+
+  DELETE_USN_JOURNAL_DATA = record
+    UsnJournalID: UInt64;
+    DeleteFlags: Cardinal;
+  end;
+
   { 只允许运行一个实例 }
 procedure OnlyOneRunInstance;
 
