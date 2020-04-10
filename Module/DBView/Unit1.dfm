@@ -25,6 +25,8 @@ object frmDBView: TfrmDBView
     Width = 173
     Height = 38
     Caption = #25968#25454#24211#36830#25509
+    DropDownMenu = pmDBType
+    Style = bsSplitButton
     TabOrder = 0
     OnClick = btnDBLinkClick
   end
@@ -158,5 +160,18 @@ object frmDBView: TfrmDBView
     Filter = 'EXCEL(*.XLSX)|*.XLSX'
     Left = 1008
     Top = 148
+  end
+  object pmDBType: TPopupMenu
+    Left = 72
+    Top = 319
+    object mniSqlite31: TMenuItem
+      Caption = 'Sqlite3 '#25968#25454#24211
+      OnClick = mniSqlite31Click
+    end
+  end
+  object dlgOpenSqlite3DB: TOpenDialog
+    Filter = 'Sqlite3(*.DB)|*.DB'
+    Left = 1004
+    Top = 96
   end
 end

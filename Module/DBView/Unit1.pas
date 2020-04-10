@@ -3,8 +3,8 @@ unit Unit1;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.IniFiles, System.SysUtils, System.StrUtils, System.SyncObjs, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Data.Win.ADOConEd, Data.Win.ADODB, Data.DB,
-  XLSReadWriteII5, Xc12Utils5, XLSUtils5, Xc12DataStyleSheet5, DB.uCommon;
+  Winapi.Windows, Winapi.Messages, System.IniFiles, System.SysUtils, System.StrUtils, System.SyncObjs, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus, Vcl.StdCtrls, Vcl.ComCtrls, Data.Win.ADOConEd, Data.Win.ADODB, Data.DB,
+  XLSReadWriteII5, Xc12Utils5, XLSUtils5, Xc12DataStyleSheet5, SQLite3, SQLite3Wrap, DB.uCommon;
 
 type
   TfrmDBView = class(TForm)
@@ -21,6 +21,9 @@ type
     qryData: TADOQuery;
     btnQuery: TButton;
     dlgSaveExcel: TSaveDialog;
+    pmDBType: TPopupMenu;
+    mniSqlite31: TMenuItem;
+    dlgOpenSqlite3DB: TOpenDialog;
     procedure btnDBLinkClick(Sender: TObject);
     procedure lstTablesClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -31,7 +34,9 @@ type
     procedure btnQueryClick(Sender: TObject);
     procedure lvFieldTypeDrawItem(Sender: TCustomListView; Item: TListItem; Rect: TRect; State: TOwnerDrawState);
     procedure lvFieldTypeClick(Sender: TObject);
+    procedure mniSqlite31Click(Sender: TObject);
   private
+    FstrDBType: String;
     procedure ReadDBFromConfig(ADOCNN: TADOConnection);
     procedure GetTableFieldType(const strTableName: string);
     function GetFieldType(const strTableName, strFieldName: string): String;
@@ -73,8 +78,33 @@ begin
   Action := caFree;
 end;
 
+procedure TfrmDBView.mniSqlite31Click(Sender: TObject);
+var
+  strSqlite3DBFileName: string;
+  strSQLLink          : String;
+begin
+  if not dlgOpenSqlite3DB.Execute then
+    Exit;
+
+  strSqlite3DBFileName := dlgOpenSqlite3DB.FileName;
+
+  { 需要安装 Sqlite3 ODBC Driver }
+  FstrDBType := ' MAIN.';
+  strSQLLink := Format('Driver=SQLite3 ODBC Driver;Database=%s;LongNames=0;Timeout=100;NoTXN=0;SyncPragma=NORMAL;StepAPI=0;', [strSqlite3DBFileName]);
+  if TryLinkDataBase(strSQLLink, conADO) then
+  begin
+    conADO.GetTableNames(lstTables.Items);
+    btnQuery.Enabled := True;
+  end
+  else
+  begin
+    MessageBox(Handle, 'Sqlite3 数据库连接失败，请检查是否正确安装了 SQLite3 ODBC Driver 数据库驱动', '系统提示：', MB_OK or MB_ICONERROR);
+  end;
+end;
+
 procedure TfrmDBView.btnDBLinkClick(Sender: TObject);
 begin
+  FstrDBType := ' dbo.';
   if EditConnectionString(conADO) then
   begin
     if TryLinkDataBase(conADO.ConnectionString, conADO) then
@@ -129,7 +159,7 @@ var
 begin
   qryTemp.Close;
   qryTemp.SQL.Clear;
-  qryTemp.SQL.Text := 'select * from ' + strTableName + ' where 0=1';
+  qryTemp.SQL.Text := 'select * from ' + FstrDBType + strTableName + ' where 0=1';
   qryTemp.Open;
 
   lvFieldType.Clear;
@@ -159,7 +189,12 @@ begin
   begin
     Connection := conADO;
     SQL.Text   := Format('select colstat, name from syscolumns where id=object_id(%s) and colstat = 1', [QuotedStr(strTableName)]);
-    Open;
+    try
+      Open;
+    except
+      Exit;
+    end;
+
     if RecordCount > 0 then
     begin
       strAutoField := Fields[1].AsString;
@@ -199,18 +234,25 @@ var
   strFields      : TArray<String>;
   I              : Integer;
   strChineseField: string;
+  qry            : TADOQuery;
 begin
   strFields := strDisplayFields.Split([',']);
-  with TADOQuery.Create(nil) do
-  begin
-    Connection := conADO;
-    SQL.Text   := Format(c_strFieldChineseName, [QuotedStr(strTableName)]);
-    Open;
+  qry       := TADOQuery.Create(nil);
+  try
+    qry.Connection := conADO;
+    qry.SQL.Text   := Format(c_strFieldChineseName, [QuotedStr(strTableName)]);
+    try
+      qry.Open;
+    except
+      Result := strDisplayFields.Replace(',', '|');
+      Exit;
+    end;
+
     for I := 0 to Length(strFields) - 1 do
     begin
-      if Locate('字段名', strFields[I], []) then
+      if qry.Locate('字段名', strFields[I], []) then
       begin
-        strChineseField := Fields[1].AsString;
+        strChineseField := qry.Fields[1].AsString;
         if Trim(strChineseField) <> '' then
           Result := Result + '|' + strChineseField
         else
@@ -227,7 +269,8 @@ begin
       Result := RightStr(Result, Length(Result) - 1);
     end;
 
-    Free;
+  finally
+    qry.Free;
   end;
 end;
 
@@ -296,7 +339,7 @@ begin
     lvData.OwnerData := True;
     qryData.Close;
     qryData.SQL.Clear;
-    qryData.SQL.Text := 'select ROW_NUMBER() over(order by ' + strAutoField + ') as RowNum, ' + strDisplayFields + ' from ' + strTableName;
+    qryData.SQL.Text := 'select ROW_NUMBER() over(order by ' + strAutoField + ') as RowNum, ' + strDisplayFields + ' from ' + FstrDBType + strTableName;
     qryData.Open;
     lvData.Items.Count := qryData.RecordCount;
   end
@@ -305,7 +348,10 @@ begin
     lvData.OwnerData := False;
     qryData.Close;
     qryData.SQL.Clear;
-    qryData.SQL.Text := 'select top 1000' + strDisplayFields + ' from ' + strTableName;
+    if FstrDBType = ' dbo.' then
+      qryData.SQL.Text := 'select top 1000 ' + strDisplayFields + ' from ' + FstrDBType + strTableName
+    else
+      qryData.SQL.Text := 'select ' + strDisplayFields + ' from ' + FstrDBType + strTableName + ' Limit 1000';
     qryData.Open;
     DisplayData(qryData);
   end;
@@ -457,7 +503,7 @@ begin
   Application.ProcessMessages;
   XLS := TXLSReadWriteII5.Create(nil);
   try
-    XLS.Filename := dlgSaveExcel.Filename + '.xlsx';
+    XLS.FileName := dlgSaveExcel.FileName + '.xlsx';
     for I        := 1 to lvData.Columns.Count do
     begin
       for J := 1 to qryData.RecordCount + 1 do
