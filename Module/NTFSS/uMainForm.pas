@@ -162,7 +162,6 @@ begin
       lblSearchTip.Caption := Format('正在搜索 %s 盘，请稍候······', [strDriver]);
       lblSearchTip.Left    := (lblSearchTip.Parent.Width - lblSearchTip.Width) div 2;
       CreateSqliteTable(strDriver[1] + '_Table');
-
       FSLDB.Execute(FDB, 'BEGIN TRANSACTION;', nil, nil, nil);
       Timer        := TStopwatch.StartNew;
       FhRootHandle := hRootHandle;
@@ -209,7 +208,7 @@ begin
     lblSearchTip.Left := (lblSearchTip.Parent.Width - lblSearchTip.Width) div 2;
 end;
 
-{ NTFS 磁盘文件搜索 }
+{ NTFS 磁盘文件搜索,此函数是在线程中运行，所以不要有界面操作 }
 procedure TfrmNTFSS.SearchFileNTFS;
 var
   cjd      : CREATE_USN_JOURNAL_DATA;
