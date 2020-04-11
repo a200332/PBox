@@ -72,12 +72,19 @@ object frmNTFSS: TfrmNTFSS
         Caption = #20462#25913#26102#38388
         Width = 150
       end>
+    Font.Charset = GB2312_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = #23435#20307
+    Font.Style = []
     GridLines = True
     OwnerData = True
     ReadOnly = True
     RowSelect = True
+    ParentFont = False
     TabOrder = 0
     ViewStyle = vsReport
+    OnData = lvDataData
   end
   object srchbxFilter: TSearchBox
     Left = 60
