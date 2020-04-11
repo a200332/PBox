@@ -185,16 +185,14 @@ end;
 function TfrmDBView.GetAutoAddField(const strTableName: String; var strAutoField: string): Boolean;
 begin
   Result := False;
+  if FstrDBType = ' MAIN.' then
+    Exit;
+    
   with TADOQuery.Create(nil) do
   begin
     Connection := conADO;
     SQL.Text   := Format('select colstat, name from syscolumns where id=object_id(%s) and colstat = 1', [QuotedStr(strTableName)]);
-    try
-      Open;
-    except
-      Exit;
-    end;
-
+    Open;
     if RecordCount > 0 then
     begin
       strAutoField := Fields[1].AsString;
@@ -234,25 +232,24 @@ var
   strFields      : TArray<String>;
   I              : Integer;
   strChineseField: string;
-  qry            : TADOQuery;
 begin
-  strFields := strDisplayFields.Split([',']);
-  qry       := TADOQuery.Create(nil);
-  try
-    qry.Connection := conADO;
-    qry.SQL.Text   := Format(c_strFieldChineseName, [QuotedStr(strTableName)]);
-    try
-      qry.Open;
-    except
-      Result := strDisplayFields.Replace(',', '|');
-      Exit;
-    end;
-
+  if FstrDBType = ' MAIN.' then
+  begin
+    Result := strDisplayFields.Replace(',', '|');
+    Exit;
+  end;
+  
+  with TADOQuery.Create(nil) do
+  begin
+    Connection := conADO;
+    SQL.Text   := Format(c_strFieldChineseName, [QuotedStr(strTableName)]);
+    Open;
+    strFields := strDisplayFields.Split([',']);
     for I := 0 to Length(strFields) - 1 do
     begin
-      if qry.Locate('×Ö¶ÎÃû', strFields[I], []) then
+      if Locate('×Ö¶ÎÃû', strFields[I], []) then
       begin
-        strChineseField := qry.Fields[1].AsString;
+        strChineseField := Fields[1].AsString;
         if Trim(strChineseField) <> '' then
           Result := Result + '|' + strChineseField
         else
@@ -269,8 +266,7 @@ begin
       Result := RightStr(Result, Length(Result) - 1);
     end;
 
-  finally
-    qry.Free;
+    Free;
   end;
 end;
 
