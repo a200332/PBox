@@ -36,24 +36,12 @@ const
   c_strDllExportName                          = 'db_ShowDllForm_Plugins';
   c_intBetweenVerticalDistance                = 5;
 
-  PARTITION_IFS                         = $07;
   BUF_LEN                               = 500 * 1024;
   USN_DELETE_FLAG_DELETE                = $00000001;
   c_UInt64Root                          = 1407374883553285;
   c_arrFields: array [0 .. 6] of string = ('ID', 'FileID', 'FilePID', 'FileName', 'CreateTime', 'ModifyTime', 'FullPath');
 
 type
-  PARTITION_INFORMATION = record
-    StartingOffset: LARGE_INTEGER;
-    PartitionLength: LARGE_INTEGER;
-    HiddenSectors: Cardinal;
-    PartitionNumber: Cardinal;
-    PartitionType: Byte;
-    BootIndicator: Boolean;
-    RecognizedPartition: Boolean;
-    RewritePartition: Boolean;
-  end;
-
   CREATE_USN_JOURNAL_DATA = record
     MaximumSize: UInt64;
     AllocationDelta: UInt64;

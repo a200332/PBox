@@ -3,7 +3,7 @@ unit uMainForm;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, System.IOUtils, System.Types, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, System.IOUtils, System.Types, System.Diagnostics, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Vcl.ComCtrls, Vcl.StdCtrls, Vcl.WinXCtrls, Vcl.ExtCtrls, SQLite3, SQLite3Wrap, db.uCommon;
 
 type
@@ -104,8 +104,10 @@ var
   lstDriver  : System.Types.TStringDynArray;
   strDriver  : String;
   hRootHandle: THandle;
-  DriverInfo : PARTITION_INFORMATION;
-  dwRet      : DWORD;
+  intLen     : DWORD;
+  sysFlags   : DWORD;
+  strNTFS    : array [0 .. 255] of Char;
+  Timer      : TStopwatch;
 begin
   tmrStart.Enabled := False;
   FbTerminated01   := False;
@@ -115,26 +117,24 @@ begin
   lstDriver := TDirectory.GetLogicalDrives;
   for strDriver in lstDriver do
   begin
+    { 判断是否是 NTFS 格式磁盘 }
+    if not GetVolumeInformation(PChar(strDriver), nil, 0, nil, intLen, sysFlags, strNTFS, 256) then
+      Continue;
+
+    if not SameText(strNTFS, 'NTFS') then
+      Continue;
+
+    { NTFS 磁盘文件搜索 }
     hRootHandle := CreateFile(PChar('\\.\' + strDriver[1] + strDriver[2]), GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0);
     if hRootHandle = ERROR_INVALID_HANDLE then
       Continue;
 
     try
-      { 判断是否是 NTFS 格式磁盘 }
-      if not DeviceIoControl(hRootHandle, IOCTL_DISK_GET_PARTITION_INFO, nil, 0, @DriverInfo, Sizeof(DriverInfo), dwRet, nil) then
-        Continue;
-
-      if not DriverInfo.RecognizedPartition then
-        Continue;
-
-      if DriverInfo.PartitionType <> PARTITION_IFS then
-        Continue;
-
       lblSearchTip.Caption := Format('正在查询 %s 盘，请稍候······', [strDriver]);
       lblSearchTip.Left    := (lblSearchTip.Parent.Width - lblSearchTip.Width) div 2;
       CreateSqliteTable(strDriver[1] + '_Table');
 
-      { NTFS 磁盘文件搜索 }
+      Timer        := TStopwatch.StartNew;
       FhRootHandle := hRootHandle;
       FstrDriver   := strDriver;
       FbFinished   := False;
@@ -156,6 +156,8 @@ begin
         if FbFinished then
           Break
       end;
+
+      Caption := Format('搜索 %s 用时 %d 秒', [strDriver, Timer.Elapsed.Seconds]);
     finally
       CloseHandle(hRootHandle);
     end;
@@ -163,6 +165,8 @@ begin
 
   { 全部搜索完毕 }
   lblSearchTip.Caption := '';
+  Caption              := 'NTFS 文件搜索';
+  FbTerminated02       := True;
   lblFilter.Visible    := True;
   srchbxFilter.Visible := True;
 end;
@@ -238,26 +242,26 @@ end;
 
 { 获取文件信息 }
 procedure TfrmNTFSS.GetUSNFileInfo(UsnInfo: PUSN; const strDriver: string);
-var
-  strTableName : String;
-  strSQL       : String;
-  intFileID    : UInt64;
-  intFilePID   : UInt64;
-  strFileName  : String;
-  strCreateTime: string;
-  strModifyTime: String;
-  strFullPath  : String;
+// var
+// strTableName : String;
+// strSQL       : String;
+// intFileID    : UInt64;
+// intFilePID   : UInt64;
+// strFileName  : String;
+// strCreateTime: string;
+// strModifyTime: String;
+// strFullPath  : String;
 begin
-  strTableName  := FstrDriver[1] + '_Table';
-  intFileID     := UsnInfo^.FileReferenceNumber;
-  intFilePID    := UsnInfo^.ParentFileReferenceNumber;
-  strFileName   := PWideChar(Integer(UsnInfo) + UsnInfo^.FileNameOffset);
-  strCreateTime := '';
-  strModifyTime := '';
-  strFullPath   := '';
+  // strTableName  := FstrDriver[1] + '_Table';
+  // intFileID     := UsnInfo^.FileReferenceNumber;
+  // intFilePID    := UsnInfo^.ParentFileReferenceNumber;
+  // strFileName   := PWideChar(Integer(UsnInfo) + UsnInfo^.FileNameOffset);
+  // strCreateTime := '';
+  // strModifyTime := '';
+  // strFullPath   := '';
 
   { 插入数据 }
-  strSQL := Format('insert into %s (%s, %s, %s, %s, %s, %s) Values(%u, %u, %s, %s, %s, %s)', [strTableName, c_arrFields[1], c_arrFields[2], c_arrFields[3], c_arrFields[4], c_arrFields[5], c_arrFields[6], intFileID, intFilePID, QuotedStr(strFileName), QuotedStr(strCreateTime), QuotedStr(strModifyTime), QuotedStr(strFullPath)]);
+  // strSQL := Format('insert into %s (%s, %s, %s, %s, %s, %s) Values(%u, %u, %s, %s, %s, %s)', [strTableName, c_arrFields[1], c_arrFields[2], c_arrFields[3], c_arrFields[4], c_arrFields[5], c_arrFields[6], intFileID, intFilePID, QuotedStr(strFileName), QuotedStr(strCreateTime), QuotedStr(strModifyTime), QuotedStr(strFullPath)]);
 end;
 
 end.
