@@ -80,7 +80,7 @@ begin
   if not FileExists(strDBFileName) then
     CreateSqliteDB;
 
-  strSQL := 'CREATE TABLE ' + strTableName + ' ([ID] INTEGER PRIMARY KEY, [FileName] VARCHAR (255), [FileID] INTEGER NULL, [FilePID] INTEGER NULL, [CreateTime] DateTime, [ModifyTime] DateTime, [FullName] VARCHAR (255));';
+  strSQL := 'CREATE TABLE ' + strTableName + ' ([ID] INTEGER PRIMARY KEY, [FileName] VARCHAR (255), [FileID] INTEGER NULL, [FilePID] INTEGER NULL, [FullName] VARCHAR (255));';
   FSLDB.Execute(FDB, PAnsiChar(AnsiString(strSQL)), nil, nil, nil);
 end;
 
@@ -273,21 +273,17 @@ end;
 { 获取文件信息 }
 procedure TfrmNTFSS.GetUSNFileInfo(UsnInfo: PUSN; const strDriver: string);
 var
-  strTableName : String;
-  intFileID    : UInt64;
-  intFilePID   : UInt64;
-  strFileName  : String;
-  strCreateTime: string;
-  strModifyTime: String;
-  strFullPath  : String;
+  strTableName: String;
+  intFileID   : UInt64;
+  intFilePID  : UInt64;
+  strFileName : String;
+  strFullPath : String;
 begin
-  strTableName  := FstrDriver[1] + '_Table';
-  intFileID     := UsnInfo^.FileReferenceNumber;
-  intFilePID    := UsnInfo^.ParentFileReferenceNumber;
-  strFileName   := PWideChar(Integer(UsnInfo) + UsnInfo^.FileNameOffset);
-  strCreateTime := '';
-  strModifyTime := '';
-  strFullPath   := '';
+  strTableName := FstrDriver[1] + '_Table';
+  intFileID    := UsnInfo^.FileReferenceNumber;
+  intFilePID   := UsnInfo^.ParentFileReferenceNumber;
+  strFileName  := PWideChar(Integer(UsnInfo) + UsnInfo^.FileNameOffset);
+  strFullPath  := '';
   Inc(FintCount);
   InsertDataSqlite(strTableName, strFileName, intFileID, intFilePID);
 end;
