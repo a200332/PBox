@@ -42,10 +42,10 @@
     Support x86 program to call x64 program, x64 program to call x86 program.
 
 ## VI. Note
-    Win7 and Win10£¬The title name of fusion form is different¡£
+    Win7 and Win10£¬The caption name of fusion form is different¡£
     for example Spy++£º 
-    Win7 £¬Title name£ºMicrosoft Spy++ - Windows 1
-    Win10£¬Title name£ºMicrosoft Spy++ - [Windows 1]
+    Win7 £¬caption name£ºMicrosoft Spy++ - Windows 1
+    Win10£¬caption name£ºMicrosoft Spy++ - [Windows 1]
    
 ## VII. Next work:  
     Add database support (because I am not familiar with the database, the development is slow, and it is developed in my spare time)  
