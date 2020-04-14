@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, System.IOUtils, System.Types, System.Diagnostics, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.ComCtrls, Vcl.StdCtrls, Vcl.WinXCtrls, Vcl.ExtCtrls, SynSQLite3Static, SynSQLite3, SynCommons, db.uCommon;
+  Vcl.ComCtrls, Vcl.StdCtrls, Vcl.WinXCtrls, Vcl.ExtCtrls, Vcl.Menus, SynSQLite3Static, SynSQLite3, SynCommons, db.uCommon;
 
 type
   TfrmNTFSS = class(TForm)
@@ -13,12 +13,20 @@ type
     lblSearchTip: TLabel;
     srchbxFilter: TSearchBox;
     tmrStart: TTimer;
+    pmFile: TPopupMenu;
+    mniOpenFile: TMenuItem;
+    mniOpenPath: TMenuItem;
+    mniFileAttr: TMenuItem;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure tmrStartTimer(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure lvDataData(Sender: TObject; Item: TListItem);
+    procedure mniOpenFileClick(Sender: TObject);
+    procedure mniOpenPathClick(Sender: TObject);
+    procedure mniFileAttrClick(Sender: TObject);
   private
+    FstrDBFileName: String;
     FhRootHandle  : THandle;
     FstrDriver    : String;
     FbFinished    : Boolean;
@@ -59,25 +67,20 @@ end;
 
 { 创建 Sqlite 数据库 }
 procedure TfrmNTFSS.CreateSqliteDB;
-var
-  strDBFileName: String;
 begin
-  strDBFileName := ChangeFileExt(ParamStr(0), '.db');
-  if FileExists(strDBFileName) then
-    DeleteFile(strDBFileName);
+  if FileExists(FstrDBFileName) then
+    DeleteFile(FstrDBFileName);
 
   FSLDB := TSQLite3LibraryStatic.Create;
-  FSLDB.open_v2(PUTF8Char(AnsiString(strDBFileName)), &FDB, SQLITE_OPEN_READWRITE or SQLITE_OPEN_CREATE or SQLITE_OPEN_NOMUTEX or SQLITE_OPEN_SHAREDCACHE, nil);
+  FSLDB.open_v2(PUTF8Char(AnsiString(FstrDBFileName)), &FDB, SQLITE_OPEN_READWRITE or SQLITE_OPEN_CREATE or SQLITE_OPEN_NOMUTEX or SQLITE_OPEN_SHAREDCACHE, nil);
 end;
 
 { 创建 Sqlite 表结构 }
 procedure TfrmNTFSS.CreateSqliteTable(const strTableName: string);
 var
-  strDBFileName: String;
-  strSQL       : string;
+  strSQL: string;
 begin
-  strDBFileName := ChangeFileExt(ParamStr(0), '.db');
-  if not FileExists(strDBFileName) then
+  if not FileExists(FstrDBFileName) then
     CreateSqliteDB;
 
   strSQL := 'CREATE TABLE ' + strTableName + ' ([ID] INTEGER PRIMARY KEY, [FileName] VARCHAR (255), [FileID] INTEGER NULL, [FilePID] INTEGER NULL, [FullName] VARCHAR (255));';
@@ -95,8 +98,6 @@ end;
 
 { 删除 Sqlite 数据库 }
 procedure TfrmNTFSS.DeleteSqlite;
-var
-  strDBFileName: String;
 begin
   if FSLDB <> nil then
   begin
@@ -104,9 +105,8 @@ begin
     FSLDB.Free;
   end;
 
-  strDBFileName := ChangeFileExt(ParamStr(0), '.db');
-  if FileExists(strDBFileName) then
-    DeleteFile(strDBFileName);
+  if FileExists(FstrDBFileName) then
+    DeleteFile(FstrDBFileName);
 end;
 
 procedure TfrmNTFSS.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -141,6 +141,7 @@ begin
   FbTerminated01   := False;
   FbTerminated02   := False;
   FintCount        := 0;
+  FstrDBFileName   := TPath.GetTempPath + 'ntfs.db';
 
   CreateSqliteDB;
   lstDriver := TDirectory.GetLogicalDrives;
@@ -186,6 +187,7 @@ begin
           Break
       end;
 
+      { 文件搜索完毕 }
       FSLDB.Execute(FDB, 'COMMIT TRANSACTION;', nil, nil, nil);
       Caption := Caption + '; ' + Format('搜索 %s 用时 %d 秒', [strDriver, Timer.Elapsed.Seconds]);
     finally
@@ -291,6 +293,21 @@ end;
 procedure TfrmNTFSS.lvDataData(Sender: TObject; Item: TListItem);
 begin
   Item.Caption := Format('%.10u', [Item.Index]);
+end;
+
+procedure TfrmNTFSS.mniFileAttrClick(Sender: TObject);
+begin
+  //
+end;
+
+procedure TfrmNTFSS.mniOpenFileClick(Sender: TObject);
+begin
+  //
+end;
+
+procedure TfrmNTFSS.mniOpenPathClick(Sender: TObject);
+begin
+  //
 end;
 
 end.

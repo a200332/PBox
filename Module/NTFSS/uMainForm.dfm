@@ -58,19 +58,11 @@ object frmNTFSS: TfrmNTFSS
       end
       item
         Caption = #25991#20214#21517#31216
-        Width = 150
+        Width = 200
       end
       item
         Caption = #25991#20214#36335#24452
-        Width = 500
-      end
-      item
-        Caption = #21019#24314#26102#38388
-        Width = 150
-      end
-      item
-        Caption = #20462#25913#26102#38388
-        Width = 150
+        Width = 750
       end>
     Font.Charset = GB2312_CHARSET
     Font.Color = clWindowText
@@ -98,5 +90,22 @@ object frmNTFSS: TfrmNTFSS
     OnTimer = tmrStartTimer
     Left = 72
     Top = 116
+  end
+  object pmFile: TPopupMenu
+    AutoHotkeys = maManual
+    Left = 72
+    Top = 200
+    object mniOpenFile: TMenuItem
+      Caption = #25171#24320#25991#20214
+      OnClick = mniOpenFileClick
+    end
+    object mniOpenPath: TMenuItem
+      Caption = #25171#24320#20301#32622
+      OnClick = mniOpenPathClick
+    end
+    object mniFileAttr: TMenuItem
+      Caption = #25991#20214#23646#24615
+      OnClick = mniFileAttrClick
+    end
   end
 end

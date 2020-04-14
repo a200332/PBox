@@ -5,8 +5,6 @@ library NTFSS;
 {$IFEND}
 
 uses
-  System.SysUtils,
-  System.Classes,
   uMainForm in 'uMainForm.pas' {frmNTFSS};
 
 {$R *.res}
