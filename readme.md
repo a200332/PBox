@@ -41,6 +41,10 @@
     Support the EXE program of dynamic change of form class name. 
     Support x86 program to call x64 program, x64 program to call x86 program.
 
-## VI. Next work:  
+## VI. Note
+    MDI form title, when the form is maximized, the title bar title is "main caption - [sub caption]"£¬not maximized, the title bar title is£º"main caption - sub caption"
+    Sample: Spy++.
+
+## VII. Next work:  
     Add database support (because I am not familiar with the database, the development is slow, and it is developed in my spare time)  
 
