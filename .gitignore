@@ -31,3 +31,5 @@ Win32
 /bin/Win32/plugins/ofview-x64/OpenedFilesView.cfg
 /bin/Win32/plugins/shmnview-x64/shmnview.cfg
 /bin/Win32/plugins/shexview-x64/shexview.cfg
+/bin/Win32/plugins/Notepad++/config.xml
+/bin/Win64/plugins/Notepad++/config.xml
