@@ -2,10 +2,10 @@ object frmPBox: TfrmPBox
   Left = 0
   Top = 0
   Caption = 'PBox '#24037#20855#31665' v1.0'
-  ClientHeight = 750
+  ClientHeight = 730
   ClientWidth = 1200
   Color = clBtnFace
-  Constraints.MinHeight = 750
+  Constraints.MinHeight = 730
   Constraints.MinWidth = 1216
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -24,7 +24,7 @@ object frmPBox: TfrmPBox
   TextHeight = 13
   object pnlBottom: TPanel
     Left = 0
-    Top = 725
+    Top = 705
     Width = 1200
     Height = 25
     Align = alBottom
@@ -36,7 +36,7 @@ object frmPBox: TfrmPBox
     ParentCtl3D = False
     ShowCaption = False
     TabOrder = 0
-    ExplicitTop = 775
+    ExplicitTop = 725
     object pnlInfo: TPanel
       Left = 286
       Top = 0
@@ -258,14 +258,17 @@ object frmPBox: TfrmPBox
     Left = 0
     Top = 28
     Width = 1200
-    Height = 697
+    Height = 677
     ActivePage = tsDll
     Align = alClient
     Style = tsButtons
     TabOrder = 2
-    ExplicitHeight = 747
+    ExplicitHeight = 697
     object tsButton: TTabSheet
       Caption = 'tsButton'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
       ExplicitHeight = 678
       object imgButtonBack: TImage
         Left = 0
@@ -349,12 +352,12 @@ object frmPBox: TfrmPBox
     end
     object tsDll: TTabSheet
       Caption = 'tsDll'
-      ExplicitHeight = 716
+      ExplicitHeight = 666
       object imgDllFormBack: TImage
         Left = 0
         Top = 0
         Width = 1192
-        Height = 666
+        Height = 646
         Align = alClient
         Stretch = True
         ExplicitWidth = 1200
