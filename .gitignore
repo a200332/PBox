@@ -33,3 +33,5 @@ Win32
 /bin/Win32/plugins/shexview-x64/shexview.cfg
 /bin/Win32/plugins/Notepad++/config.xml
 /bin/Win64/plugins/Notepad++/config.xml
+/bin/Win32/plugins/whatinstartup/WhatInStartup.cfg
+/bin/Win64/plugins/whatinstartup/WhatInStartup.cfg
