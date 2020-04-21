@@ -91,7 +91,7 @@ end;
 { 检查 Sysinternals 软件许可 }
 procedure CheckSysinternalsAllow(const strEXEFileName: String);
 const
-  c_strSysinternalsSoft: array [0 .. 5] of string = ('AutoRuns.exe', 'AutoRuns64.exe', 'DbgView.exe', 'procexp.exe', 'procexp64.exe', 'Procmon.exe');
+  c_strSysinternalsSoft: array [0 .. 6] of string = ('AutoRuns.exe', 'AutoRuns64.exe', 'DbgView.exe', 'procexp.exe', 'procexp64.exe', 'Procmon.exe', 'Procmon64.exe');
 var
   strFileName: String;
 begin
@@ -102,7 +102,7 @@ begin
     CheckSysinternalsREG('DbgView')
   else if (SameText(strFileName, c_strSysinternalsSoft[3])) or (SameText(strFileName, c_strSysinternalsSoft[4])) then
     CheckSysinternalsREG('Process Explorer')
-  else if SameText(strFileName, c_strSysinternalsSoft[5]) then
+  else if (SameText(strFileName, c_strSysinternalsSoft[5])) or (SameText(strFileName, c_strSysinternalsSoft[6])) then
     CheckSysinternalsREG('Process Monitor');
 end;
 
