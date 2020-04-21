@@ -5,7 +5,7 @@ unit db.uCreateEXE;
 
 interface
 
-uses Winapi.Windows, Winapi.ShellAPI, System.SysUtils, System.Classes, Vcl.Forms, Vcl.ComCtrls, Vcl.StdCtrls, db.uCommon;
+uses Winapi.Windows, Winapi.ShellAPI, System.Win.Registry, System.SysUtils, System.Classes, Vcl.Forms, Vcl.ComCtrls, Vcl.StdCtrls, db.uCommon;
 
 procedure PBoxRun_IMAGE_EXE(const strEXEFileName, strFileValue: String; ts: TTabSheet; lblInfo: TLabel; OnPEProcessDestroyCallback: TNotifyEvent);
 
@@ -63,14 +63,47 @@ begin
     RemoveMenu(GetSystemMenu(hEXEFormHandle, False), 0, MF_BYPOSITION);                                                                                    // 删除移动菜单
     SetWindowLong(hEXEFormHandle, GWL_STYLE, Integer(WS_CAPTION OR WS_POPUP OR WS_VISIBLE OR WS_CLIPSIBLINGS OR WS_CLIPCHILDREN OR WS_SYSMENU));           // $96C80000);                                                                        // $96000000
     SetWindowLong(hEXEFormHandle, GWL_EXSTYLE, Integer(WS_EX_LEFT OR WS_EX_LTRREADING OR WS_EX_DLGMODALFRAME OR WS_EX_WINDOWEDGE OR WS_EX_CONTROLPARENT)); // $00010000);                                                                              // $00010101
+    DelayTime(500);                                                                                                                                        // 延时 500毫秒
     ShowWindow(hEXEFormHandle, SW_SHOWNORMAL);                                                                                                             // 显示窗体
     Application.MainForm.Height      := Application.MainForm.Height + 1;
     Application.MainForm.Height      := Application.MainForm.Height - 1;
     FTabsheet.PageControl.ActivePage := FTabsheet;
     FlblInfo.Caption                 := FstrFileValue.Split([';'])[0] + ' - ' + FstrFileValue.Split([';'])[1];
     KillTimer(Application.MainForm.Handle, $1000);
-    SetTimer(Application.MainForm.Handle, $2000, 100, @EndExeForm);
+    SetTimer(Application.MainForm.Handle, $2000, 200, @EndExeForm);
   end;
+end;
+
+procedure CheckSysinternalsREG(const strProgramName: String);
+begin
+  with TRegistry.Create do
+  begin
+    RootKey := HKEY_CURRENT_USER;
+    if not OpenKey('Software\Sysinternals\' + strProgramName, False) then
+    begin
+      OpenKey('Software\Sysinternals\' + strProgramName, True);
+      WriteInteger('EulaAccepted', 1);
+    end;
+    Free;
+  end;
+end;
+
+{ 检查 Sysinternals 软件许可 }
+procedure CheckSysinternalsAllow(const strEXEFileName: String);
+const
+  c_strSysinternalsSoft: array [0 .. 5] of string = ('AutoRuns.exe', 'AutoRuns64.exe', 'DbgView.exe', 'procexp.exe', 'procexp64.exe', 'Procmon.exe');
+var
+  strFileName: String;
+begin
+  strFileName := ExtractFileName(strEXEFileName);
+  if (SameText(strFileName, c_strSysinternalsSoft[0])) or (SameText(strFileName, c_strSysinternalsSoft[1])) then
+    CheckSysinternalsREG('AutoRuns')
+  else if SameText(strFileName, c_strSysinternalsSoft[2]) then
+    CheckSysinternalsREG('DbgView')
+  else if (SameText(strFileName, c_strSysinternalsSoft[3])) or (SameText(strFileName, c_strSysinternalsSoft[4])) then
+    CheckSysinternalsREG('Process Explorer')
+  else if SameText(strFileName, c_strSysinternalsSoft[5]) then
+    CheckSysinternalsREG('Process Monitor');
 end;
 
 procedure PBoxRun_IMAGE_EXE(const strEXEFileName, strFileValue: String; ts: TTabSheet; lblInfo: TLabel; OnPEProcessDestroyCallback: TNotifyEvent);
@@ -82,10 +115,13 @@ begin
 
   FstrEXEFormClassName := strFileValue.Split([';'])[2];
   FstrEXEFormTitleName := strFileValue.Split([';'])[3];
-  SetTimer(Application.MainForm.Handle, $1000, 100, @FindExeForm);
+  SetTimer(Application.MainForm.Handle, $1000, 200, @FindExeForm);
 
   { 删除插件配置文件中关于窗体位置的配置信息 }
   CheckPlugInConfigSize;
+
+  { 检查 Sysinternals 软件许可 }
+  CheckSysinternalsAllow(strEXEFileName);
 
   { 创建 EXE 进程，并隐藏窗体 }
   ShellExecute(Application.MainForm.Handle, 'Open', PChar(strEXEFileName), nil, nil, SW_HIDE);
