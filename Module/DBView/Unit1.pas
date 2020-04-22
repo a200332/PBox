@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.IniFiles, System.SysUtils, System.StrUtils, System.SyncObjs, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus, Vcl.StdCtrls, Vcl.ComCtrls, Data.Win.ADOConEd, Data.Win.ADODB, Data.DB,
-  XLSReadWriteII5, Xc12Utils5, XLSUtils5, Xc12DataStyleSheet5, SQLite3, SQLite3Wrap, DB.uCommon;
+  XLSReadWriteII5, Xc12Utils5, XLSUtils5, Xc12DataStyleSheet5, DB.uCommon;
 
 type
   TfrmDBView = class(TForm)

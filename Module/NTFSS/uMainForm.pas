@@ -127,10 +127,10 @@ begin
       lblSearchTip.Caption := Format('正在搜索 %s 盘，请稍候······', [strDriver]);
       lblSearchTip.Left    := (lblSearchTip.Parent.Width - lblSearchTip.Width) div 2;
       FstrTableName        := strDriver[1] + '_Table';
-      lstTable.Add(FstrTableName);                                                                                                                                                                                  // NTFS 磁盘列表
-      FDatabase.Execute(PAnsiChar(AnsiString('CREATE TABLE ' + FstrTableName + ' ([ID] INTEGER PRIMARY KEY, [FileID] INTEGER NULL, [FilePID] INTEGER NULL,[FileName] VARCHAR (255), [FullName] VARCHAR (255));'))); // 创建表结构
-      FDatabase.Execute('BEGIN TRANSACTION;');                                                                                                                                                                      // 开启事务
-      Timer        := TStopwatch.StartNew;                                                                                                                                                                          // 计时开始
+      lstTable.Add(FstrTableName);                                                                                                                                                                             // NTFS 磁盘列表
+      FDatabase.Execute(PAnsiChar(AnsiString('CREATE TABLE ' + FstrTableName + ' ([SID] INTEGER NULL, [FileID] INTEGER NULL, [FilePID] INTEGER NULL, [FileName] VARCHAR (255), [FullName] VARCHAR (255));'))); // 创建表结构
+      FDatabase.TransactionBegin();                                                                                                                                                                            // 开启事务
+      Timer        := TStopwatch.StartNew;                                                                                                                                                                     // 计时开始
       FhRootHandle := hRootHandle;
       FbFinished   := False;
       TThread.CreateAnonymousThread(SearchFileNTFS).Start;
@@ -153,7 +153,7 @@ begin
       end;
 
       { 文件搜索完毕 }
-      FDatabase.Execute('COMMIT TRANSACTION;');
+      FDatabase.Commit;
       Caption := Caption + '; ' + Format('搜索 %s 用时 %d 秒', [strDriver, Timer.ElapsedMilliseconds div 1000]);
     finally
       CloseHandle(hRootHandle);
@@ -191,7 +191,7 @@ begin
   strFileName := PWideChar(Integer(UsnInfo) + UsnInfo^.FileNameOffset);
   strFullPath := '';
   Inc(FintCount);
-  strSQL := 'INSERT INTO ' + FstrTableName + ' (FileName, FileID, FilePID) VALUES(' + QuotedStr(strFileName) + ', ' + UIntToStr(intFileID) + ', ' + UIntToStr(intFilePID) + ')';
+  strSQL := 'INSERT INTO ' + FstrTableName + ' (SID, FileID, FilePID, FileName) VALUES(' + UIntToStr(FintCount) + ', ' + UIntToStr(intFileID) + ', ' + UIntToStr(intFilePID) + ', ' + QuotedStr(String(UTF8Encode(strFileName))) + ')';
   FDatabase.Execute(PAnsiChar(AnsiString(strSQL)));
 end;
 
@@ -258,7 +258,12 @@ begin
 end;
 
 procedure TfrmNTFSS.lvDataData(Sender: TObject; Item: TListItem);
+var
+  strSQL: string;
 begin
+  { sqlite 定位到 index 行 }
+  FDatabase.Execute(strSQL);
+
   Item.Caption := Format('%.10u', [Item.Index + 1]);
 end;
 
