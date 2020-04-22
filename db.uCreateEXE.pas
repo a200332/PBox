@@ -50,9 +50,11 @@ begin
 
   if hEXEFormHandle <> 0 then
   begin
+    KillTimer(Application.MainForm.Handle, $1000);
     GetWindowThreadProcessId(hEXEFormHandle, intPID);
     Application.MainForm.Tag := intPID;
 
+    FTabsheet.PageControl.ActivePage := FTabsheet;
     Winapi.Windows.SetParent(hEXEFormHandle, FTabsheet.Handle);                                                                                            // 设置父窗体为 TabSheet
     SetWindowPos(hEXEFormHandle, FTabsheet.Handle, 0, 0, FTabsheet.Width, FTabsheet.Height, SWP_NOZORDER OR SWP_NOACTIVATE);                               // 最大化 Dll 子窗体
     RemoveMenu(GetSystemMenu(hEXEFormHandle, False), 0, MF_BYPOSITION);                                                                                    // 删除移动菜单
@@ -63,13 +65,11 @@ begin
     RemoveMenu(GetSystemMenu(hEXEFormHandle, False), 0, MF_BYPOSITION);                                                                                    // 删除移动菜单
     SetWindowLong(hEXEFormHandle, GWL_STYLE, Integer(WS_CAPTION OR WS_POPUP OR WS_VISIBLE OR WS_CLIPSIBLINGS OR WS_CLIPCHILDREN OR WS_SYSMENU));           // $96C80000);                                                                        // $96000000
     SetWindowLong(hEXEFormHandle, GWL_EXSTYLE, Integer(WS_EX_LEFT OR WS_EX_LTRREADING OR WS_EX_DLGMODALFRAME OR WS_EX_WINDOWEDGE OR WS_EX_CONTROLPARENT)); // $00010000);                                                                              // $00010101
-    DelayTime(500);                                                                                                                                        // 延时 500毫秒
+    DelayTime(200);                                                                                                                                        // 延时 500毫秒
     ShowWindow(hEXEFormHandle, SW_SHOWNORMAL);                                                                                                             // 显示窗体
-    Application.MainForm.Height      := Application.MainForm.Height + 1;
-    Application.MainForm.Height      := Application.MainForm.Height - 1;
-    FTabsheet.PageControl.ActivePage := FTabsheet;
-    FlblInfo.Caption                 := FstrFileValue.Split([';'])[0] + ' - ' + FstrFileValue.Split([';'])[1];
-    KillTimer(Application.MainForm.Handle, $1000);
+    Application.MainForm.Height := Application.MainForm.Height + 1;
+    Application.MainForm.Height := Application.MainForm.Height - 1;
+    FlblInfo.Caption            := FstrFileValue.Split([';'])[0] + ' - ' + FstrFileValue.Split([';'])[1];
     SetTimer(Application.MainForm.Handle, $2000, 200, @EndExeForm);
   end;
 end;
@@ -112,9 +112,8 @@ begin
   FlblInfo                    := lblInfo;
   FstrFileValue               := strFileValue;
   FOnPEProcessDestroyCallback := OnPEProcessDestroyCallback;
-
-  FstrEXEFormClassName := strFileValue.Split([';'])[2];
-  FstrEXEFormTitleName := strFileValue.Split([';'])[3];
+  FstrEXEFormClassName        := strFileValue.Split([';'])[2];
+  FstrEXEFormTitleName        := strFileValue.Split([';'])[3];
   SetTimer(Application.MainForm.Handle, $1000, 200, @FindExeForm);
 
   { 删除插件配置文件中关于窗体位置的配置信息 }
@@ -125,6 +124,7 @@ begin
 
   { 创建 EXE 进程，并隐藏窗体 }
   ShellExecute(Application.MainForm.Handle, 'Open', PChar(strEXEFileName), nil, nil, SW_HIDE);
+  // DelayTime(200);
 end;
 
 end.

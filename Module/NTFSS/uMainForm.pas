@@ -3,8 +3,8 @@ unit uMainForm;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, System.IOUtils, System.Types, System.Diagnostics, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.ComCtrls, Vcl.StdCtrls, Vcl.WinXCtrls, Vcl.ExtCtrls, Vcl.Menus, SynSQLite3Static, SynSQLite3, SynCommons, db.uCommon;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.StrUtils, System.Variants, System.Classes, System.IOUtils, System.Types, System.Diagnostics, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  Vcl.ComCtrls, Vcl.StdCtrls, Vcl.WinXCtrls, Vcl.ExtCtrls, Vcl.Menus, SynSQLite3Static, mORMotSQLite3, SynSQLite3, SynCommons, SynTable, mORMot, db.uCommon;
 
 type
   TfrmNTFSS = class(TForm)
@@ -26,27 +26,18 @@ type
     procedure mniOpenPathClick(Sender: TObject);
     procedure mniFileAttrClick(Sender: TObject);
   private
+    FDatabase     : TSQLDataBase;
     FstrDBFileName: String;
+    FstrTableName : String;
     FhRootHandle  : THandle;
-    FstrDriver    : String;
     FbFinished    : Boolean;
     FbTerminated01: Boolean;
     FbTerminated02: Boolean;
-    FSLDB         : TSQLite3LibraryStatic;
-    FDB           : TSQLite3DB;
     FintCount     : UInt64;
     { NTFS 磁盘文件搜索 }
     procedure SearchFileNTFS;
     { 获取文件信息 }
-    procedure GetUSNFileInfo(UsnInfo: PUSN; const strDriver: string);
-    { 创建 Sqlite 数据库 }
-    procedure CreateSqliteDB;
-    { 创建 Sqlite 表结构 }
-    procedure CreateSqliteTable(const strTableName: string);
-    { 往 Sqlite 里插入数据 }
-    procedure InsertDataSqlite(const strTableName: string; const strFileName: String; const intFileID, intFilePID: UInt64);
-    { 删除 Sqlite 数据库 }
-    procedure DeleteSqlite;
+    procedure GetUSNFileInfo(UsnInfo: PUSN);
   end;
 
 procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strModuleName, strIconFileName: PAnsiChar); stdcall;
@@ -65,48 +56,10 @@ begin
   Application.Icon.Handle := GetMainFormApplication.Icon.Handle;
 end;
 
-{ 创建 Sqlite 数据库 }
-procedure TfrmNTFSS.CreateSqliteDB;
+procedure TfrmNTFSS.FormResize(Sender: TObject);
 begin
-  if FileExists(FstrDBFileName) then
-    DeleteFile(FstrDBFileName);
-
-  FSLDB := TSQLite3LibraryStatic.Create;
-  FSLDB.open_v2(PUTF8Char(AnsiString(FstrDBFileName)), &FDB, SQLITE_OPEN_READWRITE or SQLITE_OPEN_CREATE or SQLITE_OPEN_NOMUTEX or SQLITE_OPEN_SHAREDCACHE, nil);
-end;
-
-{ 创建 Sqlite 表结构 }
-procedure TfrmNTFSS.CreateSqliteTable(const strTableName: string);
-var
-  strSQL: string;
-begin
-  if not FileExists(FstrDBFileName) then
-    CreateSqliteDB;
-
-  strSQL := 'CREATE TABLE ' + strTableName + ' ([ID] INTEGER PRIMARY KEY, [FileName] VARCHAR (255), [FileID] INTEGER NULL, [FilePID] INTEGER NULL, [FullName] VARCHAR (255));';
-  FSLDB.Execute(FDB, PAnsiChar(AnsiString(strSQL)), nil, nil, nil);
-end;
-
-{ 往 Sqlite 里插入数据 }
-procedure TfrmNTFSS.InsertDataSqlite(const strTableName: string; const strFileName: String; const intFileID, intFilePID: UInt64);
-var
-  strSQL: string;
-begin
-  strSQL := 'INSERT INTO ' + strTableName + ' (FileName, FileID, FilePID) VALUES(' + QuotedStr(strFileName) + ', ' + UIntToStr(intFileID) + ', ' + UIntToStr(intFilePID) + ')';
-  FSLDB.Execute(FDB, PAnsiChar(AnsiString(strSQL)), nil, nil, nil);
-end;
-
-{ 删除 Sqlite 数据库 }
-procedure TfrmNTFSS.DeleteSqlite;
-begin
-  if FSLDB <> nil then
-  begin
-    FSLDB.close(FDB);
-    FSLDB.Free;
-  end;
-
-  if FileExists(FstrDBFileName) then
-    DeleteFile(FstrDBFileName);
+  if lblSearchTip.Caption <> '' then
+    lblSearchTip.Left := (lblSearchTip.Parent.Width - lblSearchTip.Width) div 2;
 end;
 
 procedure TfrmNTFSS.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -123,7 +76,10 @@ end;
 
 procedure TfrmNTFSS.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  DeleteSqlite;
+  FDatabase.DBClose;
+  if FileExists(FstrDBFileName) then
+    DeleteFile(FstrDBFileName);
+
   Action := caFree;
 end;
 
@@ -136,14 +92,22 @@ var
   sysFlags   : DWORD;
   strNTFS    : array [0 .. 255] of Char;
   Timer      : TStopwatch;
+  I          : Integer;
+  lstTable   : TStringList;
+  strSQL     : String;
 begin
   tmrStart.Enabled := False;
   FbTerminated01   := False;
   FbTerminated02   := False;
+  lstTable         := TStringList.Create;
   FintCount        := 0;
   FstrDBFileName   := TPath.GetTempPath + 'ntfs.db';
+  if FileExists(FstrDBFileName) then
+    DeleteFile(FstrDBFileName);
 
-  CreateSqliteDB;
+  { 创建 Sqlite 数据库 }
+  FDatabase := TSQLDataBase.Create(FstrDBFileName);
+
   lstDriver := TDirectory.GetLogicalDrives;
   for strDriver in lstDriver do
   begin
@@ -162,11 +126,12 @@ begin
     try
       lblSearchTip.Caption := Format('正在搜索 %s 盘，请稍候······', [strDriver]);
       lblSearchTip.Left    := (lblSearchTip.Parent.Width - lblSearchTip.Width) div 2;
-      CreateSqliteTable(strDriver[1] + '_Table');
-      FSLDB.Execute(FDB, 'BEGIN TRANSACTION;', nil, nil, nil);
-      Timer        := TStopwatch.StartNew;
+      FstrTableName        := strDriver[1] + '_Table';
+      lstTable.Add(FstrTableName);                                                                                                                                                                                  // NTFS 磁盘列表
+      FDatabase.Execute(PAnsiChar(AnsiString('CREATE TABLE ' + FstrTableName + ' ([ID] INTEGER PRIMARY KEY, [FileID] INTEGER NULL, [FilePID] INTEGER NULL,[FileName] VARCHAR (255), [FullName] VARCHAR (255));'))); // 创建表结构
+      FDatabase.Execute('BEGIN TRANSACTION;');                                                                                                                                                                      // 开启事务
+      Timer        := TStopwatch.StartNew;                                                                                                                                                                          // 计时开始
       FhRootHandle := hRootHandle;
-      FstrDriver   := strDriver;
       FbFinished   := False;
       TThread.CreateAnonymousThread(SearchFileNTFS).Start;
 
@@ -188,8 +153,8 @@ begin
       end;
 
       { 文件搜索完毕 }
-      FSLDB.Execute(FDB, 'COMMIT TRANSACTION;', nil, nil, nil);
-      Caption := Caption + '; ' + Format('搜索 %s 用时 %d 秒', [strDriver, Timer.Elapsed.Seconds]);
+      FDatabase.Execute('COMMIT TRANSACTION;');
+      Caption := Caption + '; ' + Format('搜索 %s 用时 %d 秒', [strDriver, Timer.ElapsedMilliseconds div 1000]);
     finally
       CloseHandle(hRootHandle);
     end;
@@ -201,13 +166,33 @@ begin
   lblFilter.Visible    := True;
   srchbxFilter.Visible := True;
   lvData.Items.Count   := FintCount;
-  Caption              := Caption + '; ' + Format('总记录数：%u', [FintCount]);
+  strSQL               := '';
+  for I                := 0 to lstTable.Count - 1 do
+  begin
+    strSQL := strSQL + 'select * from ' + lstTable.Strings[I] + ' union all ';
+  end;
+  strSQL := LeftStr(strSQL, Length(strSQL) - 11);
+  FDatabase.Execute(PAnsiChar(AnsiString(strSQL)));
+  lstTable.Free;
+  Caption := Caption + '; ' + Format('总记录数：%u', [FintCount]);
 end;
 
-procedure TfrmNTFSS.FormResize(Sender: TObject);
+{ 获取文件信息 }
+procedure TfrmNTFSS.GetUSNFileInfo(UsnInfo: PUSN);
+var
+  intFileID  : UInt64;
+  intFilePID : UInt64;
+  strFileName: String;
+  strFullPath: String;
+  strSQL     : String;
 begin
-  if lblSearchTip.Caption <> '' then
-    lblSearchTip.Left := (lblSearchTip.Parent.Width - lblSearchTip.Width) div 2;
+  intFileID   := UsnInfo^.FileReferenceNumber;
+  intFilePID  := UsnInfo^.ParentFileReferenceNumber;
+  strFileName := PWideChar(Integer(UsnInfo) + UsnInfo^.FileNameOffset);
+  strFullPath := '';
+  Inc(FintCount);
+  strSQL := 'INSERT INTO ' + FstrTableName + ' (FileName, FileID, FilePID) VALUES(' + QuotedStr(strFileName) + ', ' + UIntToStr(intFileID) + ', ' + UIntToStr(intFilePID) + ')';
+  FDatabase.Execute(PAnsiChar(AnsiString(strSQL)));
 end;
 
 { NTFS 磁盘文件搜索,此函数是在线程中运行，所以不要有界面操作 }
@@ -250,7 +235,7 @@ begin
         Break;
 
       { 获取文件信息 }
-      GetUSNFileInfo(UsnInfo, FstrDriver);
+      GetUSNFileInfo(UsnInfo);
 
       { 获取下一个 USN 记录 }
       if UsnInfo.RecordLength > 0 then
@@ -272,27 +257,9 @@ begin
   FbFinished := True;
 end;
 
-{ 获取文件信息 }
-procedure TfrmNTFSS.GetUSNFileInfo(UsnInfo: PUSN; const strDriver: string);
-var
-  strTableName: String;
-  intFileID   : UInt64;
-  intFilePID  : UInt64;
-  strFileName : String;
-  strFullPath : String;
-begin
-  strTableName := FstrDriver[1] + '_Table';
-  intFileID    := UsnInfo^.FileReferenceNumber;
-  intFilePID   := UsnInfo^.ParentFileReferenceNumber;
-  strFileName  := PWideChar(Integer(UsnInfo) + UsnInfo^.FileNameOffset);
-  strFullPath  := '';
-  Inc(FintCount);
-  InsertDataSqlite(strTableName, strFileName, intFileID, intFilePID);
-end;
-
 procedure TfrmNTFSS.lvDataData(Sender: TObject; Item: TListItem);
 begin
-  Item.Caption := Format('%.10u', [Item.Index]);
+  Item.Caption := Format('%.10u', [Item.Index + 1]);
 end;
 
 procedure TfrmNTFSS.mniFileAttrClick(Sender: TObject);

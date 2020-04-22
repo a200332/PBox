@@ -4,3 +4,6 @@
 [submodule "3rdparty/DOSCommand"]
 	path = 3rdparty/DOSCommand
 	url = https://github.com/TurboPack/DOSCommand.git
+[submodule "3rdparty/mORMot"]
+	path = 3rdparty/mORMot
+	url = https://github.com/synopse/mORMot.git
