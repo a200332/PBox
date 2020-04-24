@@ -58,11 +58,7 @@ object frmNTFSS: TfrmNTFSS
       end
       item
         Caption = #25991#20214#21517#31216
-        Width = 200
-      end
-      item
-        Caption = #25991#20214#36335#24452
-        Width = 750
+        Width = 900
       end>
     Font.Charset = GB2312_CHARSET
     Font.Color = clWindowText

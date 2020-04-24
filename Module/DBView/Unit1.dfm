@@ -78,6 +78,7 @@ object frmDBView: TfrmDBView
           Caption = #25968#25454#31867#22411
           Width = 90
         end>
+      GridLines = True
       OwnerDraw = True
       ReadOnly = True
       RowSelect = True
@@ -97,10 +98,11 @@ object frmDBView: TfrmDBView
     DoubleBuffered = True
     Font.Charset = GB2312_CHARSET
     Font.Color = clWindowText
-    Font.Height = -12
+    Font.Height = -14
     Font.Name = #23435#20307
     Font.Style = []
     GridLines = True
+    OwnerData = True
     ReadOnly = True
     RowSelect = True
     ParentDoubleBuffered = False
@@ -171,6 +173,7 @@ object frmDBView: TfrmDBView
   end
   object dlgOpenSqlite3DB: TOpenDialog
     Filter = 'Sqlite3(*.DB)|*.DB'
+    Options = [ofReadOnly, ofHideReadOnly, ofEnableSizing]
     Left = 1004
     Top = 96
   end
