@@ -61,6 +61,8 @@ type
     { 保存到 EXCEL 文件 }
     procedure SaveToXLSX_ADO(const strFileName: string);
     procedure SaveToXLSX_Sqlite3(const strFileName: string);
+    function GetSqliteFieldDataType(const strFieldType: string): string;
+    function GetSqliteFieldDataType2(const strFieldType: string): string;
   public
     { Public declarations }
   end;
@@ -160,6 +162,9 @@ begin
   if lstTables.ItemIndex = -1 then
     Exit;
 
+  lvData.Items.Count := 0;
+  lvData.Items.Clear;
+  lvData.Columns.Clear;
   btnDataView.Enabled := True;
   btnQuery.Enabled    := True;
   GetTableFieldType(lstTables.Items.Strings[lstTables.ItemIndex]);
@@ -223,12 +228,14 @@ begin
   end;
 end;
 
-function GetSqliteFieldDataType(const strFieldType: string): string;
+function TfrmDBView.GetSqliteFieldDataType(const strFieldType: string): string;
 var
   strUpper: String;
 begin
   strUpper := System.SysUtils.UpperCase(strFieldType);
   if Pos('VARCHAR', strUpper) > 0 then
+    Result := '字符串'
+  else if Pos('TEXT', strUpper) > 0 then
     Result := '字符串'
   else if Pos('INTEGER', strUpper) > 0 then
     Result := '整数'
@@ -236,6 +243,21 @@ begin
     Result := '整数'
   else
     Result := '二进制';
+end;
+
+function TfrmDBView.GetSqliteFieldDataType2(const strFieldType: string): string;
+var
+  I: Integer;
+begin
+  Result := '二进制';
+  for I  := 0 to lvFieldType.Items.Count - 1 do
+  begin
+    if SameText(lvFieldType.Items[I].SubItems[0], strFieldType) then
+    begin
+      Result := lvFieldType.Items[I].SubItems[1];
+      Break;
+    end;
+  end;
 end;
 
 { 获取表信息 Sqlite3 }
@@ -493,10 +515,17 @@ end;
 
 procedure TfrmDBView.lvDataData(Sender: TObject; Item: TListItem);
 var
-  I      : Integer;
-  strJson: RawUTF8;
-  jsn    : TJSONArray;
+  I           : Integer;
+  strSQL      : String;
+  strJson     : RawUTF8;
+  jso         : TJSONObject;
+  jsn         : TJSONArray;
+  intRows     : Integer;
+  strFieldName: String;
 begin
+  if lvData.Items.Count = 0 then
+    Exit;
+
   if not FbSqlite3 then
   begin
     qryData.RecNo := Item.Index + 1;
@@ -511,14 +540,43 @@ begin
   end
   else
   begin
-    strJson := FSqlite3DB.ExecuteJSON(RawUTF8('select ' + FstrColumns + ' from ' + lstTables.Items[lstTables.ItemIndex] + ' where RowID=' + IntToStr(Item.Index + 1)), True);
-    jsn     := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(string(strJson)), 0) as TJSONArray;
-    if (jsn <> nil) and (jsn.Count > 0) then
+    strSQL := 'select ' + FstrColumns + ' from ' + lstTables.Items[lstTables.ItemIndex] + ' where RowID=' + IntToStr(Item.Index + 1);
+    try
+      strJson := FSqlite3DB.ExecuteJSON(RawUTF8(strSQL), False);
+    except
+      Exit;
+    end;
+    if LeftStr(string(strJson), 1) <> '[' then
     begin
-      Item.Caption := Format('%.10u', [Item.Index + 1]);
-      for I        := 1 to lvData.Columns.Count - 1 do
+      jso     := (TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(string(strJson)), 0) as TJSONObject);
+      intRows := jso.Values['rowCount'].AsType<Integer>;
+      if intRows > 0 then
       begin
-        Item.SubItems.Add(jsn.Items[0].GetValue<String>(lvData.Columns[I].Caption));
+        jsn := jso.Values['values'] as TJSONArray;
+        if (jsn <> nil) and (jsn.Count > 0) then
+        begin
+          Item.Caption := Format('%.10u', [Item.Index + 1]);
+          for I        := 0 to lvData.Columns.Count - 2 do
+          begin
+            strFieldName := lvData.Columns[I + 1].Caption;
+            if GetSqliteFieldDataType2(strFieldName) <> '二进制' then
+              Item.SubItems.Add(System.SysUtils.Trim(jsn.Items[lvData.Columns.Count + I - 1].ToString))
+            else
+              Item.SubItems.Add('');
+          end;
+        end;
+      end;
+    end
+    else
+    begin
+      jsn := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(string(strJson)), 0) as TJSONArray;
+      if (jsn <> nil) and (jsn.Count > 0) then
+      begin
+        Item.Caption := Format('%.10u', [Item.Index + 1]);
+        for I        := 1 to lvData.Columns.Count - 1 do
+        begin
+          Item.SubItems.Add(jsn.Items[0].GetValue<String>(lvData.Columns[I].Caption));
+        end;
       end;
     end;
   end;
