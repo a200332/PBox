@@ -63,6 +63,8 @@ type
     procedure SaveToXLSX_Sqlite3(const strFileName: string);
     function GetSqliteFieldDataType(const strFieldType: string): string;
     function GetSqliteFieldDataType2(const strFieldType: string): string;
+    procedure DrawListView_ADO(Item: TListItem);
+    procedure DrawListView_Sqlite3(Item: TListItem);
   public
     { Public declarations }
   end;
@@ -513,7 +515,29 @@ begin
     BrowseData_Sqlite3;
 end;
 
-procedure TfrmDBView.lvDataData(Sender: TObject; Item: TListItem);
+procedure TfrmDBView.DrawListView_ADO(Item: TListItem);
+var
+  I: Integer;
+begin
+  qryData.RecNo := Item.Index + 1;
+  Item.Caption  := Format('%.10u', [Item.Index + 1]);
+  for I         := 1 to qryData.Fields.Count - 1 do
+  begin
+    if qryData.Fields[I].DataType = Data.DB.ftBlob then
+      Item.SubItems.Add('')
+    else
+      Item.SubItems.Add(qryData.Fields[I].AsString);
+  end;
+end;
+
+function MyTrim(const strValue: string): String;
+begin
+  Result := strValue;
+  if (strValue[1] = '"') and (strValue[Length(strValue)] = '"') then
+    Result := MidStr(strValue, 2, Length(strValue) - 2);
+end;
+
+procedure TfrmDBView.DrawListView_Sqlite3(Item: TListItem);
 var
   I           : Integer;
   strSQL      : String;
@@ -523,63 +547,59 @@ var
   intRows     : Integer;
   strFieldName: String;
 begin
-  if lvData.Items.Count = 0 then
+  strSQL := 'select ' + FstrColumns + ' from ' + lstTables.Items[lstTables.ItemIndex] + ' where RowID=' + IntToStr(Item.Index + 1);
+  try
+    strJson := FSqlite3DB.ExecuteJSON(RawUTF8(strSQL), False);
+    if Trim(strJson) = '' then
+      Exit;
+  except
     Exit;
+  end;
 
-  if not FbSqlite3 then
+  if LeftStr(string(strJson), 1) <> '[' then
   begin
-    qryData.RecNo := Item.Index + 1;
-    Item.Caption  := Format('%.10u', [Item.Index + 1]);
-    for I         := 1 to qryData.Fields.Count - 1 do
+    jso     := (TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(string(strJson)), 0) as TJSONObject);
+    intRows := jso.Values['rowCount'].AsType<Integer>;
+    if intRows > 0 then
     begin
-      if qryData.Fields[I].DataType = Data.DB.ftBlob then
-        Item.SubItems.Add('')
-      else
-        Item.SubItems.Add(qryData.Fields[I].AsString);
+      jsn := jso.Values['values'] as TJSONArray;
+      if (jsn <> nil) and (jsn.Count > 0) then
+      begin
+        Item.Caption := Format('%.10u', [Item.Index + 1]);
+        for I        := 0 to lvData.Columns.Count - 2 do
+        begin
+          strFieldName := lvData.Columns[I + 1].Caption;
+          if GetSqliteFieldDataType2(strFieldName) <> '二进制' then
+            Item.SubItems.Add(MyTrim(jsn.Items[lvData.Columns.Count + I - 1].ToString))
+          else
+            Item.SubItems.Add('');
+        end;
+      end;
     end;
   end
   else
   begin
-    strSQL := 'select ' + FstrColumns + ' from ' + lstTables.Items[lstTables.ItemIndex] + ' where RowID=' + IntToStr(Item.Index + 1);
-    try
-      strJson := FSqlite3DB.ExecuteJSON(RawUTF8(strSQL), False);
-    except
-      Exit;
-    end;
-    if LeftStr(string(strJson), 1) <> '[' then
+    jsn := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(string(strJson)), 0) as TJSONArray;
+    if (jsn <> nil) and (jsn.Count > 0) then
     begin
-      jso     := (TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(string(strJson)), 0) as TJSONObject);
-      intRows := jso.Values['rowCount'].AsType<Integer>;
-      if intRows > 0 then
+      Item.Caption := Format('%.10u', [Item.Index + 1]);
+      for I        := 1 to lvData.Columns.Count - 1 do
       begin
-        jsn := jso.Values['values'] as TJSONArray;
-        if (jsn <> nil) and (jsn.Count > 0) then
-        begin
-          Item.Caption := Format('%.10u', [Item.Index + 1]);
-          for I        := 0 to lvData.Columns.Count - 2 do
-          begin
-            strFieldName := lvData.Columns[I + 1].Caption;
-            if GetSqliteFieldDataType2(strFieldName) <> '二进制' then
-              Item.SubItems.Add(System.SysUtils.Trim(jsn.Items[lvData.Columns.Count + I - 1].ToString))
-            else
-              Item.SubItems.Add('');
-          end;
-        end;
-      end;
-    end
-    else
-    begin
-      jsn := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(string(strJson)), 0) as TJSONArray;
-      if (jsn <> nil) and (jsn.Count > 0) then
-      begin
-        Item.Caption := Format('%.10u', [Item.Index + 1]);
-        for I        := 1 to lvData.Columns.Count - 1 do
-        begin
-          Item.SubItems.Add(jsn.Items[0].GetValue<String>(lvData.Columns[I].Caption));
-        end;
+        Item.SubItems.Add(MyTrim(jsn.Items[0].GetValue<String>(lvData.Columns[I].Caption)));
       end;
     end;
   end;
+end;
+
+procedure TfrmDBView.lvDataData(Sender: TObject; Item: TListItem);
+begin
+  if lvData.Items.Count = 0 then
+    Exit;
+
+  if not FbSqlite3 then
+    DrawListView_ADO(Item)
+  else
+    DrawListView_Sqlite3(Item);
 end;
 
 procedure TfrmDBView.lvFieldTypeClick(Sender: TObject);
