@@ -1,7 +1,7 @@
 object frmProcessManager: TfrmProcessManager
   Left = 0
   Top = 0
-  Caption = 'frmProcessManager'
+  Caption = 'PM '#36827#31243#31649#29702#22120
   ClientHeight = 752
   ClientWidth = 1174
   Color = clBtnFace
@@ -158,6 +158,10 @@ object frmProcessManager: TfrmProcessManager
     object mniLine01: TMenuItem
       Caption = '-'
     end
+    object mniProcessDump: TMenuItem
+      Caption = 'Dump '#21040#30913#30424#25991#20214
+      OnClick = mniProcessDumpClick
+    end
     object mniLoadPE: TMenuItem
       Caption = #21152#36733#21040'PE'#20998#26512
       OnClick = mniLoadPEClick
@@ -203,9 +207,26 @@ object frmProcessManager: TfrmProcessManager
     end
     object mniSaveToFile: TMenuItem
       Caption = #27169#22359#21015#34920#20445#23384#21040#25991#20214
+      OnClick = mniSaveToFileClick
     end
     object mniSelectedLineToSaveFile: TMenuItem
       Caption = #25152#36873#34892#20445#23384#21040#25991#20214
+      OnClick = mniSelectedLineToSaveFileClick
     end
+  end
+  object dlgOpenDll: TOpenDialog
+    Filter = 'Dll(*.dll)|*.dll'
+    Left = 44
+    Top = 112
+  end
+  object dlgSaveEXE: TSaveDialog
+    Filter = 'EXE(*.EXE)|*.EXE'
+    Left = 44
+    Top = 176
+  end
+  object dlgSaveModuleInfo: TSaveDialog
+    Filter = 'TEXT(*.TXT)|*.TXT|EXCEL(*.XLSX)|*.XLSX'
+    Left = 52
+    Top = 256
   end
 end

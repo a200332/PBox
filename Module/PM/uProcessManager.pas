@@ -4,8 +4,9 @@
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, Winapi.ShlObj, Winapi.TlHelp32, System.Classes, System.IniFiles, System.Math, System.StrUtils, Winapi.ShellAPI, Winapi.ActiveX,
-  Vcl.FileCtrl, Vcl.Controls, Vcl.Forms, Vcl.ComCtrls, Vcl.Menus, Vcl.StdCtrls, uProcessAPI, db.uCommon;
+  Winapi.Windows, Winapi.ShlObj, Winapi.ShellAPI, Winapi.ActiveX, Winapi.TlHelp32, Winapi.PsAPI, System.SysUtils, System.Classes, System.IniFiles, System.Math, System.StrUtils,
+  Vcl.Clipbrd, Vcl.FileCtrl, Vcl.Controls, Vcl.Forms, Vcl.ComCtrls, Vcl.Menus, Vcl.StdCtrls, Vcl.Dialogs, Vcl.Graphics,
+  XLSReadWriteII5, Xc12Utils5, XLSUtils5, Xc12DataStyleSheet5, uProcessAPI, db.uCommon;
 
 type
   TfrmProcessManager = class(TForm)
@@ -32,6 +33,10 @@ type
     mniSelectedLineToSaveFile: TMenuItem;
     mniKillProcess: TMenuItem;
     edtParam: TEdit;
+    dlgOpenDll: TOpenDialog;
+    dlgSaveEXE: TSaveDialog;
+    mniProcessDump: TMenuItem;
+    dlgSaveModuleInfo: TSaveDialog;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure lvProcessClick(Sender: TObject);
@@ -50,10 +55,15 @@ type
     procedure mniCopyFileToClick(Sender: TObject);
     procedure mniKillProcessClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure mniSaveToFileClick(Sender: TObject);
+    procedure mniSelectedLineToSaveFileClick(Sender: TObject);
+    procedure mniProcessDumpClick(Sender: TObject);
   private
     procedure EnumProcess(lv: TListView);
     procedure EnumProcessModules(const intPID: Cardinal; lv: TListView);
     function GetFileVersion(const strExeName: string): String;
+    procedure SaveModuleInfoToText(const strSaveFileName: String; const bSelected: Boolean = False);
+    procedure SaveModuleInfoToExcel(const strSaveFileName: String; const bSelected: Boolean = False);
   public
     { Public declarations }
   end;
@@ -387,61 +397,124 @@ begin
   end;
 end;
 
-procedure TfrmProcessManager.mniCopyFileToClick(Sender: TObject);
+procedure TfrmProcessManager.mniCopySelectedModulePathClick(Sender: TObject);
 var
-  III        : Integer;
-  strFileName: String;
-  strSavePath: String;
+  I       : Integer;
+  strValue: string;
 begin
   if lvModule.SelCount = 0 then
     Exit;
 
-  if not SelectDirectory('选择一个文件夹：', '', strSavePath, [], GetInstanceFromhWnd(FindMainFormHandle)) then
-    Exit;
-
-  for III := 0 to lvModule.Items.count - 1 do
+  strValue := '';
+  for I    := 0 to lvModule.Items.Count - 1 do
   begin
-    if lvModule.Items.Item[III].Selected then
+    if lvModule.Items[I].Selected then
     begin
-      strFileName := lvModule.Items.Item[III].SubItems[1];
-      CopyFile(PChar(strFileName), PChar(strSavePath + '\' + ExtractFileName(strFileName)), True);
+      strValue := strValue + Chr(13) + Chr(10) + lvModule.Items[I].SubItems[1];
     end;
   end;
-end;
-
-procedure TfrmProcessManager.mniCopySelectedModuleMemoryAddressClick(Sender: TObject);
-begin
-  //
+  Clipboard.AsText := Trim(strValue);
 end;
 
 procedure TfrmProcessManager.mniCopySelectedModuleNameClick(Sender: TObject);
+var
+  I       : Integer;
+  strValue: string;
 begin
-  //
+  if lvModule.SelCount = 0 then
+    Exit;
+
+  strValue := '';
+  for I    := 0 to lvModule.Items.Count - 1 do
+  begin
+    if lvModule.Items[I].Selected then
+    begin
+      strValue := strValue + Chr(13) + Chr(10) + lvModule.Items[I].SubItems[0];
+    end;
+  end;
+  Clipboard.AsText := Trim(strValue);
 end;
 
-procedure TfrmProcessManager.mniCopySelectedModulePathClick(Sender: TObject);
+procedure TfrmProcessManager.mniCopySelectedModuleMemoryAddressClick(Sender: TObject);
+var
+  I       : Integer;
+  strValue: string;
 begin
-  //
-end;
+  if lvModule.SelCount = 0 then
+    Exit;
 
-procedure TfrmProcessManager.mniDeleteProcessFileClick(Sender: TObject);
-begin
-  //
-end;
-
-procedure TfrmProcessManager.mniDllInsertProcessClick(Sender: TObject);
-begin
-  //
-end;
-
-procedure TfrmProcessManager.mniDumpToDiskFileClick(Sender: TObject);
-begin
-  //
+  strValue := '';
+  for I    := 0 to lvModule.Items.Count - 1 do
+  begin
+    if lvModule.Items[I].Selected then
+    begin
+      strValue := strValue + Chr(13) + Chr(10) + lvModule.Items[I].SubItems[3];
+    end;
+  end;
+  Clipboard.AsText := Trim(strValue);
 end;
 
 procedure TfrmProcessManager.mniEjectFromProcessClick(Sender: TObject);
+var
+  PID: Cardinal;
 begin
-  //
+  if lvModule.SelCount = 0 then
+    Exit;
+
+  if Trim(lvModule.Selected.SubItems[1]) = '' then
+    Exit;
+
+  if lvProcess.Selected = nil then
+    Exit;
+
+  if Trim(lvProcess.Selected.SubItems[1]) = '' then
+    Exit;
+
+  PID := System.SysUtils.StrToInt(lvProcess.Selected.SubItems[1]);
+  EjectFromProcess(lvModule.Selected.SubItems[1], PID);
+end;
+
+procedure TfrmProcessManager.mniDumpToDiskFileClick(Sender: TObject);
+var
+  msEXE    : TMemoryStream;
+  PID      : Cardinal;
+  hProcess : THANDLE;
+  intLen   : Cardinal;
+  hModAddr : UInt64;
+  BytesRead: Winapi.Windows.SIZE_T;
+begin
+  if lvProcess.Selected = nil then
+    Exit;
+
+  if lvModule.ItemIndex = -1 then
+    Exit;
+
+  if Trim(lvProcess.Selected.SubItems[3]) = '' then
+    Exit;
+
+  dlgSaveEXE.FileName := lvModule.Items[lvModule.ItemIndex].SubItems[0];
+  if not dlgSaveEXE.Execute then
+    Exit;
+
+  PID      := System.SysUtils.StrToInt(lvProcess.Selected.SubItems[1]);
+  hProcess := OpenProcess(PROCESS_ALL_ACCESS, False, PID);
+  if hProcess = INVALID_HANDLE_VALUE then
+    Exit;
+
+  hModAddr := StrToIntDef(lvModule.Items[lvModule.ItemIndex].SubItems[2], 0);
+  intLen   := StrToIntDef(lvModule.Items[lvModule.ItemIndex].SubItems[4], 0);
+  msEXE    := TMemoryStream.Create;
+  try
+    BytesRead  := 0;
+    msEXE.Size := intLen;
+    if ReadProcessMemory(hProcess, Pointer(hModAddr), msEXE.Memory, intLen, BytesRead) then
+      msEXE.SaveToFile(dlgSaveEXE.FileName)
+    else
+      MessageBox(Handle, 'X86 无法读取 X64 内存，请使用 X64 版本', c_strMsgTitle, MB_OK or MB_ICONINFORMATION);
+  finally
+    msEXE.Free;
+    CloseHandle(hProcess);
+  end;
 end;
 
 procedure TfrmProcessManager.mniKillProcessClick(Sender: TObject);
@@ -457,10 +530,58 @@ begin
 
   PID      := System.SysUtils.StrToInt(lvProcess.Selected.SubItems[1]);
   hProcess := OpenProcess(PROCESS_TERMINATE, False, PID);
-  if TerminateProcess(hProcess, 0) then
+  if hProcess <> INVALID_HANDLE_VALUE then
   begin
-    lvProcess.DeleteSelected;
+    if TerminateProcess(hProcess, 0) then
+    begin
+      lvProcess.DeleteSelected;
+    end;
+    CloseHandle(hProcess);
   end;
+end;
+
+procedure TfrmProcessManager.mniDeleteProcessFileClick(Sender: TObject);
+var
+  hProcess   : THANDLE;
+  PID        : Cardinal;
+  strFileName: String;
+begin
+  if lvProcess.Selected = nil then
+    Exit;
+
+  if Trim(lvProcess.Selected.SubItems[1]) = '' then
+    Exit;
+
+  PID         := System.SysUtils.StrToInt(lvProcess.Selected.SubItems[1]);
+  strFileName := lvProcess.Selected.SubItems[3];
+  hProcess    := OpenProcess(PROCESS_TERMINATE, False, PID);
+  if hProcess <> INVALID_HANDLE_VALUE then
+  begin
+    if TerminateProcess(hProcess, 0) then
+    begin
+      DeleteFile(strFileName);
+      lvProcess.DeleteSelected;
+    end;
+    CloseHandle(hProcess);
+  end;
+end;
+
+{ 进程注入 }
+procedure TfrmProcessManager.mniDllInsertProcessClick(Sender: TObject);
+var
+  PID: Cardinal;
+begin
+  if lvProcess.Selected = nil then
+    Exit;
+
+  if Trim(lvProcess.Selected.SubItems[1]) = '' then
+    Exit;
+
+  if not dlgOpenDll.Execute then
+    Exit;
+
+  PID := System.SysUtils.StrToInt(lvProcess.Selected.SubItems[1]);
+  InjectToProcess(dlgOpenDll.FileName, PID);
 end;
 
 procedure TfrmProcessManager.mniLoadPEClick(Sender: TObject);
@@ -490,6 +611,47 @@ begin
   OpenFolderAndSelectFile(lvProcess.Selected.SubItems[3]);
 end;
 
+procedure TfrmProcessManager.mniProcessDumpClick(Sender: TObject);
+var
+  msEXE    : TMemoryStream;
+  PID      : Cardinal;
+  hProcess : THANDLE;
+  intLen   : Cardinal;
+  hModAddr : UInt64;
+  BytesRead: Winapi.Windows.SIZE_T;
+  pinfo    : PROCESS_INFO;
+begin
+  if lvProcess.Selected = nil then
+    Exit;
+
+  if Trim(lvProcess.Selected.SubItems[3]) = '' then
+    Exit;
+
+  if not dlgSaveEXE.Execute then
+    Exit;
+
+  PID      := System.SysUtils.StrToInt(lvProcess.Selected.SubItems[1]);
+  hProcess := OpenProcess(PROCESS_ALL_ACCESS, False, PID);
+  if hProcess = INVALID_HANDLE_VALUE then
+    Exit;
+
+  GetProcessInfo(PID, pinfo);
+  hModAddr := pinfo.ModulesList.Modules[0].BaseAddress;
+  intLen   := pinfo.ModulesList.Modules[0].SizeOfImage;
+  msEXE    := TMemoryStream.Create;
+  try
+    BytesRead  := 0;
+    msEXE.Size := intLen;
+    if ReadProcessMemory(hProcess, Pointer(hModAddr), msEXE.Memory, intLen, BytesRead) then
+      msEXE.SaveToFile(dlgSaveEXE.FileName)
+    else
+      MessageBox(Handle, 'X86 无法读取 X64 内存，请使用 X64 版本', c_strMsgTitle, MB_OK or MB_ICONINFORMATION);
+  finally
+    msEXE.Free;
+    CloseHandle(hProcess);
+  end;
+end;
+
 procedure TfrmProcessManager.mniRenameProcessNameClick(Sender: TObject);
 begin
   if lvProcess.Selected = nil then
@@ -499,6 +661,157 @@ begin
     Exit;
 
   OpenFolderAndSelectFile(lvProcess.Selected.SubItems[3], True);
+end;
+
+procedure TfrmProcessManager.mniCopyFileToClick(Sender: TObject);
+var
+  III        : Integer;
+  strFileName: String;
+  strSavePath: String;
+begin
+  if lvModule.SelCount = 0 then
+    Exit;
+
+  if not SelectDirectory('选择一个文件夹：', '', strSavePath, [], GetInstanceFromhWnd(FindMainFormHandle)) then
+    Exit;
+
+  for III := 0 to lvModule.Items.Count - 1 do
+  begin
+    if lvModule.Items.Item[III].Selected then
+    begin
+      strFileName := lvModule.Items.Item[III].SubItems[1];
+      CopyFile(PChar(strFileName), PChar(strSavePath + '\' + ExtractFileName(strFileName)), True);
+    end;
+  end;
+end;
+
+procedure TfrmProcessManager.SaveModuleInfoToText(const strSaveFileName: String; const bSelected: Boolean = False);
+var
+  I        : Integer;
+  strValue : string;
+  lstModule: TStringList;
+
+  procedure AddToList;
+  var
+    J       : Integer;
+    strValue: string;
+  begin
+    strValue := lvModule.Items[I].Caption;
+    for J    := 0 to lvModule.Columns.Count - 2 do
+    begin
+      strValue := strValue + Chr(9) + lvModule.Items[I].SubItems[J];
+    end;
+    lstModule.Add(strValue);
+  end;
+
+begin
+  lstModule := TStringList.Create;
+  try
+    { 列名称 }
+    strValue := lvModule.Columns[0].Caption;
+    for I    := 1 to lvModule.Columns.Count - 1 do
+    begin
+      strValue := strValue + Chr(9) + lvModule.Columns[I].Caption;
+    end;
+    lstModule.Add(strValue);
+
+    { 数据 }
+    for I := 0 to lvModule.Items.Count - 1 do
+    begin
+      if bSelected and lvModule.Items[I].Selected then
+        AddToList
+      else
+        AddToList;
+    end;
+    lstModule.SaveToFile(dlgSaveModuleInfo.FileName + '.txt');
+  finally
+    lstModule.Free;
+  end;
+end;
+
+procedure TfrmProcessManager.SaveModuleInfoToExcel(const strSaveFileName: String; const bSelected: Boolean);
+var
+  XLS : TXLSReadWriteII5;
+  I, J: Integer;
+  procedure AddToList;
+  var
+    I: Integer;
+  begin
+    for I := 0 to lvModule.Columns.Count - 1 do
+    begin
+      if I = 0 then
+        XLS.Sheets[0].AsString[I + 1, J + 2] := lvModule.Items[J].Caption
+      else
+        XLS.Sheets[0].AsString[I + 1, J + 2] := lvModule.Items[J].SubItems[I - 1];
+
+      XLS.Sheets[0].Cell[I + 1, J + 2].HorizAlignment := chaCenter;
+      XLS.Sheets[0].Cell[I + 1, J + 2].VertAlignment  := cvaCenter;
+    end;
+  end;
+
+begin
+  XLS := TXLSReadWriteII5.Create(nil);
+  try
+    XLS.FileName := strSaveFileName;
+
+    for I := 1 to lvModule.Columns.Count do
+    begin
+      for J := 1 to lvModule.Items.Count + 1 do
+      begin
+        XLS.Sheets[0].Range.Items[I, J, I, J].BorderOutlineStyle := cbsThin;
+        XLS.Sheets[0].Range.Items[I, J, I, J].BorderOutlineColor := 0;
+      end;
+    end;
+
+    for I := 1 to lvModule.Columns.Count do
+    begin
+      Application.ProcessMessages;
+      XLS.Sheets[0].AsString[I, 1]                  := lvModule.Column[I - 1].Caption;
+      XLS.Sheets[0].Columns[I].Width                := 6000;
+      XLS.Sheets[0].Cell[I, 1].FontColor            := clWhite;
+      XLS.Sheets[0].Cell[I, 1].FontStyle            := XLS.Sheets[0].Cell[I, 1].FontStyle + [xfsBold];
+      XLS.Sheets[0].Cell[I, 1].FillPatternForeColor := xcBlue;
+      XLS.Sheets[0].Cell[I, 1].HorizAlignment       := chaCenter;
+      XLS.Sheets[0].Cell[I, 1].VertAlignment        := cvaCenter;
+    end;
+
+    for J := 0 to lvModule.Items.Count - 1 do
+    begin
+      if bSelected and lvModule.Items[J].Selected then
+        AddToList
+      else
+        AddToList;
+    end;
+
+    XLS.Write;
+  finally
+    XLS.Free;
+  end;
+end;
+
+procedure TfrmProcessManager.mniSaveToFileClick(Sender: TObject);
+begin
+  if not dlgSaveModuleInfo.Execute then
+    Exit;
+
+  if dlgSaveModuleInfo.FilterIndex = 1 then
+    SaveModuleInfoToText(dlgSaveModuleInfo.FileName + '.txt')
+  else
+    SaveModuleInfoToExcel(dlgSaveModuleInfo.FileName + '.xlsx');
+end;
+
+procedure TfrmProcessManager.mniSelectedLineToSaveFileClick(Sender: TObject);
+begin
+  if lvModule.SelCount = 0 then
+    Exit;
+
+  if not dlgSaveModuleInfo.Execute then
+    Exit;
+
+  if dlgSaveModuleInfo.FilterIndex = 1 then
+    SaveModuleInfoToText(dlgSaveModuleInfo.FileName + '.txt', True)
+  else
+    SaveModuleInfoToExcel(dlgSaveModuleInfo.FileName + '.xlsx', True);
 end;
 
 end.

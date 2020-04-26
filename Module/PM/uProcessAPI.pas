@@ -3,7 +3,7 @@
 interface
 
 uses
-  Windows, TlHelp32;
+  Winapi.Windows, SysUtils, PSAPI, TlHelp32;
 
 type
   PROCESSENTRY32A = record
@@ -460,6 +460,8 @@ function GetTlHelp32ProcessInfo(ProcessID: LongWord): TProcessInfo; overload;
 function GetTlHelp32ProcessInfo(ProcessName: AnsiString): TProcessInfo; overload;
 procedure StartProcess(const CommandLine: string; out ProcessHandle: THandle; out ProcessID: LongWord);
 function GetProcessCPULoading(ProcessID: LongWord; Delay: Cardinal): Single;
+function EjectFromProcess(pszDllFile: string; dwProcessId: DWORD): Boolean;
+function InjectToProcess(GuestFile: string; PID: DWORD): Boolean; stdcall;
 
 implementation
 
@@ -1212,6 +1214,116 @@ begin
   WorkingInterval := WorkingTime - FirstWorkingTime;
   Result          := WorkingInterval / (LifeInterval * 100 * ProcessorsCount);
   CloseHandle(ProcessHandle);
+end;
+
+function CheckDllFile_hModule(const pszDllFile: string; dwProcessId: DWORD): Cardinal;
+var
+  hProcess : Cardinal;
+  hMods    : array [0 .. 1023] of DWORD;
+  cbNeeded : Cardinal;
+  szModName: PChar;
+  I        : Integer;
+  count    : Integer;
+begin
+  Result   := 0;
+  hProcess := OpenProcess(PROCESS_QUERY_INFORMATION or PROCESS_VM_READ, false, dwProcessId);
+  if EnumProcessModules(hProcess, @hMods[0], SizeOf(hMods), cbNeeded) then
+  begin
+    count := cbNeeded div 4;
+    for I := 0 to count - 1 do
+    begin
+      GetMem(szModName, 255);
+      try
+        GetModuleFileNameEx(hProcess, hMods[I], szModName, 255);
+        if UpperCase(szModName) = UpperCase(pszDllFile) then
+        begin
+          Result := hMods[I];
+          Break;
+        end;
+      finally
+        FreeMem(szModName);
+      end;
+    end;
+  end;
+  CloseHandle(hProcess);
+end;
+
+function EjectFromProcess(pszDllFile: string; dwProcessId: DWORD): Boolean;
+var
+  hProcess     : Cardinal;
+  pfnThreadRtn : Pointer;
+  hThread      : Cardinal;
+  tID          : Cardinal;
+  dwThreadError: Cardinal;
+  hDll         : Cardinal;
+begin
+  Result   := false;
+  hProcess := 0;
+  hThread  := 0;
+
+  try
+    hDll := CheckDllFile_hModule(UpperCase(pszDllFile), dwProcessId);
+    if hDll <= 0 then
+      Exit;
+
+    hProcess := OpenProcess(PROCESS_QUERY_INFORMATION + PROCESS_CREATE_THREAD + PROCESS_VM_OPERATION, false, dwProcessId);
+    if hProcess <= 0 then
+      Exit;
+
+    pfnThreadRtn := GetProcAddress(GetModuleHandle('Kernel32'), 'FreeLibrary');
+    if pfnThreadRtn = nil then
+      Exit;
+
+    hThread := CreateRemoteThread(hProcess, nil, 0, pfnThreadRtn, Pointer(hDll), 0, tID);
+    if hThread <= 0 then
+      Exit;
+
+    WaitForSingleObject(hThread, INFINITE);
+    GetExitCodeThread(hThread, dwThreadError);
+    Result := True;
+  finally
+    CloseHandle(hThread);
+    CloseHandle(hProcess);
+  end;
+end;
+
+function InjectToProcess(GuestFile: string; PID: DWORD): Boolean; stdcall;
+var
+  hRemoteProcess   : THandle;
+  dwRemoteProcessId: DWORD;
+  cb               : Winapi.Windows.SIZE_T;
+  pszLibFileRemote : Pointer;
+  iReturnCode      : Winapi.Windows.BOOL;
+  intrb            : Winapi.Windows.SIZE_T;
+  pfnStartAddr     : TFNThreadStartRoutine;
+  pszLibAFilename  : PWideChar;
+  intFlag          : DWORD;
+  intWB            : DWORD;
+begin
+  Result := false;
+  if PID <= 0 then
+    Exit;
+
+  GetMem(pszLibAFilename, Length(GuestFile) * 2 + 1);
+  StringToWideChar(GuestFile, pszLibAFilename, Length(GuestFile) * 2 + 1);
+  dwRemoteProcessId := PID;
+
+  hRemoteProcess := OpenProcess(PROCESS_CREATE_THREAD + { 允许远程创建线程 }
+    PROCESS_VM_OPERATION +                              { 允许远程VM操作 }
+    PROCESS_VM_WRITE,                                   { 允许远程VM写 }
+    false, dwRemoteProcessId);
+  cb               := (1 + lstrlenW(pszLibAFilename)) * SizeOf(WCHAR);
+  pszLibFileRemote := PWIDESTRING(VirtualAllocEx(hRemoteProcess, nil, cb, MEM_COMMIT, PAGE_READWRITE));
+  intrb            := 0;
+  iReturnCode      := WriteProcessMemory(hRemoteProcess, pszLibFileRemote, pszLibAFilename, cb, intrb);
+  if iReturnCode then
+  begin
+    pfnStartAddr := GetProcAddress(GetModuleHandle('Kernel32'), 'LoadLibraryW');
+    intWB        := 0;
+    intFlag      := 0;
+    Result       := CreateRemoteThread(hRemoteProcess, nil, 0, pfnStartAddr, pszLibFileRemote, intFlag, intWB) <> INVALID_HANDLE_VALUE;
+  end;
+  FreeMem(pszLibAFilename);
 end;
 
 initialization
