@@ -1,4 +1,4 @@
-library pm;
+library scoopUI;
 {$IF CompilerVersion >= 21.0}
 {$WEAKLINKRTTI ON}
 {$RTTI EXPLICIT METHODS([]) PROPERTIES([]) FIELDS([])}
@@ -7,7 +7,8 @@ library pm;
 uses
   System.SysUtils,
   System.Classes,
-  uProcessManager in 'uProcessManager.pas' {frmProcessManager};
+  uMain in 'uMain.pas' {frmScoopUI},
+  db.uCommon in '..\..\db.uCommon.pas';
 
 {$R *.res}
 
@@ -15,5 +16,4 @@ exports
   db_ShowDllForm_Plugins;
 
 begin
-
 end.
