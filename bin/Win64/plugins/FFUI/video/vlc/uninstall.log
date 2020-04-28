@@ -16,8 +16,8 @@ plugins\access\libaccess_realrtsp_plugin.dll
 plugins\access\libaccess_srt_plugin.dll
 plugins\access\libaccess_wasapi_plugin.dll
 plugins\access\libattachment_plugin.dll
-plugins\access\libbluray-awt-j2se-1.1.2.jar
-plugins\access\libbluray-j2se-1.1.2.jar
+plugins\access\libbluray-awt-j2se-1.2.0.jar
+plugins\access\libbluray-j2se-1.2.0.jar
 plugins\access\libcdda_plugin.dll
 plugins\access\libdcp_plugin.dll
 plugins\access\libdshow_plugin.dll

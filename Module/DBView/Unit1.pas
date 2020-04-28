@@ -239,6 +239,8 @@ begin
     Result := '×Ö·û´®'
   else if Pos('TEXT', strUpper) > 0 then
     Result := '×Ö·û´®'
+  else if Pos('CHAR(', strUpper) > 0 then
+    Result := '×Ö·û´®'
   else if Pos('INTEGER', strUpper) > 0 then
     Result := 'ÕûÊý'
   else if Pos('BIGINT', strUpper) > 0 then
@@ -495,8 +497,11 @@ begin
   begin
     if lvFieldType.Items[I].Caption = '1' then
     begin
-      strTemp     := strTemp + '|' + lvFieldType.Items[I].SubItems[0];
-      FstrColumns := FstrColumns + ',' + lvFieldType.Items[I].SubItems[0];
+      if lvFieldType.Items[I].SubItems[1] <> '¶þ½øÖÆ' then
+      begin
+        strTemp     := strTemp + '|' + lvFieldType.Items[I].SubItems[0];
+        FstrColumns := FstrColumns + ',' + lvFieldType.Items[I].SubItems[0];
+      end;
     end;
   end;
   strTemp     := RightStr(strTemp, Length(strTemp) - 1);
@@ -549,7 +554,7 @@ var
 begin
   strSQL := 'select ' + FstrColumns + ' from ' + lstTables.Items[lstTables.ItemIndex] + ' where RowID=' + IntToStr(Item.Index + 1);
   try
-    strJson := FSqlite3DB.ExecuteJSON(RawUTF8(strSQL), False);
+    strJson := FSqlite3DB.ExecuteJSON(RawUTF8(strSQL), True);
     if Trim(strJson) = '' then
       Exit;
   except
@@ -558,7 +563,10 @@ begin
 
   if LeftStr(string(strJson), 1) <> '[' then
   begin
-    jso     := (TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(string(strJson)), 0) as TJSONObject);
+    jso := (TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(string(strJson)), 0) as TJSONObject);
+    if jso = nil then
+      Exit;
+
     intRows := jso.Values['rowCount'].AsType<Integer>;
     if intRows > 0 then
     begin
