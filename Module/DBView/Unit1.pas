@@ -538,6 +538,9 @@ end;
 function MyTrim(const strValue: string): String;
 begin
   Result := strValue;
+  if System.SysUtils.Trim(strValue) = '' then
+    Exit;
+
   if (strValue[1] = '"') and (strValue[Length(strValue)] = '"') then
     Result := MidStr(strValue, 2, Length(strValue) - 2);
 end;
@@ -547,6 +550,7 @@ var
   I           : Integer;
   strSQL      : String;
   strJson     : RawUTF8;
+  strValue    : String;
   jso         : TJSONObject;
   jsn         : TJSONArray;
   intRows     : Integer;
@@ -554,16 +558,17 @@ var
 begin
   strSQL := 'select ' + FstrColumns + ' from ' + lstTables.Items[lstTables.ItemIndex] + ' where RowID=' + IntToStr(Item.Index + 1);
   try
-    strJson := FSqlite3DB.ExecuteJSON(RawUTF8(strSQL), True);
-    if Trim(strJson) = '' then
+    strJson  := FSqlite3DB.ExecuteJSON(RawUTF8(strSQL), True);
+    strValue := UTF8ToString((strJson));
+    if System.SysUtils.Trim(strValue) = '' then
       Exit;
   except
     Exit;
   end;
 
-  if LeftStr(string(strJson), 1) <> '[' then
+  if LeftStr(string(strValue), 1) <> '[' then
   begin
-    jso := (TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(string(strJson)), 0) as TJSONObject);
+    jso := (TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(string(strValue)), 0) as TJSONObject);
     if jso = nil then
       Exit;
 
@@ -587,7 +592,7 @@ begin
   end
   else
   begin
-    jsn := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(string(strJson)), 0) as TJSONArray;
+    jsn := TJSONObject.ParseJSONValue(TEncoding.UTF8.GetBytes(string(strValue)), 0) as TJSONArray;
     if (jsn <> nil) and (jsn.Count > 0) then
     begin
       Item.Caption := Format('%.10u', [Item.Index + 1]);
