@@ -40,21 +40,18 @@ object frmFFUI: TfrmFFUI
     Top = 40
     Width = 992
     Height = 564
-    ActivePage = tsConfig
+    ActivePage = tsPlay
     Anchors = [akLeft, akTop, akRight, akBottom]
     Images = ilpgc
     TabHeight = 50
     TabOrder = 0
     TabWidth = 123
-    ExplicitHeight = 616
     object tsInfo: TTabSheet
       Caption = #20449#24687
-      ExplicitHeight = 584
     end
     object tsPlay: TTabSheet
       Caption = #25773#25918
       ImageIndex = 1
-      ExplicitHeight = 584
       object pnlButtonCommand: TPanel
         Left = 0
         Top = 0
@@ -121,13 +118,11 @@ object frmFFUI: TfrmFFUI
         ParentBackground = False
         ShowCaption = False
         TabOrder = 1
-        ExplicitHeight = 542
       end
     end
     object tsConv: TTabSheet
       Caption = #36716#25442
       ImageIndex = 2
-      ExplicitHeight = 584
       DesignSize = (
         984
         504)
@@ -139,7 +134,6 @@ object frmFFUI: TfrmFFUI
         Anchors = [akLeft, akTop, akBottom]
         ItemHeight = 13
         TabOrder = 0
-        ExplicitHeight = 559
       end
       object btnAddVideoFile: TButton
         Left = 280
@@ -200,7 +194,6 @@ object frmFFUI: TfrmFFUI
         ParentCtl3D = False
         ShowCaption = False
         TabOrder = 6
-        ExplicitHeight = 559
       end
       object btnVideoConvParam: TButton
         Left = 280
@@ -215,7 +208,6 @@ object frmFFUI: TfrmFFUI
     object tsSplit: TTabSheet
       Caption = #20998#31163
       ImageIndex = 3
-      ExplicitHeight = 584
       DesignSize = (
         984
         504)
@@ -327,7 +319,6 @@ object frmFFUI: TfrmFFUI
     object tsMerge: TTabSheet
       Caption = #21512#24182
       ImageIndex = 4
-      ExplicitHeight = 584
       DesignSize = (
         984
         504)
@@ -568,7 +559,6 @@ object frmFFUI: TfrmFFUI
     object tsCut: TTabSheet
       Caption = #25130#21462
       ImageIndex = 5
-      ExplicitHeight = 584
       DesignSize = (
         984
         504)
@@ -680,7 +670,6 @@ object frmFFUI: TfrmFFUI
     object tsLive: TTabSheet
       Caption = #30452#25773
       ImageIndex = 6
-      ExplicitHeight = 584
       DesignSize = (
         984
         504)
@@ -740,7 +729,6 @@ object frmFFUI: TfrmFFUI
     object tsConfig: TTabSheet
       Caption = #37197#32622
       ImageIndex = 7
-      ExplicitHeight = 584
       DesignSize = (
         984
         504)
@@ -1270,7 +1258,6 @@ object frmFFUI: TfrmFFUI
     Panels = <>
     PopupMenu = pmStatCopy
     SimplePanel = True
-    ExplicitTop = 706
   end
   object dlgOpenVideoFile: TOpenDialog
     Left = 396
@@ -2905,5 +2892,11 @@ object frmFFUI: TfrmFFUI
       C07FFE03FFE007FFFFFFC3FFFF800003C07FFE03FFFFFFFFFFFFC7FFFFFFFFFF
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000000000000000000000000000
       000000000000}
+  end
+  object tmrUSBCamera: TTimer
+    Enabled = False
+    OnTimer = tmrUSBCameraTimer
+    Left = 72
+    Top = 242
   end
 end

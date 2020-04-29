@@ -149,6 +149,7 @@ type
     btnLive: TButton;
     btnPlayUSBCamera: TButton;
     chkConvAutoSearchSubtitle: TCheckBox;
+    tmrUSBCamera: TTimer;
     procedure FormResize(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure srchbxSelectVideoFileInvokeSearch(Sender: TObject);
@@ -199,6 +200,7 @@ type
     procedure srchbxMergeVideoSavePathInvokeSearch(Sender: TObject);
     procedure btnLiveClick(Sender: TObject);
     procedure btnPlayUSBCameraClick(Sender: TObject);
+    procedure tmrUSBCameraTimer(Sender: TObject);
   private
     FlngUI                   : TLangUI;
     FDOSCommand              : TDosCommand;
@@ -215,6 +217,7 @@ type
     FStatStyle               : TStatStyle;
     FbLoadConfig             : Boolean;
     FstrUSBCameraFriendlyName: String;
+    FbPlayUSBCamera          : Boolean;
     { 更改界面语言 }
     procedure ChangeLanguageUI;
     procedure ChangeLanguageChinese;
@@ -710,6 +713,7 @@ begin
   FStatStyle             := ssBlank;
   FhPlayVideoWnd         := 0;
   pgcAll.ActivePageIndex := 0;
+  FbPlayUSBCamera        := False;
 
   { 加载系统参数 }
   LoadConfig;
@@ -1196,13 +1200,28 @@ var
   strPlayProgramPath: String;
 begin
   strPlayProgramPath      := ExtractFilePath(ParamStr(0)) + 'video\ffmpeg';
-  FDOSCommand.CommandLine := Format('"%s\ffplay" -f dshow -i video="%s"', [strPlayProgramPath, FstrUSBCameraFriendlyName]);
+  FDOSCommand.CommandLine := Format('"%s\ffplay" -window_title ffplay -f dshow -i video="%s"', [strPlayProgramPath, FstrUSBCameraFriendlyName]);
   FDOSCommand.Execute;
   statInfo.SimpleText       := FDOSCommand.CommandLine;
-  tmrPlayVideo.Enabled      := True;
+  tmrUSBCamera.Enabled      := True;
   btnVideoPlayPlay.Enabled  := False;
   btnVideoPlayPause.Enabled := True;
   btnVideoPlayStop.Enabled  := True;
+end;
+
+procedure TfrmFFUI.tmrUSBCameraTimer(Sender: TObject);
+begin
+  FhPlayVideoWnd := FindWindow('SDL_app', 'ffplay');
+  if FhPlayVideoWnd <> 0 then
+  begin
+    FbPlayUSBCamera      := True;
+    tmrUSBCamera.Enabled := False;
+    SetWindowLong(FhPlayVideoWnd, GWL_STYLE, NativeInt($96000000));
+    SetWindowLong(FhPlayVideoWnd, GWL_EXSTYLE, $00050000);
+    Winapi.Windows.SetParent(FhPlayVideoWnd, pnlVideo.Handle);
+    SetWindowPos(FhPlayVideoWnd, pnlVideo.Handle, 0, 0, pnlVideo.Width, pnlVideo.Height, SWP_NOZORDER OR SWP_NOACTIVATE);
+    ShowWindow(FhPlayVideoWnd, SW_SHOWNORMAL);
+  end;
 end;
 
 procedure TfrmFFUI.tmrPlayVideoTimer(Sender: TObject);
@@ -1301,10 +1320,17 @@ begin
   if FhPlayVideoWnd = 0 then
     Exit;
 
-  if rgPlayUI.ItemIndex <> 2 then
-    SendPlayUIKey(FhPlayVideoWnd, 'p')
+  if FbPlayUSBCamera then
+  begin
+    SendPlayUIKey(FhPlayVideoWnd, 'q');
+  end
   else
-    SendPlayUIKey_vlc(FhPlayVideoWnd, Char(VK_SPACE));
+  begin
+    if rgPlayUI.ItemIndex <> 2 then
+      SendPlayUIKey(FhPlayVideoWnd, 'p')
+    else
+      SendPlayUIKey_vlc(FhPlayVideoWnd, Char(VK_SPACE));
+  end;
 end;
 
 procedure TfrmFFUI.btnVideoPlayStopClick(Sender: TObject);
@@ -1312,11 +1338,19 @@ begin
   if FhPlayVideoWnd = 0 then
     Exit;
 
-  if rgPlayUI.ItemIndex <> 2 then
-    SendPlayUIKey(FhPlayVideoWnd, 'q')
+  if FbPlayUSBCamera then
+  begin
+    SendPlayUIKey(FhPlayVideoWnd, 'q');
+  end
   else
-    SendPlayUIKey_vlc(FhPlayVideoWnd, 's');
+  begin
+    if rgPlayUI.ItemIndex <> 2 then
+      SendPlayUIKey(FhPlayVideoWnd, 'q')
+    else
+      SendPlayUIKey_vlc(FhPlayVideoWnd, 's');
+  end;
 
+  FbPlayUSBCamera           := False;
   btnVideoPlayPlay.Enabled  := True;
   btnVideoPlayPause.Enabled := False;
   btnVideoPlayStop.Enabled  := False;
