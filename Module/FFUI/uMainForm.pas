@@ -149,6 +149,7 @@ type
     btnLive: TButton;
     btnPlayUSBCamera: TButton;
     chkConvAutoSearchSubtitle: TCheckBox;
+    lblTip: TLabel;
     procedure FormResize(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure srchbxSelectVideoFileInvokeSearch(Sender: TObject);

@@ -40,7 +40,7 @@ object frmFFUI: TfrmFFUI
     Top = 45
     Width = 992
     Height = 644
-    ActivePage = tsInfo
+    ActivePage = tsConfig
     Anchors = [akLeft, akTop, akRight, akBottom]
     Images = ilpgc
     TabHeight = 50
@@ -732,6 +732,13 @@ object frmFFUI: TfrmFFUI
       DesignSize = (
         984
         584)
+      object lblTip: TLabel
+        Left = 16
+        Top = 562
+        Width = 452
+        Height = 13
+        Caption = #27880#65306'FFUI(x64) '#29256#26412#38656#35201#23433#35013' CUDA10 '#20197#19978#65292#24182#23558' CUDA BIN '#30446#24405#28155#21152#21040#31995#32479#25628#32034#30446#24405#12290
+      end
       object rgPlayUI: TRadioGroup
         Left = 12
         Top = 16
