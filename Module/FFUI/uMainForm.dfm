@@ -2,10 +2,10 @@ object frmFFUI: TfrmFFUI
   Left = 0
   Top = 0
   Caption = 'FFMPEG UI v2.0'
-  ClientHeight = 730
+  ClientHeight = 634
   ClientWidth = 1008
   Color = clBtnFace
-  Constraints.MinHeight = 768
+  Constraints.MinHeight = 650
   Constraints.MinWidth = 1024
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -19,7 +19,7 @@ object frmFFUI: TfrmFFUI
   OnResize = FormResize
   DesignSize = (
     1008
-    730)
+    634)
   PixelsPerInch = 96
   TextHeight = 13
   object lblVideoFile: TLabel
@@ -37,21 +37,24 @@ object frmFFUI: TfrmFFUI
   end
   object pgcAll: TPageControl
     Left = 8
-    Top = 45
+    Top = 40
     Width = 992
-    Height = 644
+    Height = 564
     ActivePage = tsConfig
     Anchors = [akLeft, akTop, akRight, akBottom]
     Images = ilpgc
     TabHeight = 50
     TabOrder = 0
     TabWidth = 123
+    ExplicitHeight = 616
     object tsInfo: TTabSheet
       Caption = #20449#24687
+      ExplicitHeight = 584
     end
     object tsPlay: TTabSheet
       Caption = #25773#25918
       ImageIndex = 1
+      ExplicitHeight = 584
       object pnlButtonCommand: TPanel
         Left = 0
         Top = 0
@@ -110,7 +113,7 @@ object frmFFUI: TfrmFFUI
         Left = 0
         Top = 42
         Width = 984
-        Height = 542
+        Height = 462
         Align = alClient
         BevelOuter = bvNone
         Caption = 'pnl1'
@@ -118,22 +121,25 @@ object frmFFUI: TfrmFFUI
         ParentBackground = False
         ShowCaption = False
         TabOrder = 1
+        ExplicitHeight = 542
       end
     end
     object tsConv: TTabSheet
       Caption = #36716#25442
       ImageIndex = 2
+      ExplicitHeight = 584
       DesignSize = (
         984
-        584)
+        504)
       object lstFiles: TListBox
         Left = 8
         Top = 12
         Width = 257
-        Height = 559
+        Height = 479
         Anchors = [akLeft, akTop, akBottom]
         ItemHeight = 13
         TabOrder = 0
+        ExplicitHeight = 559
       end
       object btnAddVideoFile: TButton
         Left = 280
@@ -185,7 +191,7 @@ object frmFFUI: TfrmFFUI
         Left = 412
         Top = 12
         Width = 561
-        Height = 559
+        Height = 479
         Anchors = [akLeft, akTop, akRight, akBottom]
         BevelOuter = bvNone
         BorderStyle = bsSingle
@@ -194,6 +200,7 @@ object frmFFUI: TfrmFFUI
         ParentCtl3D = False
         ShowCaption = False
         TabOrder = 6
+        ExplicitHeight = 559
       end
       object btnVideoConvParam: TButton
         Left = 280
@@ -208,9 +215,10 @@ object frmFFUI: TfrmFFUI
     object tsSplit: TTabSheet
       Caption = #20998#31163
       ImageIndex = 3
+      ExplicitHeight = 584
       DesignSize = (
         984
-        584)
+        504)
       object lblVidoeSplitAudio: TLabel
         Left = 354
         Top = 44
@@ -319,9 +327,10 @@ object frmFFUI: TfrmFFUI
     object tsMerge: TTabSheet
       Caption = #21512#24182
       ImageIndex = 4
+      ExplicitHeight = 584
       DesignSize = (
         984
-        584)
+        504)
       object lblMergeVideo: TLabel
         Left = 70
         Top = 41
@@ -559,9 +568,10 @@ object frmFFUI: TfrmFFUI
     object tsCut: TTabSheet
       Caption = #25130#21462
       ImageIndex = 5
+      ExplicitHeight = 584
       DesignSize = (
         984
-        584)
+        504)
       object rgCut: TRadioGroup
         Left = 16
         Top = 8
@@ -670,9 +680,10 @@ object frmFFUI: TfrmFFUI
     object tsLive: TTabSheet
       Caption = #30452#25773
       ImageIndex = 6
+      ExplicitHeight = 584
       DesignSize = (
         984
-        584)
+        504)
       object rgLive: TRadioGroup
         Left = 10
         Top = 3
@@ -729,19 +740,13 @@ object frmFFUI: TfrmFFUI
     object tsConfig: TTabSheet
       Caption = #37197#32622
       ImageIndex = 7
+      ExplicitHeight = 584
       DesignSize = (
         984
-        584)
-      object lblTip: TLabel
-        Left = 16
-        Top = 562
-        Width = 452
-        Height = 13
-        Caption = #27880#65306'FFUI(x64) '#29256#26412#38656#35201#23433#35013' CUDA10 '#20197#19978#65292#24182#23558' CUDA BIN '#30446#24405#28155#21152#21040#31995#32479#25628#32034#30446#24405#12290
-      end
+        504)
       object rgPlayUI: TRadioGroup
         Left = 12
-        Top = 16
+        Top = 0
         Width = 961
         Height = 45
         Anchors = [akLeft, akTop, akRight]
@@ -763,7 +768,7 @@ object frmFFUI: TfrmFFUI
       end
       object rgUseGPU: TRadioGroup
         Left = 12
-        Top = 65
+        Top = 49
         Width = 961
         Height = 45
         Anchors = [akLeft, akTop, akRight]
@@ -784,9 +789,9 @@ object frmFFUI: TfrmFFUI
       end
       object grpVideoConv: TGroupBox
         Left = 12
-        Top = 113
+        Top = 97
         Width = 961
-        Height = 237
+        Height = 208
         Anchors = [akLeft, akTop, akRight]
         Caption = #26684#24335#36716#25442#65306
         Font.Charset = GB2312_CHARSET
@@ -798,9 +803,9 @@ object frmFFUI: TfrmFFUI
         TabOrder = 2
         DesignSize = (
           961
-          237)
+          208)
         object lblVideoWidth: TLabel
-          Left = 208
+          Left = 168
           Top = 52
           Width = 26
           Height = 13
@@ -808,8 +813,8 @@ object frmFFUI: TfrmFFUI
           Visible = False
         end
         object lblVideoHeight: TLabel
-          Left = 209
-          Top = 77
+          Left = 228
+          Top = 52
           Width = 26
           Height = 13
           Caption = #39640#65306
@@ -832,35 +837,35 @@ object frmFFUI: TfrmFFUI
         end
         object lblTitle: TLabel
           Left = 30
-          Top = 125
+          Top = 98
           Width = 39
           Height = 13
           Caption = #26631#39064#65306
         end
         object lblArtist: TLabel
           Left = 30
-          Top = 153
+          Top = 126
           Width = 39
           Height = 13
           Caption = #33402#26415#65306
         end
         object lblGenre: TLabel
           Left = 30
-          Top = 181
+          Top = 154
           Width = 39
           Height = 13
           Caption = #31867#22411#65306
         end
         object lblComment: TLabel
           Left = 30
-          Top = 207
+          Top = 180
           Width = 39
           Height = 13
           Caption = #27880#37322#65306
         end
         object lblVideoInfo: TLabel
           Left = 24
-          Top = 103
+          Top = 76
           Width = 65
           Height = 13
           Caption = #21098#36753#20449#24687#65306
@@ -885,9 +890,9 @@ object frmFFUI: TfrmFFUI
           OnClick = chkVideoSizeClick
         end
         object edtVideoHeight: TEdit
-          Left = 234
-          Top = 74
-          Width = 47
+          Left = 253
+          Top = 49
+          Width = 28
           Height = 21
           NumbersOnly = True
           TabOrder = 1
@@ -895,9 +900,9 @@ object frmFFUI: TfrmFFUI
           Visible = False
         end
         object edtVideoWidth: TEdit
-          Left = 234
-          Top = 47
-          Width = 47
+          Left = 194
+          Top = 49
+          Width = 33
           Height = 21
           NumbersOnly = True
           TabOrder = 2
@@ -937,7 +942,7 @@ object frmFFUI: TfrmFFUI
         end
         object edtTitle: TEdit
           Left = 84
-          Top = 123
+          Top = 96
           Width = 203
           Height = 21
           TabOrder = 5
@@ -945,7 +950,7 @@ object frmFFUI: TfrmFFUI
         end
         object edtArtist: TEdit
           Left = 84
-          Top = 150
+          Top = 123
           Width = 203
           Height = 21
           TabOrder = 6
@@ -953,7 +958,7 @@ object frmFFUI: TfrmFFUI
         end
         object edtGenre: TEdit
           Left = 84
-          Top = 177
+          Top = 150
           Width = 203
           Height = 21
           TabOrder = 7
@@ -961,7 +966,7 @@ object frmFFUI: TfrmFFUI
         end
         object edtComment: TEdit
           Left = 84
-          Top = 204
+          Top = 177
           Width = 203
           Height = 21
           TabOrder = 8
@@ -969,7 +974,7 @@ object frmFFUI: TfrmFFUI
         end
         object btnSaveConvParam: TButton
           Left = 810
-          Top = 169
+          Top = 137
           Width = 135
           Height = 25
           Anchors = [akRight, akBottom]
@@ -979,7 +984,7 @@ object frmFFUI: TfrmFFUI
         end
         object btnSaveConvParamAndStartConv: TButton
           Left = 810
-          Top = 200
+          Top = 168
           Width = 135
           Height = 25
           Anchors = [akRight, akBottom]
@@ -999,7 +1004,7 @@ object frmFFUI: TfrmFFUI
         end
         object chkConvOpenSavePath: TCheckBox
           Left = 332
-          Top = 103
+          Top = 76
           Width = 265
           Height = 17
           Caption = #36716#25442#32467#26463#25171#24320#20445#23384#30446#24405
@@ -1010,7 +1015,7 @@ object frmFFUI: TfrmFFUI
         end
         object chkConvAutoSearchSubtitle: TCheckBox
           Left = 332
-          Top = 126
+          Top = 99
           Width = 613
           Height = 17
           Caption = #33258#21160#25628#32034#24403#21069#30446#24405#19979#21516#25991#20214#30340#23383#24149#25991#20214
@@ -1022,7 +1027,7 @@ object frmFFUI: TfrmFFUI
       end
       object grpSplitPath: TGroupBox
         Left = 12
-        Top = 354
+        Top = 305
         Width = 409
         Height = 72
         Caption = #20998#31163#20445#23384#36335#24452#65306
@@ -1090,7 +1095,7 @@ object frmFFUI: TfrmFFUI
       end
       object rgLanguageUI: TRadioGroup
         Left = 12
-        Top = 506
+        Top = 457
         Width = 409
         Height = 45
         Caption = #30028#38754#35821#35328#65306
@@ -1110,7 +1115,7 @@ object frmFFUI: TfrmFFUI
       end
       object grpMergePath: TGroupBox
         Left = 427
-        Top = 354
+        Top = 305
         Width = 546
         Height = 72
         Anchors = [akLeft, akTop, akRight]
@@ -1186,7 +1191,7 @@ object frmFFUI: TfrmFFUI
       end
       object grpCutConfig: TGroupBox
         Left = 12
-        Top = 429
+        Top = 380
         Width = 409
         Height = 72
         Caption = #25130#21462#20445#23384#36335#24452#65306
@@ -1259,16 +1264,17 @@ object frmFFUI: TfrmFFUI
   end
   object statInfo: TStatusBar
     Left = 0
-    Top = 706
+    Top = 610
     Width = 1008
     Height = 24
     Panels = <>
     PopupMenu = pmStatCopy
     SimplePanel = True
+    ExplicitTop = 706
   end
   object dlgOpenVideoFile: TOpenDialog
-    Left = 392
-    Top = 355
+    Left = 396
+    Top = 327
   end
   object pmOpen: TPopupMenu
     AutoHotkeys = maManual
@@ -1289,8 +1295,8 @@ object frmFFUI: TfrmFFUI
   end
   object pmStatCopy: TPopupMenu
     AutoHotkeys = maManual
-    Left = 480
-    Top = 355
+    Left = 484
+    Top = 335
     object mniCopyDosCommand: TMenuItem
       Caption = #22797#21046#21040#21098#20999#26495
       OnClick = mniCopyDosCommandClick
@@ -1301,13 +1307,13 @@ object frmFFUI: TfrmFFUI
     Interval = 100
     OnTimer = tmrPlayVideoTimer
     Left = 556
-    Top = 355
+    Top = 335
   end
   object ilpgc: TImageList
     Height = 32
     Width = 32
-    Left = 308
-    Top = 360
+    Left = 332
+    Top = 332
     Bitmap = {
       494C010108000C00040020002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       00000000000036000000280000008000000060000000010020000000000000C0

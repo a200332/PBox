@@ -149,7 +149,6 @@ type
     btnLive: TButton;
     btnPlayUSBCamera: TButton;
     chkConvAutoSearchSubtitle: TCheckBox;
-    lblTip: TLabel;
     procedure FormResize(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure srchbxSelectVideoFileInvokeSearch(Sender: TObject);
@@ -602,7 +601,7 @@ begin
   FSynEdit_VideoSplit.Left           := 70;
   FSynEdit_VideoSplit.Top            := 324;
   FSynEdit_VideoSplit.Width          := 761;
-  FSynEdit_VideoSplit.Height         := 233;
+  FSynEdit_VideoSplit.Height         := 171;
   FSynEdit_VideoSplit.Anchors        := [akLeft, akTop, akRight, akBottom];
   FSynEdit_VideoSplit.Gutter.Visible := False;
   FSynEdit_VideoSplit.Font.Name      := '宋体';
@@ -617,7 +616,7 @@ begin
   FSynEdit_VideoMerge.Left           := 70;
   FSynEdit_VideoMerge.Top            := 324;
   FSynEdit_VideoMerge.Width          := 761;
-  FSynEdit_VideoMerge.Height         := 233;
+  FSynEdit_VideoMerge.Height         := 171;
   FSynEdit_VideoMerge.Anchors        := [akLeft, akTop, akRight, akBottom];
   FSynEdit_VideoMerge.Gutter.Visible := False;
   FSynEdit_VideoMerge.Font.Name      := '宋体';
@@ -632,7 +631,7 @@ begin
   FSynEdit_VideoCut.Left           := 70;
   FSynEdit_VideoCut.Top            := 324;
   FSynEdit_VideoCut.Width          := 761;
-  FSynEdit_VideoCut.Height         := 233;
+  FSynEdit_VideoCut.Height         := 171;
   FSynEdit_VideoCut.Anchors        := [akLeft, akTop, akRight, akBottom];
   FSynEdit_VideoCut.Gutter.Visible := False;
   FSynEdit_VideoCut.Font.Name      := '宋体';
@@ -647,7 +646,7 @@ begin
   FSynEdit_VideoLive.Left           := 10;
   FSynEdit_VideoLive.Top            := 80;
   FSynEdit_VideoLive.Width          := 960;
-  FSynEdit_VideoLive.Height         := 490;
+  FSynEdit_VideoLive.Height         := 415;
   FSynEdit_VideoLive.Anchors        := [akLeft, akTop, akRight, akBottom];
   FSynEdit_VideoLive.Gutter.Visible := False;
   FSynEdit_VideoLive.Font.Name      := '宋体';
