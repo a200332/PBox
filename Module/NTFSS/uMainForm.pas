@@ -3,8 +3,8 @@ unit uMainForm;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.StrUtils, System.Variants, System.Classes, System.IOUtils, System.Types, System.Diagnostics, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.ComCtrls, Vcl.StdCtrls, Vcl.WinXCtrls, Vcl.ExtCtrls, Vcl.Menus, SynSQLite3Static, mORMotSQLite3, SynSQLite3, SynCommons, SynTable, mORMot, db.uCommon;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.StrUtils, System.Variants, System.Classes, System.IOUtils, System.Types, System.Diagnostics, System.Generics.Collections, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  Vcl.ComCtrls, Vcl.StdCtrls, Vcl.WinXCtrls, Vcl.ExtCtrls, Vcl.Menus, System.JSON, SynSQLite3Static, mORMotSQLite3, SynSQLite3, SynCommons, SynTable, mORMot, db.uCommon;
 
 type
   TfrmNTFSS = class(TForm)
@@ -34,12 +34,10 @@ type
     FbTerminated02: Boolean;
     FintCount     : UInt64;
     FchrDriver    : Char;
-    FStmt_FileName: TSQLite3Statement;
     { NTFS 磁盘文件搜索 }
     procedure SearchFileNTFS;
     { 获取文件信息 }
     procedure GetUSNFileInfo(UsnInfo: PUSN);
-    procedure PrepareStatement(const strSQL: String; var Stmt: TSQLite3Statement);
   end;
 
 procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strModuleName, strIconFileName: PAnsiChar); stdcall;
@@ -52,7 +50,7 @@ procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, s
 begin
   frm                     := TfrmNTFSS;
   strParentModuleName     := '系统管理';
-  strModuleName           := 'NTFS 文件搜索';
+  strModuleName           := 'NTFS文件搜索';
   strIconFileName         := '';
   Application.Handle      := GetMainFormApplication.Handle;
   Application.Icon.Handle := GetMainFormApplication.Icon.Handle;
@@ -88,21 +86,14 @@ end;
 
 const
   c_strTableName = 'NTFS';
-  c_strAllData   =                                                                                                                                                                               //
-    ' WITH RECURSIVE temptable(FILEID, FILEPID, FILENAME) AS ' +                                                                                                                                 //
-    ' ( ' +                                                                                                                                                                                      //
-    '	 select FILEID, FILEPID, FILENAME from NTFS where FILEPID = 1407374883553285 ' +                                                                                                           //
-    '	 union all ' +                                                                                                                                                                             //
+  c_strAllData   =                                                                                                                                                                                //
+    ' WITH RECURSIVE temptable(FILEID, FILEPID, FILENAME) AS ' +                                                                                                                                  //
+    ' ( ' +                                                                                                                                                                                       //
+    '	 select FILEID, FILEPID, FILENAME from NTFS where FILEPID = 1407374883553285 ' +                                                                                                            //
+    '	 union all ' +                                                                                                                                                                              //
     '	 select a.FILEID, a.FILEPID, convert(varchar(255), convert(varchar(255), b.FILENAME) + ''\'' + a.FILENAME ) as FILENAME  from NTFS  a inner join temptable  b on (a.FILEPID = b.FILEID) ' + //
-    ' ) ' +                                                                                                                                                                                      //
+    ' ) ' +                                                                                                                                                                                       //
     ' select RowID, * from temptable';
-
-procedure TfrmNTFSS.PrepareStatement(const strSQL: String; var Stmt: TSQLite3Statement);
-var
-  pz: PUTF8Char;
-begin
-  FDatabase.SQLite3Library.prepare_v2(FDatabase.db, PUTF8Char(AnsiString(strSQL)), Length(strSQL), Stmt, pz);
-end;
 
 procedure TfrmNTFSS.tmrStartTimer(Sender: TObject);
 var
@@ -124,7 +115,7 @@ begin
 
   { 创建 Sqlite 数据库 }
   FDatabase := TSQLDataBase.Create(FstrDBFileName);
-  FDatabase.Execute(PAnsiChar(AnsiString('CREATE TABLE ' + c_strTableName + ' ([Driver] VARCHAR(1), [FileID] INTEGER NULL, [FilePID] INTEGER NULL, [FileName] VARCHAR (255), [FullName] VARCHAR (255));'))); // 创建表结构
+  FDatabase.Execute(PAnsiChar(AnsiString('CREATE TABLE ' + c_strTableName + ' ([Driver] VARCHAR(1), [FileID] INTEGER NULL, [FilePID] INTEGER NULL, [IsDir] INTEGER NULL, [FileName] VARCHAR (255), [FullName] VARCHAR (255));'))); // 创建表结构
 
   lstDriver := TDirectory.GetLogicalDrives;
   for strDriver in lstDriver do
@@ -177,9 +168,6 @@ begin
   end;
 
   { 全部搜索完毕 }
-  FDatabase.Execute(PAnsiChar(AnsiString(c_strAllData)));
-  PrepareStatement('SELECT "FileName" FROM temptable WHERE "RowID" = ?;', FStmt_FileName);
-
   lblSearchTip.Caption := '';
   FbTerminated02       := True;
   lblFilter.Visible    := True;
@@ -196,14 +184,17 @@ var
   strFileName: String;
   strFullPath: String;
   strSQL     : String;
+  intDir     : Integer;
 begin
   intFileID   := UsnInfo^.FileReferenceNumber;
   intFilePID  := UsnInfo^.ParentFileReferenceNumber;
   strFileName := PWideChar(Integer(UsnInfo) + UsnInfo^.FileNameOffset);
+  strFileName := Copy(strFileName, 1, UsnInfo^.FileNameLength div 2);
+  intDir      := Integer(UsnInfo^.FileAttributes and FILE_ATTRIBUTE_DIRECTORY = FILE_ATTRIBUTE_DIRECTORY);
   strFullPath := '';
   Inc(FintCount);
-  strSQL := 'INSERT INTO ' + c_strTableName + ' (Driver, FileID, FilePID, FileName) VALUES(' + QuotedStr(FchrDriver) + ', ' + UIntToStr(intFileID) + ', ' + UIntToStr(intFilePID) + ', ' + QuotedStr(String(UTF8Encode(strFileName))) + ')';
-  FDatabase.Execute(PAnsiChar(AnsiString(strSQL)));
+  strSQL := 'INSERT INTO ' + c_strTableName + ' (Driver, FileID, FilePID, IsDir, FileName) VALUES(' + QuotedStr(FchrDriver) + ', ' + UIntToStr(intFileID) + ', ' + UIntToStr(intFilePID) + ', ' + IntToStr(intDir) + ', ' + QuotedStr(String((strFileName))) + ')';
+  FDatabase.Execute(RawUTF8(strSQL));
 end;
 
 { NTFS 磁盘文件搜索,此函数是在线程中运行，所以不要有界面操作 }
@@ -270,19 +261,14 @@ end;
 
 procedure TfrmNTFSS.lvDataData(Sender: TObject; Item: TListItem);
 var
-  strFileName: String;
+  strJson: RawUTF8;
 begin
+  if Item = nil then
+    Exit;
+
   Item.Caption := Format('%.10u', [Item.Index + 1]);
-  FDatabase.SQLite3Library.bind_int(FStmt_FileName, 1, Item.Index + 1);
-  try
-    if FDatabase.SQLite3Library.step(FStmt_FileName) = SQLITE_ROW then
-    begin
-      strFileName := FDatabase.SQLite3Library.column_text16(FStmt_FileName, 0);
-      Item.SubItems.Add(strFileName);
-    end;
-  finally
-    FDatabase.SQLite3Library.reset(FStmt_FileName);
-  end;
+  strJson      := FDatabase.ExecuteNoExceptionUTF8(RawUTF8(Format('select FileName from NTFS where RowID = %u', [Item.Index + 1])));
+  Item.SubItems.Add(string(strJson));
 end;
 
 procedure TfrmNTFSS.mniFileAttrClick(Sender: TObject);
