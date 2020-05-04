@@ -37,6 +37,8 @@ type
     dlgSaveEXE: TSaveDialog;
     mniProcessDump: TMenuItem;
     dlgSaveModuleInfo: TSaveDialog;
+    mniFileAttr: TMenuItem;
+    mniOpenModuleFileAtti: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure lvProcessClick(Sender: TObject);
@@ -58,6 +60,8 @@ type
     procedure mniSaveToFileClick(Sender: TObject);
     procedure mniSelectedLineToSaveFileClick(Sender: TObject);
     procedure mniProcessDumpClick(Sender: TObject);
+    procedure mniFileAttrClick(Sender: TObject);
+    procedure mniOpenModuleFileAttiClick(Sender: TObject);
   private
     procedure EnumProcess(lv: TListView);
     procedure EnumProcessModules(const intPID: Cardinal; lv: TListView);
@@ -474,6 +478,42 @@ begin
   EjectFromProcess(lvModule.Selected.SubItems[1], PID);
 end;
 
+function ShowFileProperties(FileName: String; Wnd: hWnd): Boolean;
+var
+  sfi: TSHELLEXECUTEINFOW;
+begin
+  with sfi do
+  begin
+    cbSize       := SizeOf(sfi);
+    lpFile       := PChar(FileName);
+    Wnd          := Wnd;
+    fMask        := SEE_MASK_NOCLOSEPROCESS or SEE_MASK_INVOKEIDLIST or SEE_MASK_FLAG_NO_UI;
+    lpVerb       := PChar('properties');
+    lpIDList     := nil;
+    lpDirectory  := nil;
+    nShow        := 0;
+    hInstApp     := 0;
+    lpParameters := nil;
+    dwHotKey     := 0;
+    hIcon        := 0;
+    hkeyClass    := 0;
+    hProcess     := 0;
+    lpClass      := nil;
+  end;
+  Result := ShellExecuteEX(@sfi);
+end;
+
+procedure TfrmProcessManager.mniFileAttrClick(Sender: TObject);
+begin
+  if lvProcess.Selected = nil then
+    Exit;
+
+  if Trim(lvProcess.Selected.SubItems[3]) = '' then
+    Exit;
+
+  ShowFileProperties(lvProcess.Selected.SubItems[3], 0);
+end;
+
 procedure TfrmProcessManager.mniDumpToDiskFileClick(Sender: TObject);
 var
   msEXE    : TMemoryStream;
@@ -587,6 +627,17 @@ end;
 procedure TfrmProcessManager.mniLoadPEClick(Sender: TObject);
 begin
   //
+end;
+
+procedure TfrmProcessManager.mniOpenModuleFileAttiClick(Sender: TObject);
+begin
+  if lvModule.Selected = nil then
+    Exit;
+
+  if Trim(lvModule.Selected.SubItems[1]) = '' then
+    Exit;
+
+  ShowFileProperties(lvModule.Selected.SubItems[1], 0);
 end;
 
 procedure TfrmProcessManager.mniOpenModulePathClick(Sender: TObject);

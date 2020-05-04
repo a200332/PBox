@@ -1,7 +1,7 @@
 object frmNTFSS: TfrmNTFSS
   Left = 0
   Top = 0
-  Caption = 'NTFS '#25991#20214#25628#32034
+  Caption = 'NTFS'#25991#20214#25628#32034
   ClientHeight = 686
   ClientWidth = 1129
   Color = clBtnFace
@@ -70,17 +70,20 @@ object frmNTFSS: TfrmNTFSS
     ReadOnly = True
     RowSelect = True
     ParentFont = False
+    PopupMenu = pmFile
     TabOrder = 0
     ViewStyle = vsReport
     OnData = lvDataData
+    OnDblClick = mniOpenFileClick
   end
   object srchbxFilter: TSearchBox
     Left = 60
     Top = 8
-    Width = 281
+    Width = 301
     Height = 21
     TabOrder = 1
     Visible = False
+    OnInvokeSearch = srchbxFilterInvokeSearch
   end
   object tmrStart: TTimer
     OnTimer = tmrStartTimer
@@ -91,10 +94,6 @@ object frmNTFSS: TfrmNTFSS
     AutoHotkeys = maManual
     Left = 72
     Top = 200
-    object mniOpenFile: TMenuItem
-      Caption = #25171#24320#25991#20214
-      OnClick = mniOpenFileClick
-    end
     object mniOpenPath: TMenuItem
       Caption = #25171#24320#20301#32622
       OnClick = mniOpenPathClick
@@ -102,6 +101,17 @@ object frmNTFSS: TfrmNTFSS
     object mniFileAttr: TMenuItem
       Caption = #25991#20214#23646#24615
       OnClick = mniFileAttrClick
+    end
+    object mniDeleteFile: TMenuItem
+      Caption = #21024#38500#25991#20214
+      OnClick = mniDeleteFileClick
+    end
+    object mniLine01: TMenuItem
+      Caption = '-'
+    end
+    object mniOpenFile: TMenuItem
+      Caption = #36816#34892#25991#20214
+      OnClick = mniOpenFileClick
     end
   end
 end

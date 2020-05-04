@@ -5,7 +5,8 @@ library NTFSS;
 {$IFEND}
 
 uses
-  uMainForm in 'uMainForm.pas' {frmNTFSS};
+  uMainForm in 'uMainForm.pas' {frmNTFSS},
+  uWaittingForm in 'uWaittingForm.pas' {frmWaitting};
 
 {$R *.res}
 

@@ -139,6 +139,10 @@ object frmProcessManager: TfrmProcessManager
       Caption = #25171#24320#25991#20214#20301#32622
       OnClick = mniOpenProcessPathClick
     end
+    object mniFileAttr: TMenuItem
+      Caption = #25991#20214#23646#24615
+      OnClick = mniFileAttrClick
+    end
     object mniRenameProcessName: TMenuItem
       Caption = #25991#20214#37325#21629#21517
       OnClick = mniRenameProcessNameClick
@@ -174,6 +178,10 @@ object frmProcessManager: TfrmProcessManager
     object mniOpenModulePath: TMenuItem
       Caption = #25171#24320#25991#20214#20301#32622
       OnClick = mniOpenModulePathClick
+    end
+    object mniOpenModuleFileAtti: TMenuItem
+      Caption = #25991#20214#23646#24615
+      OnClick = mniOpenModuleFileAttiClick
     end
     object mniEjectFromProcess: TMenuItem
       Caption = #20174#36827#31243#20013#24377#20986
