@@ -7,3 +7,6 @@
 [submodule "3rdparty/mORMot"]
 	path = 3rdparty/mORMot
 	url = https://github.com/synopse/mORMot.git
+[submodule "3rdparty/DelphiDX12"]
+	path = 3rdparty/DelphiDX12
+	url = https://github.com/CMCHTPC/DelphiDX12.git

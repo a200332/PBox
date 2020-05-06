@@ -8,7 +8,8 @@ uses
   System.SysUtils,
   System.Classes,
   uMain in 'uMain.pas' {frmP2PChat},
-  db.uCommon in '..\..\db.uCommon.pas';
+  db.uCommon in '..\..\db.uCommon.pas',
+  uFrame in 'uFrame.pas' {frmcht: TFrame};
 
 {$R *.res}
 
