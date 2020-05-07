@@ -190,10 +190,6 @@ object frmP2PChat: TfrmP2PChat
             VertScrollBar.Tracking = True
             Align = alClient
             TabOrder = 0
-            ExplicitLeft = 48
-            ExplicitTop = 48
-            ExplicitWidth = 561
-            ExplicitHeight = 413
             object imgScreen: TImage
               Left = 0
               Top = 0
@@ -207,7 +203,6 @@ object frmP2PChat: TfrmP2PChat
     end
   end
   object tmrSnap: TTimer
-    Interval = 3000
     OnTimer = tmrSnapTimer
     Left = 736
     Top = 164

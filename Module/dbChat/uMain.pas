@@ -35,6 +35,8 @@ type
     procedure btnShowLoginFormClick(Sender: TObject);
     procedure btnShowFriendsClick(Sender: TObject);
   private
+    FBmpBackup   : TBitmap;
+    FBmpScreen   : TBitmap;
     FbDXGIDesktop: Boolean;
     FDevice      : ID3D11Device;
     FContext     : ID3D11DeviceContext;
@@ -46,6 +48,8 @@ type
     procedure SnapScreen_DXGI;
     procedure SnapScreen_GDI;
     procedure SendScreen(const bmp: TBitmap);
+    { 屏幕是否发生改变 }
+    function ScreenChange(const bmp: TBitmap): Boolean;
   public
     { Public declarations }
   end;
@@ -66,13 +70,29 @@ begin
   Application.Icon.Handle := GetMainFormApplication.Icon.Handle;
 end;
 
+type
+  TMyBitamp = class(TBitmap)
+
+  end;
+
+  TMyBitmapImage = class(TBitmapImage)
+
+  end;
+
 procedure TfrmP2PChat.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  FBmpBackup.Free;
+  FBmpScreen.Free;
   Action := caFree;
 end;
 
 procedure TfrmP2PChat.FormCreate(Sender: TObject);
 begin
+  FBmpBackup             := TBitmap.Create;
+  FBmpScreen             := TBitmap.Create;
+  FBmpScreen.PixelFormat := pf32bit;
+  FBmpBackup.PixelFormat := pf32bit;
+
   FbDXGIDesktop := CreateDuplicateOutput;
   HideLoginGroup;
 end;
@@ -177,7 +197,6 @@ var
   Desc     : TD3D11_TEXTURE2D_DESC;
   Copy     : ID3D11Texture2D;
   ScreenRes: TD3D11_MAPPED_SUBRESOURCE;
-  bmp      : TBitmap;
 begin
   if FDuplicate = nil then
     Exit;
@@ -205,19 +224,56 @@ begin
 
     FContext.CopyResource(Copy, Texture);
     FContext.Map(Copy, 0, D3D11_MAP_READ_WRITE, 0, ScreenRes);
-    bmp := TBitmap.Create;
     try
-      bmp.PixelFormat := pf32bit;
-      bmp.Width       := Desc.Width;
-      bmp.Height      := Desc.Height;
-      SetBitmapBits(bmp.Handle, Desc.Width * Desc.Height * 4, ScreenRes.PData);
-      SendScreen(bmp);
+      FBmpScreen.Width  := Desc.Width;
+      FBmpScreen.Height := Desc.Height;
+      SetBitmapBits(FBmpScreen.Handle, Desc.Width * Desc.Height * 4, ScreenRes.PData);
+      SendScreen(FBmpScreen);
     finally
       Texture := nil;
-      bmp.Free;
     end;
   finally
     FDuplicate.ReleaseFrame();
+  end;
+end;
+
+{ 比较位图差异 }
+function SameAsBmp(const bmp1, bmp2: TBitmap): Boolean;
+var
+  p1, p2: PByte;
+begin
+  p1     := TMyBitmapImage(TMyBitamp(bmp1).FImage).FDIB.dsBm.bmBits;
+  p2     := TMyBitmapImage(TMyBitamp(bmp2).FImage).FDIB.dsBm.bmBits;
+  Result := CompareMem(p1, p2, TMyBitmapImage(TMyBitamp(bmp1).FImage).FDIB.dsBm.bmWidthBytes * TMyBitmapImage(TMyBitamp(bmp1).FImage).FDIB.dsBm.bmHeight);
+end;
+
+{ 屏幕是否发生改变 }
+function TfrmP2PChat.ScreenChange(const bmp: TBitmap): Boolean;
+  procedure BackupBmp;
+  begin
+    { 备份位图 }
+    FBmpBackup.Width  := bmp.Width;
+    FBmpBackup.Height := bmp.Height;
+    FBmpBackup.Assign(bmp);
+    Result := True;
+  end;
+
+begin
+  Result := False;
+
+  if FBmpBackup.Handle = 0 then
+  begin
+    { 备份位图 }
+    BackupBmp;
+  end
+  else
+  begin
+    { 比较位图差异 }
+    if not SameAsBmp(FBmpBackup, bmp) then
+    begin
+      { 备份位图 }
+      BackupBmp;
+    end;
   end;
 end;
 
@@ -225,30 +281,32 @@ procedure TfrmP2PChat.SnapScreen_GDI;
 var
   memDC    : HDC;
   tmpCanvas: TCanvas;
-  bmp      : TBitmap;
 begin
   memDC := GetDC(0);
-  bmp   := TBitmap.Create;
   try
-    tmpCanvas        := TCanvas.Create;
-    tmpCanvas.Handle := memDC;
-    bmp.PixelFormat  := pf32bit;
-    bmp.Width        := tmpCanvas.ClipRect.Width;
-    bmp.Height       := tmpCanvas.ClipRect.Height;
-    bmp.Canvas.CopyRect(bmp.Canvas.ClipRect, tmpCanvas, tmpCanvas.ClipRect);
-    SendScreen(bmp);
+    tmpCanvas         := TCanvas.Create;
+    tmpCanvas.Handle  := memDC;
+    FBmpScreen.Width  := tmpCanvas.ClipRect.Width;
+    FBmpScreen.Height := tmpCanvas.ClipRect.Height;
+    FBmpScreen.Canvas.CopyRect(FBmpScreen.Canvas.ClipRect, tmpCanvas, tmpCanvas.ClipRect);
+    if ScreenChange(FBmpScreen) then
+      SendScreen(FBmpScreen);
   finally
-    bmp.Free;
     DeleteDC(memDC);
   end;
 end;
 
 procedure TfrmP2PChat.tmrSnapTimer(Sender: TObject);
 begin
-  if FbDXGIDesktop then
-    SnapScreen_DXGI
-  else
-    SnapScreen_GDI;
+  tmrSnap.Enabled := False;
+  try
+    if FbDXGIDesktop then
+      SnapScreen_DXGI
+    else
+      SnapScreen_GDI;
+  finally
+    tmrSnap.Enabled := True;
+  end;
 end;
 
 procedure TfrmP2PChat.SendScreen(const bmp: TBitmap);

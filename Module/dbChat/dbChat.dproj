@@ -171,7 +171,6 @@
             <Form>frmP2PChat</Form>
             <FormType>dfm</FormType>
         </DCCReference>
-        <DCCReference Include="..\..\db.uCommon.pas"/>
         <DCCReference Include="uFrame.pas">
             <Form>frmcht</Form>
             <FormType>dfm</FormType>
