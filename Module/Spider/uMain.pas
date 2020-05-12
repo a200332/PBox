@@ -100,7 +100,7 @@ begin
       Exit;
 
     { 读取上次下载已经进行到的分类 }
-    with TIniFile.Create(ChangeFileExt(ParamStr(0), '.ini')) do
+    with TIniFile.Create(string(GetConfigFileName)) do
     begin
       intIndex := ReadInteger('Down', 'IndexCate', 0);
       Free;
