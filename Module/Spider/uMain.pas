@@ -130,7 +130,10 @@ begin
 
       Application.ProcessMessages;
       if Application.Terminated then
+      begin
+        SaveDownIndex;
         Break;
+      end;
 
       strCateKey   := lstCategory.Names[I];
       strCateValue := lstCategory.ValueFromIndex[I];
@@ -244,7 +247,10 @@ begin
 
     Application.ProcessMessages;
     if Application.Terminated then
+    begin
+      SaveDownIndex;
       Break;
+    end;
 
     if I = 0 then
       strPageURL := Format(c_strCateURL, [strCateName]) + '/index.htm'
@@ -302,7 +308,10 @@ begin
   begin
     Application.ProcessMessages;
     if Application.Terminated then
+    begin
+      SaveDownIndex;
       Break;
+    end;
 
     I := Pos(c_strUrlStart, mt.Value);
     J := Pos(c_strUrlEnd, mt.Value);
