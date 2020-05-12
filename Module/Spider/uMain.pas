@@ -62,7 +62,7 @@ const
 
 procedure TfrmSpider.SaveDownIndex;
 begin
-  with TIniFile.Create(ChangeFileExt(ParamStr(0), '.ini')) do
+  with TIniFile.Create(string(GetConfigFileName)) do
   begin
     writeInteger('Down', 'IndexCate', FintIndexCate);
     writeInteger('Down', 'IndexPage', FintIndexPage);
@@ -218,7 +218,7 @@ var
   intIndex  : Integer;
 begin
   { 读取上次下载已经进行到的页面 }
-  with TIniFile.Create(ChangeFileExt(ParamStr(0), '.ini')) do
+  with TIniFile.Create(string(GetConfigFileName)) do
   begin
     intIndex := ReadInteger('Down', 'IndexPage', 0);
     Free;
