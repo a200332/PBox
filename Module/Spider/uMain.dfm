@@ -18,12 +18,13 @@ object frmSpider: TfrmSpider
     629)
   PixelsPerInch = 96
   TextHeight = 13
-  object imgSnap: TImage
+  object imgVW: TImage
     Left = 779
     Top = 8
     Width = 406
     Height = 613
     Anchors = [akTop, akRight, akBottom]
+    Stretch = True
     ExplicitHeight = 555
   end
   object mmoLog: TMemo
@@ -42,7 +43,6 @@ object frmSpider: TfrmSpider
     ReadOnly = True
     ScrollBars = ssBoth
     TabOrder = 0
-    ExplicitHeight = 577
   end
   object pmLog: TPopupMenu
     Left = 176

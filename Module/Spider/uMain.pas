@@ -3,13 +3,13 @@ unit uMain;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, System.StrUtils, System.RegularExpressions, System.IniFiles, db.uCommon,
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, System.StrUtils, System.RegularExpressions, System.IniFiles, Vcl.Imaging.jpeg, db.uCommon,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Menus, Vcl.OleCtrls, SHDocVw, IdBaseComponent, IdComponent, IdTCPConnection, IdTCPClient, IdHTTP, IdURI;
 
 type
   TfrmSpider = class(TForm)
     mmoLog: TMemo;
-    imgSnap: TImage;
+    imgVW: TImage;
     pmLog: TPopupMenu;
     idhtpDown: TIdHTTP;
     tmrDown: TTimer;
@@ -131,6 +131,8 @@ begin
       { 下载某个分类的所有页 }
       DownCategroyAllPage(strCateKey, strCateValue, intPageCount);
     end;
+
+    mmoLog.Lines.Add('下载完毕');
   finally
     lstCategory.Free;
   end;
@@ -266,7 +268,6 @@ var
   mt           : TMatch;
   strPicUrl    : String;
   strPicDownURL: String;
-  bSucced      : Boolean;
 begin
   try
     strHtml := idhtpDown.Get(strURL);
@@ -332,8 +333,7 @@ begin
 
       { 下载一幅图片保存到磁盘 }
       strPicDownURL := mp.Groups[1].Value;
-      bSucced       := DownImageFile(strCateKey, strPicDownURL, intPageIndex);
-      mmoLog.Lines.Add('下载：' + strPicDownURL + Chr(9) + IfThen(bSucced, '成功', '失败'));
+      DownImageFile(strCateKey, strPicDownURL, intPageIndex);
     except
       SaveDownIndex;
     end;
@@ -343,32 +343,45 @@ end;
 { 下载一幅图片保存到磁盘 }
 function TfrmSpider.DownImageFile(const strCateKey, strImageURL: string; const intPageIndex: Integer): Boolean;
 var
-  ImageMM    : TMemoryStream;
+  imgMS      : TMemoryStream;
   strFilePath: String;
   strFileName: String;
   url        : TIdURI;
 begin
-  Result  := True;
-  ImageMM := TMemoryStream.Create;
-  url     := TIdURI.Create(strImageURL);
+  Result := True;
+
+  { 检查保存目录是否存在，不在则创建 }
+  url         := TIdURI.Create(strImageURL);
+  strFilePath := Format(c_strFileSavePath + '\%s\%d', [strCateKey, intPageIndex]);
+  if not DirectoryExists(strFilePath) then
+    ForceDirectories(strFilePath);
+
+  { 检查文件是否已经存在，如果存在就不重复下载了 }
+  strFileName := strFilePath + '\' + url.Document;
+  if FileExists(strFileName) then
+  begin
+    mmoLog.Lines.Add('下载：' + strImageURL + Chr(9) + '已经存在，无需重复下载');
+    imgVW.Picture.LoadFromFile(strFileName);
+    Exit;
+  end;
+
+  imgMS := TMemoryStream.Create;
   try
     try
-      idhtpDown.Get(strImageURL, ImageMM);
-      if ImageMM.Size = 0 then
+      idhtpDown.Get(strImageURL, imgMS);
+      if imgMS.Size = 0 then
         Exit;
 
-      strFilePath := Format(c_strFileSavePath + '\%s\%d', [strCateKey, intPageIndex]);
-      if not DirectoryExists(strFilePath) then
-        ForceDirectories(strFilePath);
-
-      strFileName := strFilePath + '\' + url.Document;
-      ImageMM.SaveToFile(strFileName);
-      imgSnap.Picture.LoadFromFile(strFileName);
+      imgMS.SaveToFile(strFileName);
+      imgVW.Picture.LoadFromFile(strFileName);
+      mmoLog.Lines.Add('下载：' + strImageURL + Chr(9) + '成功');
     finally
       url.Free;
-      ImageMM.Free;
+      imgMS.Free;
     end;
   except
+    mmoLog.Lines.Add('下载：' + strImageURL + Chr(9) + '失败');
+    Result := False;
     SaveDownIndex;
   end;
 end;
