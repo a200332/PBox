@@ -60,20 +60,6 @@ const
   c_ImageSize       = '1920x1080';
   c_strFileSavePath = 'F:\Picture';
 
-procedure DelayTime(const intTime: Cardinal);
-var
-  intST, intET: Cardinal;
-begin
-  intST := GetTickCount;
-  while True do
-  begin
-    Application.ProcessMessages;
-    intET := GetTickCount;
-    if intET - intST >= intTime then
-      Break;
-  end;
-end;
-
 procedure TfrmSpider.SaveDownIndex;
 begin
   with TIniFile.Create(ChangeFileExt(ParamStr(0), '.ini')) do
