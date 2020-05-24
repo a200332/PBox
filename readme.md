@@ -39,7 +39,6 @@
     The UI supports menu display, button (dialog box) display and list view display.  
     PBox also supports the display of an EXE form program in our forms. 
     Support the EXE program of dynamic change of form class name. 
-    Support x86 program to call x64 program, x64 program to call x86 program.
 
 ## VI. Note
     MDI form title, when the form is maximized, the title bar title is "main caption - [sub caption]"£¬not maximized, the title bar title is£º"main caption - sub caption"
