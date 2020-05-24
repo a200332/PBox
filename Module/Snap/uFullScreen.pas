@@ -67,39 +67,39 @@ begin
   if Key = Char(VK_ESCAPE) then
   begin
     Close;
-    FDllMainForm.Show;
+    FDllMainForm.ShowDllMainForm;
   end;
 end;
 
 procedure TfrmFullScreen.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-//  FbMouseDown := True;
-//  GetCursorPos(FptOld);
+  FbMouseDown := True;
+  GetCursorPos(FptOld);
 end;
 
 procedure TfrmFullScreen.FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
   pt: TPoint;
 begin
-//  if not FbMouseDown then
-//    Exit;
-//
-//  GetCursorPos(pt);
-//  DrawRect(FptOld, pt);
+  if not FbMouseDown then
+    Exit;
+
+  GetCursorPos(pt);
+  DrawRect(FptOld, pt);
 end;
 
 procedure TfrmFullScreen.FormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
   pt: TPoint;
 begin
-//  FbMouseDown := False;
-//  GetCursorPos(pt);
-//  DrawRect(FptOld, pt);
-//
-//  ClearCanvas;
-//  Close;
-//  FDllMainForm.Snap(FptOld.X, FptOld.Y, pt.X, pt.Y);
-//  FDllMainForm.Show;
+  FbMouseDown := False;
+  GetCursorPos(pt);
+  DrawRect(FptOld, pt);
+
+  ClearCanvas;
+  Close;
+  FDllMainForm.Snap(FptOld.X, FptOld.Y, pt.X, pt.Y);
+  FDllMainForm.ShowDllMainForm;
 end;
 
 procedure TfrmFullScreen.ClearCanvas;
