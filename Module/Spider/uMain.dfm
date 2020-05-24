@@ -12,6 +12,7 @@ object frmSpider: TfrmSpider
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
+  OnClose = FormClose
   OnDestroy = FormDestroy
   DesignSize = (
     1193

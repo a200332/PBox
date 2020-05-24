@@ -15,6 +15,7 @@ type
     tmrDown: TTimer;
     procedure tmrDownTimer(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     FintIndexCate: Integer;
     FintIndexPage: Integer;
@@ -68,6 +69,11 @@ begin
     writeInteger('Down', 'IndexPage', FintIndexPage);
     Free;
   end;
+end;
+
+procedure TfrmSpider.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
 end;
 
 procedure TfrmSpider.FormDestroy(Sender: TObject);
