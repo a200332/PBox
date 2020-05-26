@@ -97,6 +97,7 @@ begin
   DrawRect(FptOld, pt);
 
   ClearCanvas;
+  Hide;
   Close;
   FDllMainForm.Snap(FptOld.X, FptOld.Y, pt.X, pt.Y);
   FDllMainForm.ShowDllMainForm;

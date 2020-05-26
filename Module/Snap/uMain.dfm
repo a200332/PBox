@@ -14,6 +14,7 @@ object frmSnapScreen: TfrmSnapScreen
   OldCreateOrder = False
   Position = poScreenCenter
   OnClose = FormClose
+  OnCreate = FormCreate
   DesignSize = (
     981
     576)
@@ -33,8 +34,9 @@ object frmSnapScreen: TfrmSnapScreen
     Top = 8
     Width = 151
     Height = 41
-    Caption = 'DX '#25130#22270' (WIN8 - WIN10)'
+    Caption = 'DX '#25130#22270' (WIN7 - WIN10)'
     TabOrder = 1
+    OnClick = btnDXClick
   end
   object scrlbxSnapScreen: TScrollBox
     Left = 8
@@ -46,6 +48,8 @@ object frmSnapScreen: TfrmSnapScreen
     VertScrollBar.Smooth = True
     VertScrollBar.Tracking = True
     Anchors = [akLeft, akTop, akRight, akBottom]
+    Color = clGray
+    ParentColor = False
     TabOrder = 2
     object imgSnap: TImage
       Left = 0
@@ -55,8 +59,32 @@ object frmSnapScreen: TfrmSnapScreen
       AutoSize = True
     end
   end
+  object btnDXGI: TButton
+    Left = 322
+    Top = 8
+    Width = 151
+    Height = 41
+    Caption = 'DXGI '#25130#22270' (WIN8 - WIN10)'
+    TabOrder = 3
+    OnClick = btnDXGIClick
+  end
+  object btnSaveFile: TButton
+    Left = 822
+    Top = 8
+    Width = 151
+    Height = 41
+    Anchors = [akTop, akRight]
+    Caption = #22270#20687#20445#23384
+    TabOrder = 4
+    OnClick = btnSaveFileClick
+  end
   object tmrPos: TTimer
     Left = 428
     Top = 204
+  end
+  object dlgSaveSnap: TSaveDialog
+    Filter = 'BMP|*.BMP|JPG|*.JPG|PNG|*.PNG'
+    Left = 424
+    Top = 136
   end
 end

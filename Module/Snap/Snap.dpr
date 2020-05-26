@@ -7,7 +7,8 @@ library Snap;
 uses
   System.SysUtils,
   System.Classes,
-  uMain in 'uMain.pas' {frmSnapScreen};
+  uMain in 'uMain.pas' {frmSnapScreen},
+  uFullScreen in 'uFullScreen.pas' {frmFullScreen};
 
 {$R *.res}
 
