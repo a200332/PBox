@@ -833,6 +833,16 @@ begin
       XLS.Sheets[0].Cell[I, 1].VertAlignment        := cvaCenter;
     end;
 
+    for I := 0 to lvData.Items.Count - 1 do
+    begin
+      XLS.Sheets[0].AsString[1, I + 2] := lvData.Items[I].Caption;
+      for J                            := 0 to lvData.Columns.Count - 2 do
+      begin
+        Application.ProcessMessages;
+        XLS.Sheets[0].AsString[J + 2, I + 2] := lvData.Items[I].SubItems[J];
+      end;
+    end;
+
     XLS.Write;
   finally
     XLS.Free;

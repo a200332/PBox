@@ -39994,6 +39994,7 @@ begin
     {$elseif defined(VER310)}'Delphi 10.1'
     {$elseif defined(VER320)}'Delphi 10.2'
     {$elseif defined(VER330)}'Delphi 10.3'
+    {$elseif defined(VER340)}'Delphi 10.4'
     {$ifend}
   {$endif CONDITIONALEXPRESSIONS}
 {$endif}
