@@ -1174,7 +1174,7 @@ end;
 procedure StartProcess(const CommandLine: string; out ProcessHandle: THandle; out ProcessID: LongWord);
 var
   ProcessInfo: _PROCESS_INFORMATION;
-  StartupInfo: _STARTUPINFO;
+  StartupInfo: TStartupInfo;
 begin
   FillChar(StartupInfo, SizeOf(StartupInfo), #0);
   FillChar(ProcessInfo, SizeOf(ProcessInfo), #0);
