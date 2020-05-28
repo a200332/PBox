@@ -8,11 +8,11 @@
     PBox2 (https://github.com/dbyoung720/PBox2) Support Delphi¡¢VC¡¢QT, Dll Form
 
 ## II. Development platform
-    Delphi10.3.3¡¢WIN10X64£»
+    Delphi10.4¡¢WIN10X64£»
     The code does not use any third-party controls£»
     WIN7X64¡¢WIN10X64 test pass£»Support X86¡¢X64;
     Email£ºdbyoung@sina.com
-    QQ   £º101611228
+    QQg  £º101611228
 
 ## III.Usage 
 ### Delphi£º
@@ -39,7 +39,8 @@
     The UI supports menu display, button (dialog box) display and list view display.  
     PBox also supports the display of an EXE form program in our forms. 
     Support the EXE program of dynamic change of form class name. 
-
+    Support x86 EXE call x64 EXE, x64 EXE call x86 EXE.
+    
 ## VI. Note
     MDI form title, when the form is maximized, the title bar title is "main caption - [sub caption]"£¬not maximized, the title bar title is£º"main caption - sub caption"
     Sample: Spy++.
