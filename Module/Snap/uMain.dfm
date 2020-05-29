@@ -25,7 +25,9 @@ object frmSnapScreen: TfrmSnapScreen
     Top = 8
     Width = 151
     Height = 41
-    Caption = 'GDI '#25130#22270' (WIN7 - WIN10)'
+    Caption = 'GDI  (WIN7 - WIN10)'
+    DropDownMenu = pmGDI
+    Style = bsSplitButton
     TabOrder = 0
     OnClick = btnGDIClick
   end
@@ -34,7 +36,7 @@ object frmSnapScreen: TfrmSnapScreen
     Top = 8
     Width = 151
     Height = 41
-    Caption = 'DX '#25130#22270' (WIN7 - WIN10)'
+    Caption = 'DX  (WIN7 - WIN10)'
     TabOrder = 1
     OnClick = btnDXClick
   end
@@ -64,7 +66,7 @@ object frmSnapScreen: TfrmSnapScreen
     Top = 8
     Width = 151
     Height = 41
-    Caption = 'DXGI '#25130#22270' (WIN8 - WIN10)'
+    Caption = 'DXGI  (WIN8 - WIN10)'
     TabOrder = 3
     OnClick = btnDXGIClick
   end
@@ -86,5 +88,17 @@ object frmSnapScreen: TfrmSnapScreen
     Filter = 'BMP|*.BMP|JPG|*.JPG|PNG|*.PNG'
     Left = 424
     Top = 136
+  end
+  object pmGDI: TPopupMenu
+    AutoHotkeys = maManual
+    Left = 136
+    Top = 308
+    object mniGDIRect: TMenuItem
+      Caption = #20219#24847#30697#24418
+      OnClick = btnGDIClick
+    end
+    object N2: TMenuItem
+      Caption = #31383#21475
+    end
   end
 end

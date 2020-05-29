@@ -3,7 +3,8 @@ unit uMain;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, {$IFDEF DX12} DX12.D3D11, DX12.D3DCommon, DX12.DXGI, DX12.DXGI1_2, {$ELSE} Winapi.D3D11, Winapi.D3DX9, Winapi.Direct3D9, Winapi.D3DCommon, Winapi.DXGI, Winapi.DXGI1_2, {$ENDIF} System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Imaging.jpeg, Vcl.Imaging.pngimage, db.uCommon;
+  Winapi.Windows, Winapi.Messages, {$IFDEF DX12} DX12.D3D11, DX12.D3DCommon, DX12.DXGI, DX12.DXGI1_2, {$ELSE} Winapi.D3D11, Winapi.D3DX9, Winapi.Direct3D9, Winapi.D3DCommon, Winapi.DXGI, Winapi.DXGI1_2, {$ENDIF} System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Imaging.jpeg, Vcl.Imaging.pngimage, db.uCommon,
+  Vcl.Menus;
 
 type
   TSnapType = (stGDI, stDX, stDXGI);
@@ -18,6 +19,9 @@ type
     btnDXGI: TButton;
     btnSaveFile: TButton;
     dlgSaveSnap: TSaveDialog;
+    pmGDI: TPopupMenu;
+    mniGDIRect: TMenuItem;
+    N2: TMenuItem;
     procedure btnGDIClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCreate(Sender: TObject);

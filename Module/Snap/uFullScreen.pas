@@ -18,7 +18,7 @@ type
     FptOld     : TPoint;
     Fpt1, Fpt2 : TPoint;
     procedure DrawRect(const pt1, pt2: TPoint);
-    procedure ClearCanvas;
+    procedure DeleteRect;
   end;
 
 procedure ShowFullScreen(DllManFormHandle: THandle);
@@ -96,29 +96,30 @@ begin
   GetCursorPos(pt);
   DrawRect(FptOld, pt);
 
-  ClearCanvas;
   Hide;
   Close;
   FDllMainForm.Snap(FptOld.X, FptOld.Y, pt.X, pt.Y);
   FDllMainForm.ShowDllMainForm;
 end;
 
-procedure TfrmFullScreen.ClearCanvas;
+procedure TfrmFullScreen.DeleteRect;
+var
+  rgn1, rgn2: THandle;
 begin
-  if Fpt2.Y = 0 then
+  if (Fpt1.X = Fpt2.X) and (Fpt1.Y = Fpt2.Y) then
     Exit;
 
-  Fcvs.Pen.Mode := pmNotXor;
-  Fcvs.Rectangle(Rect(Fpt1.X, Fpt1.Y, Fpt2.X, Fpt2.Y));
+  rgn1 := CreateRectRgn(0, 0, Width, Height);
+  rgn2 := CreateRectRgn(Fpt1.X, Fpt1.Y, Fpt2.X, Fpt2.Y);
+  CombineRGN(rgn1, rgn1, rgn2, RGN_XOR);
+  SetWindowRgn(Handle, rgn1, False);
+  DeleteObject(rgn1);
+  DeleteObject(rgn2);
 end;
 
 procedure TfrmFullScreen.DrawRect(const pt1, pt2: TPoint);
 begin
-  ClearCanvas;
-  Fcvs.Pen.Color   := clBlack;
-  Fcvs.Pen.Width   := 4;
-  Fcvs.Brush.Style := bsClear;
-  Fcvs.Rectangle(Rect(pt1.X, pt1.Y, pt2.X, pt2.Y));
+  DeleteRect;
   Fpt1 := pt1;
   Fpt2 := pt2;
 end;

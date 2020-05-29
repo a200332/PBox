@@ -3,11 +3,11 @@ object frmFullScreen: TfrmFullScreen
   Top = 0
   Cursor = crCross
   AlphaBlend = True
-  AlphaBlendValue = 1
+  AlphaBlendValue = 128
   BorderStyle = bsNone
   Caption = 'frmFullScreen'
-  ClientHeight = 636
-  ClientWidth = 986
+  ClientHeight = 260
+  ClientWidth = 425
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
