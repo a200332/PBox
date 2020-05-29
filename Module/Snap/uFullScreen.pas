@@ -67,7 +67,7 @@ begin
   if Key = Char(VK_ESCAPE) then
   begin
     Close;
-    FDllMainForm.ShowDllMainForm;
+    FDllMainForm.ShowMainForm;
   end;
 end;
 
@@ -99,7 +99,7 @@ begin
   Hide;
   Close;
   FDllMainForm.Snap(FptOld.X, FptOld.Y, pt.X, pt.Y);
-  FDllMainForm.ShowDllMainForm;
+  FDllMainForm.ShowMainForm;
 end;
 
 procedure TfrmFullScreen.DeleteRect;

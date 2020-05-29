@@ -21,23 +21,35 @@ type
     dlgSaveSnap: TSaveDialog;
     pmGDI: TPopupMenu;
     mniGDIRect: TMenuItem;
-    N2: TMenuItem;
+    mniGDIWindow: TMenuItem;
     procedure btnGDIClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure btnSaveFileClick(Sender: TObject);
     procedure btnDXClick(Sender: TObject);
     procedure btnDXGIClick(Sender: TObject);
+    procedure mniGDIWindowClick(Sender: TObject);
+    procedure tmrPosTimer(Sender: TObject);
   private
-    FSnapType                : TSnapType;
-    FintBackTop, FintBackLeft: Integer;
-    FDevice                  : ID3D11Device;
-    FContext                 : ID3D11DeviceContext;
-    FFeatureLevel            : TD3D_FEATURE_LEVEL;
-    FOutput                  : {$IFDEF DX12} TDXGI_OUTPUT_DESC {$ELSE} TDXGIOutputDesc {$ENDIF};
-    FDuplicate               : IDXGIOutputDuplication;
-    FbGetDuplicateScreen     : Boolean;
+    FSnapType           : TSnapType;
+    FDevice             : ID3D11Device;
+    FContext            : ID3D11DeviceContext;
+    FFeatureLevel       : TD3D_FEATURE_LEVEL;
+    FOutput             : {$IFDEF DX12} TDXGI_OUTPUT_DESC {$ELSE} TDXGIOutputDesc {$ENDIF};
+    FDuplicate          : IDXGIOutputDuplication;
+    FbGetDuplicateScreen: Boolean;
+    FcvsGDIWindow       : TCanvas;
+    FintBackHandle      : THandle;
+    FrctBackForm        : TRect;
     function CreateDuplicateOutput: Boolean;
+    { 注册热键 }
+    procedure RegHotkey;
+    { 销毁热键 }
+    procedure FreeHotkey;
+    procedure ClearFormRect;
+  protected
+    { 热键相应消息 }
+    procedure WMHOTKEY(var Msg: TWMHOTKEY); message wm_hotkey;
   public
     procedure Snap(const x1, y1, x2, y2: Integer);
     { GDI 截图 }
@@ -46,7 +58,8 @@ type
     procedure SnapDX(const x1, y1, x2, y2: Integer);
     { DXGI 截图 }
     procedure SnapDXGI(const x1, y1, x2, y2: Integer);
-    procedure ShowDllMainForm;
+    procedure HideMainForm;
+    procedure ShowMainForm;
   end;
 
 procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strModuleName, strIconFileName: PAnsiChar); stdcall;
@@ -57,6 +70,9 @@ implementation
 
 uses uFullScreen;
 
+const
+  c_intHotkeyID = 11223344;
+
 procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strModuleName, strIconFileName: PAnsiChar); stdcall;
 begin
   frm                     := TfrmSnapScreen;
@@ -65,6 +81,16 @@ begin
   strIconFileName         := '';
   Application.Handle      := GetMainFormApplication.Handle;
   Application.Icon.Handle := GetMainFormApplication.Icon.Handle;
+end;
+
+procedure TfrmSnapScreen.HideMainForm;
+begin
+  GetMainFormApplication.MainForm.WindowState := wsMinimized;
+end;
+
+procedure TfrmSnapScreen.ShowMainForm;
+begin
+  GetMainFormApplication.MainForm.WindowState := wsNormal;
 end;
 
 procedure TfrmSnapScreen.btnDXClick(Sender: TObject);
@@ -81,10 +107,7 @@ procedure TfrmSnapScreen.btnGDIClick(Sender: TObject);
 begin
   FSnapType := stGDI;
   ShowFullScreen(Handle);
-  FintBackTop                          := GetMainFormApplication.MainForm.Top;
-  FintBackLeft                         := GetMainFormApplication.MainForm.Left;
-  GetMainFormApplication.MainForm.Top  := -10000;
-  GetMainFormApplication.MainForm.Left := -10000;
+  HideMainForm;
 end;
 
 procedure TfrmSnapScreen.btnSaveFileClick(Sender: TObject);
@@ -166,18 +189,86 @@ end;
 
 procedure TfrmSnapScreen.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  DeleteDC(FcvsGDIWindow.Handle);
+  FcvsGDIWindow.Free;
   Action := caFree;
 end;
 
 procedure TfrmSnapScreen.FormCreate(Sender: TObject);
 begin
-  btnDXGI.Enabled := Win32MajorVersion > 6;
+  btnDXGI.Enabled      := Win32MajorVersion > 6;
+  FcvsGDIWindow        := TCanvas.create;
+  FcvsGDIWindow.Handle := GetDC(0);
 end;
 
-procedure TfrmSnapScreen.ShowDllMainForm;
+{ 注册热键 }
+procedure TfrmSnapScreen.RegHotkey;
 begin
-  GetMainFormApplication.MainForm.Top  := FintBackTop;
-  GetMainFormApplication.MainForm.Left := FintBackLeft;
+  RegisterHotKey(Handle, c_intHotkeyID, 0, VK_ESCAPE)
+end;
+
+{ 销毁热键 }
+procedure TfrmSnapScreen.FreeHotkey;
+begin
+  UnRegisterHotKey(Handle, c_intHotkeyID);
+end;
+
+procedure TfrmSnapScreen.ClearFormRect;
+begin
+  FcvsGDIWindow.Pen.Mode := pmNotXor;
+  FcvsGDIWindow.Rectangle(FrctBackForm);
+  InvalidateRect(FintBackHandle, FrctBackForm, True);
+end;
+
+procedure TfrmSnapScreen.tmrPosTimer(Sender: TObject);
+var
+  pt  : TPoint;
+  hwnd: Cardinal;
+  rct : TRect;
+begin
+  tmrPos.Enabled := False;
+  GetCursorPos(pt);
+  hwnd := WindowFromPoint(pt);
+  GetWindowRect(hwnd, rct);
+  try
+    if (rct.Left = 0) and (rct.Right = 0) then
+      Exit;
+
+    if FintBackHandle = hwnd then
+      Exit;
+
+    ClearFormRect;
+    FcvsGDIWindow.Pen.Style   := psSolid;
+    FcvsGDIWindow.Pen.Color   := clRed;
+    FcvsGDIWindow.Pen.Width   := 2;
+    FcvsGDIWindow.Brush.Style := bsClear;
+    FcvsGDIWindow.Rectangle(rct);
+  finally
+    FintBackHandle := hwnd;
+    FrctBackForm   := rct;
+    tmrPos.Enabled := True;
+  end;
+end;
+
+{ 热键相应消息 }
+procedure TfrmSnapScreen.WMHOTKEY(var Msg: TWMHOTKEY);
+begin
+  if Msg.HotKey = c_intHotkeyID then
+  begin
+    tmrPos.Enabled := False;
+    FreeHotkey;
+    SetSystemCursor(Screen.Cursors[0], OCR_NORMAL);
+    SystemParametersinfo(SPI_SETCURSORS, 0, nil, SPIF_SENDCHANGE);
+    ShowMainForm;
+  end;
+end;
+
+procedure TfrmSnapScreen.mniGDIWindowClick(Sender: TObject);
+begin
+  SetSystemCursor(Screen.Cursors[0], OCR_HAND);
+  HideMainForm;
+  tmrPos.Enabled := True;
+  RegHotkey;
 end;
 
 procedure TfrmSnapScreen.Snap(const x1, y1, x2, y2: Integer);
@@ -203,7 +294,7 @@ begin
   try
     cvsTemp.Handle      := GetDC(0);
     bmpSnap.PixelFormat := pf32bit;
-    bmpSnap.width       := abs(x2 - x1);
+    bmpSnap.Width       := abs(x2 - x1);
     bmpSnap.height      := abs(y2 - y1);
     bmpSnap.Canvas.CopyRect(bmpSnap.Canvas.ClipRect, cvsTemp, Rect(x1, y1, x2, y2));
     imgSnap.Picture.Bitmap.Assign(bmpSnap);
@@ -220,7 +311,7 @@ var
   hr        : HRESULT;
   pD3D      : IDirect3D9;
   D3DPP     : D3DPRESENT_PARAMETERS;
-  mode      : TD3DDisplayMode;
+  Mode      : TD3DDisplayMode;
   surf      : IDirect3DSurface9;
   pD3DDevice: IDirect3DDevice9;
   rct       : TRect;
@@ -240,13 +331,13 @@ begin
     Exit;
   end;
 
-  hr := pD3DDevice.GetDisplayMode(0, mode);
+  hr := pD3DDevice.GetDisplayMode(0, Mode);
   if Failed(hr) then
   begin
     Exit;
   end;
 
-  hr := pD3DDevice.CreateOffscreenPlainSurface(mode.width, mode.height, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, surf, nil);
+  hr := pD3DDevice.CreateOffscreenPlainSurface(Mode.Width, Mode.height, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, surf, nil);
   if Failed(hr) then
   begin
     Exit;
@@ -343,11 +434,11 @@ begin
       try
         bmpTemp.PixelFormat := pf32bit;
         bmpSnap.PixelFormat := pf32bit;
-        bmpSnap.width       := abs(x2 - x1);
+        bmpSnap.Width       := abs(x2 - x1);
         bmpSnap.height      := abs(y2 - y1);
-        bmpTemp.width       := Desc.width;
+        bmpTemp.Width       := Desc.Width;
         bmpTemp.height      := Desc.height;
-        SetBitmapBits(bmpTemp.Handle, Desc.width * Desc.height * 4, ScreenRes.PData);
+        SetBitmapBits(bmpTemp.Handle, Desc.Width * Desc.height * 4, ScreenRes.PData);
         bmpSnap.Canvas.CopyRect(bmpSnap.Canvas.ClipRect, bmpTemp.Canvas, Rect(x1, y1, x2, y2));
         imgSnap.Picture.Bitmap.Assign(bmpSnap);
       finally

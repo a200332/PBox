@@ -81,6 +81,9 @@ object frmSnapScreen: TfrmSnapScreen
     OnClick = btnSaveFileClick
   end
   object tmrPos: TTimer
+    Enabled = False
+    Interval = 1
+    OnTimer = tmrPosTimer
     Left = 428
     Top = 204
   end
@@ -97,8 +100,9 @@ object frmSnapScreen: TfrmSnapScreen
       Caption = #20219#24847#30697#24418
       OnClick = btnGDIClick
     end
-    object N2: TMenuItem
-      Caption = #31383#21475
+    object mniGDIWindow: TMenuItem
+      Caption = #40736#26631#31383#21475
+      OnClick = mniGDIWindowClick
     end
   end
 end

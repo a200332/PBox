@@ -3,7 +3,7 @@ object frmFullScreen: TfrmFullScreen
   Top = 0
   Cursor = crCross
   AlphaBlend = True
-  AlphaBlendValue = 128
+  AlphaBlendValue = 150
   BorderStyle = bsNone
   Caption = 'frmFullScreen'
   ClientHeight = 260
