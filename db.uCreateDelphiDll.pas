@@ -71,7 +71,7 @@ end;
 procedure PBoxRun_DelphiDll(var DllForm: TForm; const strPEFileName: String; tsDllForm: TTabSheet; ADOCNN: TADOConnection; OnDelphiDllFormDestroyCallback: TNotifyEvent);
 var
   hLib                             : HMODULE;
-  ShowDllForm                      : Tdb_ShowDllForm_Plugins;
+  ShowDllForm                      : Tdb_ShowDllForm_Plugins_Delphi;
   frm                              : TFormClass;
   strParamModuleName, strModuleName: PAnsiChar;
   strIconFileName                  : PAnsiChar;

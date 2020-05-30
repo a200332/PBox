@@ -13,6 +13,9 @@ type
   { 界面显示方式：菜单、按钮对话框、列表 }
   TShowStyle = (ssMenu, ssButton, ssList);
 
+  { VC Dll 类型；对话框类型、MFC类型 }
+  TVCDllType = (vtDialog, vtMFC);
+
   {
     Dll 的标准输出函数
     函数名称：db_ShowDllForm_Plugins
@@ -22,7 +25,9 @@ type
     strSModuleName   : 子模块名称  ；
     strIconFileName  : 图标文件    ；如果没有指定，从 DLL/EXE 获取图标；
   }
-  Tdb_ShowDllForm_Plugins = procedure(var frm: TFormClass; var strParentModuleName, strModuleName, strIconFileName: PAnsiChar); stdcall;
+
+  Tdb_ShowDllForm_Plugins_Delphi = procedure(var frm: TFormClass; var strParentModuleName, strModuleName, strIconFileName: PAnsiChar); stdcall;
+  Tdb_ShowDllForm_Plugins_VC     = procedure(var vct: TVCDllType; var strParentModuleName, strModuleName, strIconFileName: PAnsiChar; var strClassName, strWindowName: PAnsiChar; const bShow: Boolean = False); stdcall;
 
 const
   c_strTitle                                  = '基于 DLL 的模块化开发平台 v2.0';

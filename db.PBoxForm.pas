@@ -352,7 +352,7 @@ end;
 procedure TfrmPBox.CreateDllForm(const strPEFileName: String);
 var
   hDll                             : HMODULE;
-  ShowDllForm                      : Tdb_ShowDllForm_Plugins;
+  ShowDllForm                      : Tdb_ShowDllForm_Plugins_Delphi;
   frm                              : TFormClass;
   strParamModuleName, strModuleName: PAnsiChar;
   strIconFileName                  : PAnsiChar;
@@ -571,7 +571,7 @@ end;
 procedure TfrmPBox.ScanPlugins_Dll;
 var
   hDll                          : HMODULE;
-  ShowDllForm                   : Tdb_ShowDllForm_Plugins;
+  ShowDllForm                   : Tdb_ShowDllForm_Plugins_Delphi;
   frm                           : TFormClass;
   strPModuleName, strSModuleName: PAnsiChar;
   strIconFileName               : PAnsiChar;
