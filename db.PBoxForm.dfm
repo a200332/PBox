@@ -36,7 +36,6 @@ object frmPBox: TfrmPBox
     ParentCtl3D = False
     ShowCaption = False
     TabOrder = 0
-    ExplicitTop = 725
     object pnlInfo: TPanel
       Left = 286
       Top = 0
@@ -263,7 +262,6 @@ object frmPBox: TfrmPBox
     Align = alClient
     Style = tsButtons
     TabOrder = 2
-    ExplicitHeight = 697
     object tsButton: TTabSheet
       Caption = 'tsButton'
       ExplicitLeft = 0
@@ -352,7 +350,6 @@ object frmPBox: TfrmPBox
     end
     object tsDll: TTabSheet
       Caption = 'tsDll'
-      ExplicitHeight = 666
       object imgDllFormBack: TImage
         Left = 0
         Top = 0

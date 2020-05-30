@@ -3,8 +3,11 @@ unit db.PBoxForm;
 interface
 
 uses
-  Winapi.Windows, Winapi.ShellAPI, Winapi.IpTypes, System.SysUtils, System.StrUtils, System.Classes, System.Types, System.IniFiles, System.Math, System.UITypes, System.ImageList,
-  Vcl.Graphics, Vcl.Controls, Vcl.Buttons, Vcl.Forms, Vcl.ExtCtrls, Vcl.Menus, Vcl.ComCtrls, Vcl.StdCtrls, Vcl.ImgList, Vcl.ToolWin, Data.Win.ADODB,
+  Winapi.Windows, Winapi.ShellAPI, Winapi.IpTypes, System.SysUtils,
+  System.StrUtils, System.Classes, System.Types, System.IniFiles, System.Math,
+  System.UITypes, System.ImageList,
+  Vcl.Graphics, Vcl.Controls, Vcl.Buttons, Vcl.Forms, Vcl.ExtCtrls, Vcl.Menus,
+  Vcl.ComCtrls, Vcl.StdCtrls, Vcl.ImgList, Vcl.ToolWin, Data.Win.ADODB,
   db.uCommon, db.uBaseForm;
 
 type
@@ -140,7 +143,8 @@ var
 
 implementation
 
-uses db.ConfigForm, db.DonateForm, db.AboutForm, db.uCreateDelphiDll, db.uCreateEXE;
+uses db.ConfigForm, db.DonateForm, db.AboutForm, db.uCreateDelphiDll,
+  db.uCreateEXE;
 
 {$R *.dfm}
 
@@ -270,7 +274,7 @@ begin
 
   if Trim(strName) = '' then
   begin
-    Result         := GetNativeIP;
+    Result := GetNativeIP;
     Exit;
   end;
 
@@ -589,8 +593,14 @@ begin
     begin
       strDllFileName := lstTemp.Strings[I];
       hDll           := LoadLibrary(PChar(strDllFileName));
-      if hDll = INVALID_HANDLE_VALUE then
+      if hDll = 0 then
+      begin
+        if CompareText(lowerCase(ExtractFileName(strDllFileName)), 'snap.dll') = 0 then
+          MessageBox(Handle, PChar('加载 snap.dll 出错，原因：机器上没有检测到 DirectX9'), c_strMsgTitle, 64)
+        else
+          MessageBox(Handle, PChar(Format('加载 %s 出错，原因：%d', [ExtractFileName(strDllFileName), GetLastError])), c_strMsgTitle, 64);
         Continue;
+      end;
 
       try
         ShowDllForm := GetProcAddress(hDll, c_strDllExportName);
