@@ -18,7 +18,8 @@ uses
   db.DBConfig in 'db.DBConfig.pas' {DBConfig},
   db.LoginForm in 'db.LoginForm.pas' {frmLogin},
   db.AboutForm in 'db.AboutForm.pas' {frmAbout},
-  db.DonateForm in 'db.DonateForm.pas' {frmDonate};
+  db.DonateForm in 'db.DonateForm.pas' {frmDonate},
+  db.uCreateVCDll in 'db.uCreateVCDll.pas';
 
 {$R *.res}
 

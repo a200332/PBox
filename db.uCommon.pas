@@ -13,6 +13,8 @@ type
   { 界面显示方式：菜单、按钮对话框、列表 }
   TShowStyle = (ssMenu, ssButton, ssList);
 
+  TLangType = (ltDelphi, ltVC, ltEXE);
+
   { VC Dll 类型；对话框类型、MFC类型 }
   TVCDllType = (vtDialog, vtMFC);
 
@@ -27,7 +29,7 @@ type
   }
 
   Tdb_ShowDllForm_Plugins_Delphi = procedure(var frm: TFormClass; var strParentModuleName, strModuleName, strIconFileName: PAnsiChar); stdcall;
-  Tdb_ShowDllForm_Plugins_VC     = procedure(var vct: TVCDllType; var strParentModuleName, strModuleName, strIconFileName: PAnsiChar; var strClassName, strWindowName: PAnsiChar; const bShow: Boolean = False); stdcall;
+  Tdb_ShowDllForm_Plugins_VCForm = procedure(var vct: TVCDllType; var strParentModuleName, strModuleName, strIconFileName: PAnsiChar; var strClassName, strWindowName: PAnsiChar; const bShow: Boolean = False); stdcall;
 
 const
   c_strTitle                                  = '基于 DLL 的模块化开发平台 v2.0';

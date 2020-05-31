@@ -17,6 +17,7 @@ object frmPBox: TfrmPBox
   OldCreateOrder = False
   Position = poScreenCenter
   OnActivate = FormActivate
+  OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
@@ -267,12 +268,12 @@ object frmPBox: TfrmPBox
       ExplicitLeft = 0
       ExplicitTop = 0
       ExplicitWidth = 0
-      ExplicitHeight = 678
+      ExplicitHeight = 0
       object imgButtonBack: TImage
         Left = 0
         Top = 0
         Width = 1192
-        Height = 666
+        Height = 646
         Align = alClient
         Stretch = True
         ExplicitLeft = 272
@@ -339,7 +340,7 @@ object frmPBox: TfrmPBox
         Left = 0
         Top = 0
         Width = 1192
-        Height = 716
+        Height = 646
         Align = alClient
         Stretch = True
         ExplicitLeft = 272
@@ -357,8 +358,7 @@ object frmPBox: TfrmPBox
         Height = 646
         Align = alClient
         Stretch = True
-        ExplicitWidth = 1200
-        ExplicitHeight = 639
+        ExplicitTop = -2
       end
     end
   end
