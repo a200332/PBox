@@ -362,12 +362,27 @@ begin
   end;
 end;
 
+function CheckVCX64DialogDllShow: Boolean;
+begin
+{$IF Defined(CPUX86)}
+  Result := False;
+{$ELSE}
+  Result := Application.Tag <> 0;
+{$IFEND}
+end;
+
 { 点击菜单 }
 procedure TfrmPBox.OnMenuItemClick(Sender: TObject);
 var
   strTip  : String;
   LangType: TLangType;
 begin
+  if CheckVCX64DialogDllShow then
+  begin
+    MessageBox(Handle, '先关闭窗体，再运行其它模块', c_strMsgTitle, 64);
+    Exit;
+  end;
+
   strTip := TMenuItem(TMenuItem(Sender).Owner).Caption + ' - ' + TMenuItem(Sender).Caption;
 
   { 如果已经创建了，就不在重复创建了 }
