@@ -623,8 +623,6 @@ begin
         intIconIndex := GetDllFileIcon(string(strPModuleName), string(strSModuleName), string(strIconFileName));
         strInfo      := strDllFileName + '=' + string(strPModuleName) + ';' + string(strSModuleName) + ';' + string(strVCClassName) + ';' + string(strVCWindowName) + ';' + string(strIconFileName) + ';' + IntToStr(intIconIndex) + ';' + IntToStr(Integer(LangType));
         FlstAllDll.Add(strInfo);
-        // strVCClassName  := nil;
-        // strVCWindowName := nil;
       finally
         FreeLibrary(hDll);
       end;
