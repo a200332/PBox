@@ -362,27 +362,12 @@ begin
   end;
 end;
 
-function CheckVCX64DialogDllShow: Boolean;
-begin
-{$IF Defined(CPUX86)}
-  Result := False;
-{$ELSE}
-  Result := Application.Tag <> 0;
-{$IFEND}
-end;
-
 { 点击菜单 }
 procedure TfrmPBox.OnMenuItemClick(Sender: TObject);
 var
   strTip  : String;
   LangType: TLangType;
 begin
-  if CheckVCX64DialogDllShow then
-  begin
-    MessageBox(Handle, '先关闭窗体，再运行其它模块', c_strMsgTitle, 64);
-    Exit;
-  end;
-
   strTip := TMenuItem(TMenuItem(Sender).Owner).Caption + ' - ' + TMenuItem(Sender).Caption;
 
   { 如果已经创建了，就不在重复创建了 }
@@ -797,6 +782,16 @@ begin
   ChangeUI;
 end;
 
+procedure TfrmPBox.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  { 是否有 VC Dll 窗体存在 }
+  if Application.Tag <> 0 then
+  begin
+    { 关闭窗体 }
+    FreeVCDllForm(True);
+  end;
+end;
+
 procedure TfrmPBox.FormCreate(Sender: TObject);
 begin
   { 列表显示风格，关闭按钮状态 }
@@ -838,7 +833,8 @@ begin
   { 是否有 VC Dll 窗体存在 }
   if Application.Tag <> 0 then
   begin
-    FreeVCDialogDllForm(Application.Tag);
+    { 关闭窗体 }
+    FreeVCDllForm;
   end;
 
   { 是否有 Delphi Dll 窗体存在 }
@@ -846,15 +842,6 @@ begin
   begin
     { 关闭窗体 }
     CloseDelphiDllForm;
-  end;
-end;
-
-procedure TfrmPBox.FormClose(Sender: TObject; var Action: TCloseAction);
-begin
-  { 是否有 VC Dll 窗体存在 }
-  if Application.Tag <> 0 then
-  begin
-    FreeVCDialogDllForm(Application.Tag, True);
   end;
 end;
 

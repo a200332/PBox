@@ -2,19 +2,16 @@
 
 HINSTANCE hinst = NULL;
 
-BOOL APIENTRY DllMain( HMODULE hModule,
-                       DWORD  ul_reason_for_call,
-                       LPVOID lpReserved
-                     )
+BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
 {
     switch (ul_reason_for_call)
     {
-    case DLL_PROCESS_ATTACH:
-		hinst = (HINSTANCE)hModule;
-    case DLL_THREAD_ATTACH:
-    case DLL_THREAD_DETACH:
-    case DLL_PROCESS_DETACH:
-        break;
+      case DLL_PROCESS_ATTACH:
+        hinst = (HINSTANCE)hModule;
+      case DLL_THREAD_ATTACH:
+      case DLL_THREAD_DETACH:
+      case DLL_PROCESS_DETACH:
+          break;
     }
     return TRUE;
 }
@@ -22,6 +19,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 enum TVCDllType {vtDialog, vtMFC};
 
 extern int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInst,LPSTR lpCmdLine,int nCmdShow);
+extern "C" HWND  hwndMain;
 
 extern "C" __declspec(dllexport) void db_ShowDllForm_Plugins(TVCDllType* spFileType, char** strParentName, char** strSubModuleName, char** strIconFileName, char** strClassName, char** strWindowName, const bool show = false)
 {
@@ -36,4 +34,9 @@ extern "C" __declspec(dllexport) void db_ShowDllForm_Plugins(TVCDllType* spFileT
     {
       WinMain(hinst, 0, (LPSTR)"", (int)show);
     }
+}
+
+extern "C" __declspec(dllexport) void  db_ShowDllForm_Free()
+{
+   SendMessage(hwndMain, WM_SYSCOMMAND, SC_CLOSE, 0);
 }
