@@ -120,6 +120,7 @@ begin
     ShowVCDllForm := GetProcAddress(FhVCDllModule, c_strDllExportName);
     ShowVCDllForm(Fvct, strParamModuleName, strModuleName, strIconFileName, strClassName, strWindowName, True);
     FreeLibrary(FhVCDllModule);
+    Application.Tag := 0;
 
     { ÊÇ·ñÍË³ö³ÌÐò }
     if FbExit then
