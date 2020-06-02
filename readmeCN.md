@@ -4,7 +4,7 @@
 
 ## 一：开发宗旨
     本着尽量少修改或不修改原有工程源代码的原则;
-    支持 Delphi Dll、VC DLL 窗体; 
+    支持 Delphi DLL、VC DLL 窗体; 
 
 ## 二：开发平台
     Delphi10.4、WIN10X64 下开发；

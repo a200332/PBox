@@ -4,7 +4,7 @@
 
 ## I. Development purpose
     Based on the principle of minimizing or not modifying the original project source code;
-    Support Delphi Dll¡¢VC DLL Form; 
+    Support Delphi DLL¡¢VC DLL Form; 
 
 ## II. Development platform
     Delphi10.4¡¢WIN10X64£»
