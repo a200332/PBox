@@ -363,7 +363,7 @@ begin
   { ‘À–– VC DLL ¥∞ÃÂ }
   if LangType = ltVC then
   begin
-    PBoxRun_VCDll(strPEFileName, rzpgcntrlAll, tsDll, lblInfo, FUIShowStyle, OnVCDllFormDestoryCallback);
+    PBoxRun_VCDll(strPEFileName, rzpgcntrlAll, tsDll, OnVCDllFormDestoryCallback);
   end;
 end;
 

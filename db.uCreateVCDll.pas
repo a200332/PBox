@@ -5,7 +5,7 @@ interface
 uses Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, Vcl.Forms, Vcl.StdCtrls, Vcl.ComCtrls, db.uCommon, HookUtils;
 
 { 运行 VC DLL 窗体 }
-procedure PBoxRun_VCDll(const strVCDllFileName: String; pgAll: TPageControl; tsDll: TTabSheet; lblInfo: TLabel; const uiShowStyle: TShowStyle; OnVCDllFormDestroyCallback: TNotifyEvent);
+procedure PBoxRun_VCDll(const strVCDllFileName: String; pgAll: TPageControl; tsDll: TTabSheet; OnVCDllFormDestroyCallback: TNotifyEvent);
 
 { 销毁 VC DLL 窗体 }
 procedure FreeVCDllForm(const bExit: Boolean = False);
@@ -18,14 +18,12 @@ var
   FOld_CreateWindowExW       : function(dwExStyle: DWORD; lpClassName: LPCWSTR; lpWindowName: LPCWSTR; dwStyle: DWORD; X, Y, nWidth, nHeight: Integer; hWndParent: hWnd; hMenu: hMenu; hins: HINST; lpp: Pointer): hWnd; stdcall;
   FstrVCDialogDllClassName   : String = '';
   FstrVCDialogDllWindowName  : String = '';
-  FPage                      : TPageControl;
+  FActivePage                : TPageControl;
   FTabDllForm                : TTabSheet;
   FOldWndProc                : Pointer = nil;
   FstrCreateDllFileName      : String  = '';
   FhVCDllModule              : HMODULE;
   Fvct                       : TVCDllType;
-  FlblInfo                   : TLabel;
-  FuiShowStyle               : TShowStyle;
   FbExit                     : Boolean = False;
   FOnVCDllFormDestroyCallback: TNotifyEvent;
 
@@ -60,22 +58,22 @@ begin
   if (lpClassName <> nil) and (lpWindowName <> nil) and (lpWindowName <> '') and (SameText(lpWindowName, FstrVCDialogDllWindowName)) and (SameText(lpWindowName, FstrVCDialogDllWindowName)) then
   begin
     { 创建 VC Dlll 窗体 }
-    FPage.ActivePageIndex := 2;                                                                                                               //
-    Result                := FOld_CreateWindowExW($00010101, lpClassName, lpWindowName, $96C80000, 0, 0, 0, 0, hWndParent, hMenu, hins, lpp); //
-    Application.Tag       := Result;                                                                                                          // 保存下 VC Dll 窗体句柄
-    Winapi.Windows.SetParent(Result, FTabDllForm.Handle);                                                                                     // 设置父窗体为 TabSheet
-    RemoveMenu(GetSystemMenu(Result, False), 0, MF_BYPOSITION);                                                                               // 删除移动菜单
-    RemoveMenu(GetSystemMenu(Result, False), 0, MF_BYPOSITION);                                                                               // 删除移动菜单
-    RemoveMenu(GetSystemMenu(Result, False), 0, MF_BYPOSITION);                                                                               // 删除移动菜单
-    RemoveMenu(GetSystemMenu(Result, False), 0, MF_BYPOSITION);                                                                               // 删除移动菜单
-    RemoveMenu(GetSystemMenu(Result, False), 0, MF_BYPOSITION);                                                                               // 删除移动菜单
-    RemoveMenu(GetSystemMenu(Result, False), 0, MF_BYPOSITION);                                                                               // 删除移动菜单
-    SetWindowPos(Result, FTabDllForm.Handle, 0, 0, FTabDllForm.Width, FTabDllForm.Height, SWP_NOZORDER OR SWP_NOACTIVATE);                    // 最大化 Dll 子窗体
-    FOldWndProc := Pointer(GetWindowlong(Result, GWL_WNDPROC));                                                                               // 解决 DLL 窗体获取焦点时，主窗体丢失焦点的问题
-    SetWindowLong(Result, GWL_WNDPROC, LongInt(@NewDllFormProc));                                                                             // 拦截 DLL 窗体消息
-    PostMessage(Application.MainForm.Handle, WM_NCACTIVATE, 1, 0);                                                                            // 激活主窗体
-    UnHook(@FOld_CreateWindowExW);                                                                                                            // UNHOOK
-    FOld_CreateWindowExW := nil;                                                                                                              // UNHOOK
+    FActivePage.ActivePageIndex := 2;                                                                                                               //
+    Result                      := FOld_CreateWindowExW($00010101, lpClassName, lpWindowName, $96C80000, 0, 0, 0, 0, hWndParent, hMenu, hins, lpp); //
+    Application.Tag             := Result;                                                                                                          // 保存下 VC Dll 窗体句柄
+    Winapi.Windows.SetParent(Result, FTabDllForm.Handle);                                                                                           // 设置父窗体为 TabSheet
+    RemoveMenu(GetSystemMenu(Result, False), 0, MF_BYPOSITION);                                                                                     // 删除移动菜单
+    RemoveMenu(GetSystemMenu(Result, False), 0, MF_BYPOSITION);                                                                                     // 删除移动菜单
+    RemoveMenu(GetSystemMenu(Result, False), 0, MF_BYPOSITION);                                                                                     // 删除移动菜单
+    RemoveMenu(GetSystemMenu(Result, False), 0, MF_BYPOSITION);                                                                                     // 删除移动菜单
+    RemoveMenu(GetSystemMenu(Result, False), 0, MF_BYPOSITION);                                                                                     // 删除移动菜单
+    RemoveMenu(GetSystemMenu(Result, False), 0, MF_BYPOSITION);                                                                                     // 删除移动菜单
+    SetWindowPos(Result, FTabDllForm.Handle, 0, 0, FTabDllForm.Width, FTabDllForm.Height, SWP_NOZORDER OR SWP_NOACTIVATE);                          // 最大化 Dll 子窗体
+    FOldWndProc := Pointer(GetWindowlong(Result, GWL_WNDPROC));                                                                                     // 解决 DLL 窗体获取焦点时，主窗体丢失焦点的问题
+    SetWindowLong(Result, GWL_WNDPROC, LongInt(@NewDllFormProc));                                                                                   // 拦截 DLL 窗体消息
+    PostMessage(Application.MainForm.Handle, WM_NCACTIVATE, 1, 0);                                                                                  // 激活主窗体
+    UnHook(@FOld_CreateWindowExW);                                                                                                                  // UNHOOK
+    FOld_CreateWindowExW := nil;                                                                                                                    // UNHOOK
   end
   else
   begin
@@ -84,7 +82,7 @@ begin
 end;
 
 { 运行 VC DLL 窗体 }
-procedure PBoxRun_VCDll(const strVCDllFileName: String; pgAll: TPageControl; tsDll: TTabSheet; lblInfo: TLabel; const uiShowStyle: TShowStyle; OnVCDllFormDestroyCallback: TNotifyEvent);
+procedure PBoxRun_VCDll(const strVCDllFileName: String; pgAll: TPageControl; tsDll: TTabSheet; OnVCDllFormDestroyCallback: TNotifyEvent);
 var
   hDll                             : HMODULE;
   ShowVCDllForm                    : Tdb_ShowDllForm_Plugins_VCForm;
@@ -95,10 +93,8 @@ begin
   if CompareText(FstrCreateDllFileName, strVCDllFileName) = 0 then
     Exit;
 
-  FPage                       := pgAll;
+  FActivePage                 := pgAll;
   FTabDllForm                 := tsDll;
-  FlblInfo                    := lblInfo;
-  FuiShowStyle                := uiShowStyle;
   FstrCreateDllFileName       := strVCDllFileName;
   FbExit                      := False;
   FOnVCDllFormDestroyCallback := OnVCDllFormDestroyCallback;
