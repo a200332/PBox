@@ -1,15 +1,14 @@
-# PBox is a modular development platform based on Delphi Dll Form
+# PBox is a modular development platform based on Dll Form
 
 - [¼òÌåÖÐÎÄ](readmeCN.md)
 
 ## I. Development purpose
     Based on the principle of minimizing or not modifying the original project source code;
-    Only Support Delphi Dll Form; 
-    PBox2 (https://github.com/dbyoung720/PBox2) Support Delphi¡¢VC¡¢QT, Dll Form
+    Support Delphi Dll¡¢VC DLL Form; 
 
 ## II. Development platform
     Delphi10.4¡¢WIN10X64£»
-    The code does not use any third-party controls£»
+    Do not install any third-party controls£»
     WIN7X64¡¢WIN10X64 test pass£»Support X86¡¢X64;
     Email£ºdbyoung@sina.com
     QQg  £º101611228
@@ -23,9 +22,15 @@
 ```
  procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strSubModuleName, strIconFileName: PAnsiChar); stdcall;
 ```
+* VC2017 function declaration:  
+```
+enum TVCDllType {vtDialog, vtMFC};
+extern "C" __declspec(dllexport) void db_ShowDllForm_Plugins(TVCDllType* spFileType, char** strParentName, char** strSubModuleName, char** strIconFileName, char** strClassName, char** strWindowName, const bool show = false)
+```
 
 
 ## IV: Description of DLL output function parameters 
+* Delphi £º
 ```
  procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strSubModuleName, strIconFileName: PAnsiChar); stdcall;
 
@@ -33,6 +38,17 @@
  strParentModuleName £ºParent module name;  
  strSubModuleName    £ºSub module name;  
  strIconFileName     £ºIcon file; can be empty. In PBox configuration, select the icon;  
+```
+* VC2017 £º
+```
+extern "C" __declspec(dllexport) void db_ShowDllForm_Plugins(TVCDllType* spFileType, char** strParentName, char** strSubModuleName, char** strIconFileName, char** strClassName, char** strWindowName, const bool show = false)
+
+ spFileType        £ºBase on Dialog DLL£¬or base MFC DLL£»
+ strParentName     £ºParent module name;  
+ strSubModuleName  £ºSub module name; 
+ strIconFileName   £ºIcon file; can be empty. In PBox configuration, select the icon; 
+ strClassName      £ºDLL Main form class name£»
+ strWindowName     £ºDLL Main form title name£»
 ```
 
 ## V. Features 

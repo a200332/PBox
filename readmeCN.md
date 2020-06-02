@@ -1,15 +1,14 @@
-# PBox 是一个基于 Delphi Dll 动态库窗体的模块化开发平台
+# PBox 是一个基于 Dll 动态库窗体的模块化开发平台
 
 - [English](readme.md)
 
 ## 一：开发宗旨
     本着尽量少修改或不修改原有工程源代码的原则;
-    仅支持 Delphi Dll 窗体; 
-    PBox2 (https://github.com/dbyoung720/PBox2) 支持 Delphi、VC、QT Dll 窗体; 
+    支持 Delphi Dll、VC DLL 窗体; 
 
 ## 二：开发平台
-    Delphi10.3.3、WIN10X64 下开发；
-    代码没有使用任何第三方控件；
+    Delphi10.4、WIN10X64 下开发；
+    无需安装任何第三方控件；
     WIN7X64、WIN10X64下测试通过；支持X86、X64;
     邮箱：dbyoung@sina.com
     QQ群：101611228
@@ -23,8 +22,14 @@
 ```
  procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strSubModuleName, strIconFileName: PAnsiChar); stdcall;
 ```
+* VC2017 函数声明：
+```
+enum TVCDllType {vtDialog, vtMFC};
+extern "C" __declspec(dllexport) void db_ShowDllForm_Plugins(TVCDllType* spFileType, char** strParentName, char** strSubModuleName, char** strIconFileName, char** strClassName, char** strWindowName, const bool show = false)
+```
 
 ## 四：Dll 输出函数参数说明
+* Delphi ：
 ```
  procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strSubModuleName, strIconFileName: PAnsiChar); stdcall;
 
@@ -32,6 +37,17 @@
  strParentModuleName ：父模块名称；
  strSubModuleName    ：子模块名称；
  strIconFileName     ：图标文件；可为空，在 PBox 配置中，选择图标；
+```
+* VC2017 ：
+```
+extern "C" __declspec(dllexport) void db_ShowDllForm_Plugins(TVCDllType* spFileType, char** strParentName, char** strSubModuleName, char** strIconFileName, char** strClassName, char** strWindowName, const bool show = false)
+
+ spFileType        ：是基于 Dialog(对话框) 的 DLL，还是基于 MFC 的 DLL；
+ strParentName     ：父模块名称；
+ strSubModuleName  ：子模块名称；
+ strIconFileName   ：图标文件；可为空，在 PBox 配置中，选择图标；
+ strClassName      ：DLL 主窗体的类名；
+ strWindowName     ：DLL 主窗体的标题名；
 ```
 
 ## 五：特色功能
