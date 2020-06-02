@@ -22,6 +22,12 @@
 ```
  procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strSubModuleName, strIconFileName: PAnsiChar); stdcall;
 ```
+### VC2017
+* VC 原 EXE(基于对话框) 工程文件，不作任何修改。新建一 DLL.CPP 文件，输出导出函数就可以了。原有代码不用作任何修改。
+* VC 原 EXE(基于 MFC  ) 工程文件，需要少许修改。
+* 把编译后的 Dll 文件放置到 plugins 目录下就可以了。
+* 示例(基于对话框)：DOC\VC\Dialog\Notepad2
+* 示例(基于 MFC  )：DOC\VC\MFC\mpc-be
 * VC2017 函数声明：
 ```
 enum TVCDllType {vtDialog, vtMFC};
