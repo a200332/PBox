@@ -329,7 +329,12 @@ end;
 { VC Dll Form 窗体关闭事件 }
 procedure TfrmPBox.OnVCDllFormDestoryCallback(Sender: TObject);
 begin
-  //
+  { 界面还原 }
+  lblInfo.Caption := '';
+  if FUIShowStyle = ssButton then
+    rzpgcntrlAll.ActivePageIndex := 0
+  else if FUIShowStyle = ssList then
+    rzpgcntrlAll.ActivePageIndex := 1;
 end;
 
 { 创建新的 Dll 窗体 }

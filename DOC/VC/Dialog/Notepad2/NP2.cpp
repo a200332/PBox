@@ -19,7 +19,6 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpRese
 enum TVCDllType {vtDialog, vtMFC};
 
 extern int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInst,LPSTR lpCmdLine,int nCmdShow);
-extern "C" HWND  hwndMain;
 
 extern "C" __declspec(dllexport) void db_ShowDllForm_Plugins(TVCDllType* spFileType, char** strParentName, char** strSubModuleName, char** strIconFileName, char** strClassName, char** strWindowName, const bool show = false)
 {
@@ -36,7 +35,3 @@ extern "C" __declspec(dllexport) void db_ShowDllForm_Plugins(TVCDllType* spFileT
     }
 }
 
-extern "C" __declspec(dllexport) void  db_ShowDllForm_Free()
-{
-   SendMessage(hwndMain, WM_SYSCOMMAND, SC_CLOSE, 0);
-}

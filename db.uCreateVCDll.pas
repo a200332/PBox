@@ -15,18 +15,19 @@ implementation
 function CreateWindowExW(dwExStyle: DWORD; lpClassName: LPCWSTR; lpWindowName: LPCWSTR; dwStyle: DWORD; X, Y, nWidth, nHeight: Integer; hWndParent: hWnd; hMenu: hMenu; hInstance: HINST; lpParam: Pointer): hWnd; stdcall; external user32 name 'CreateWindowExW';
 
 var
-  FOld_CreateWindowExW     : function(dwExStyle: DWORD; lpClassName: LPCWSTR; lpWindowName: LPCWSTR; dwStyle: DWORD; X, Y, nWidth, nHeight: Integer; hWndParent: hWnd; hMenu: hMenu; hins: HINST; lpp: Pointer): hWnd; stdcall;
-  FstrVCDialogDllClassName : String = '';
-  FstrVCDialogDllWindowName: String = '';
-  FPage                    : TPageControl;
-  FTabDllForm              : TTabSheet;
-  FOldWndProc              : Pointer = nil;
-  FstrCreateDllFileName    : String  = '';
-  FhVCDllModule            : HMODULE;
-  Fvct                     : TVCDllType;
-  FlblInfo                 : TLabel;
-  FuiShowStyle             : TShowStyle;
-  FbExit                   : Boolean = False;
+  FOld_CreateWindowExW       : function(dwExStyle: DWORD; lpClassName: LPCWSTR; lpWindowName: LPCWSTR; dwStyle: DWORD; X, Y, nWidth, nHeight: Integer; hWndParent: hWnd; hMenu: hMenu; hins: HINST; lpp: Pointer): hWnd; stdcall;
+  FstrVCDialogDllClassName   : String = '';
+  FstrVCDialogDllWindowName  : String = '';
+  FPage                      : TPageControl;
+  FTabDllForm                : TTabSheet;
+  FOldWndProc                : Pointer = nil;
+  FstrCreateDllFileName      : String  = '';
+  FhVCDllModule              : HMODULE;
+  Fvct                       : TVCDllType;
+  FlblInfo                   : TLabel;
+  FuiShowStyle               : TShowStyle;
+  FbExit                     : Boolean = False;
+  FOnVCDllFormDestroyCallback: TNotifyEvent;
 
   { 解决 dll 中，当 Dll 窗体获取焦点，主窗体变成非激活状态 }
 function NewDllFormProc(hWnd: THandle; msg: UINT; wParam: Cardinal; lParam: Cardinal): Integer; stdcall;
@@ -94,12 +95,13 @@ begin
   if CompareText(FstrCreateDllFileName, strVCDllFileName) = 0 then
     Exit;
 
-  FPage                 := pgAll;
-  FTabDllForm           := tsDll;
-  FlblInfo              := lblInfo;
-  FuiShowStyle          := uiShowStyle;
-  FstrCreateDllFileName := strVCDllFileName;
-  FbExit                := False;
+  FPage                       := pgAll;
+  FTabDllForm                 := tsDll;
+  FlblInfo                    := lblInfo;
+  FuiShowStyle                := uiShowStyle;
+  FstrCreateDllFileName       := strVCDllFileName;
+  FbExit                      := False;
+  FOnVCDllFormDestroyCallback := OnVCDllFormDestroyCallback;
 
   { 获取参数 }
   hDll := LoadLibrary(PChar(strVCDllFileName));
@@ -120,7 +122,13 @@ begin
     ShowVCDllForm := GetProcAddress(FhVCDllModule, c_strDllExportName);
     ShowVCDllForm(Fvct, strParamModuleName, strModuleName, strIconFileName, strClassName, strWindowName, True);
     FreeLibrary(FhVCDllModule);
-    Application.Tag := 0;
+
+    { 全局变量复位 }
+    Application.Tag           := 0;
+    FstrVCDialogDllClassName  := '';
+    FstrVCDialogDllWindowName := '';
+    FstrCreateDllFileName     := '';
+    FOnVCDllFormDestroyCallback(nil);
 
     { 是否退出程序 }
     if FbExit then
@@ -138,27 +146,11 @@ end;
 
 { 销毁 VC DLL 窗体 }
 procedure FreeVCDllForm(const bExit: Boolean = False);
-var
-  db_ShowDllForm_Free: procedure;
 begin
   FbExit := bExit;
 
   { 释放窗体 }
-  db_ShowDllForm_Free := GetProcAddress(FhVCDllModule, 'db_ShowDllForm_Free');
-  db_ShowDllForm_Free;
-
-  { 全局变量复位 }
-  FstrVCDialogDllClassName  := '';
-  FstrVCDialogDllWindowName := '';
-  FstrCreateDllFileName     := '';
-  Application.Tag           := 0;
-
-  { 界面还原 }
-  FlblInfo.Caption := '';
-  if FuiShowStyle = ssButton then
-    FPage.ActivePageIndex := 0
-  else if FuiShowStyle = ssList then
-    FPage.ActivePageIndex := 1;
+  SendMessage(Application.Tag, WM_SYSCOMMAND, SC_CLOSE, 0);
 end;
 
 end.
