@@ -15,7 +15,7 @@
 
 ## III.Usage 
 ### Delphi£º
-* Delphi original exe project, modified to DLL project. Output specific functions, the original code without any modification.
+* Delphi original exe project, modified to DLL project. Output export function, the original code without any modification.
 * Put the compiled DLL file in the plugins directory.
 * Example: Module\SysSPath
 * Delphi function declaration:  
@@ -23,11 +23,11 @@
  procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strSubModuleName, strIconFileName: PAnsiChar); stdcall;
 ```
 ### VC2017
-* VC original EXE(base on Dialog) project£¬without any modifitication¡£new a DLL.CPP file£¬output export function¡£original code not any modification¡£
+* VC original EXE(base on Dialog) project£¬without any modifitication¡£new a dll.cpp file£¬output export function¡£original code not need any modification¡£
 * VC original EXE(base on MFC   ) project£¬need a little modify code¡£
 * Put the compiled DLL file in the plugins directory.
 * Example(base on Dialog)£ºDOC\VC\Dialog\Notepad2
-* Example(base on MFC   )£ºDOC\VC\MFC\mpc-be
+* Example(base on MFC   )£ºDOC\VC\MFCDLL\mpc-be
 * VC2017 function declaration:  
 ```
 enum TVCDllType {vtDialog, vtMFC};
