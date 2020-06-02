@@ -7,7 +7,11 @@ interface
 
 uses Winapi.Windows, Winapi.ShellAPI, System.Win.Registry, System.SysUtils, System.Classes, Vcl.Forms, Vcl.ComCtrls, Vcl.StdCtrls, db.uCommon;
 
+{ 运行 EXE 文件 }
 procedure PBoxRun_IMAGE_EXE(const strEXEFileName, strFileValue: String; ts: TTabSheet; lblInfo: TLabel; OnPEProcessDestroyCallback: TNotifyEvent);
+
+{ 销毁 EXE 窗体 }
+procedure FreeExeForm;
 
 implementation
 
@@ -106,6 +110,7 @@ begin
     CheckSysinternalsREG('Process Monitor');
 end;
 
+{ 运行 EXE 文件 }
 procedure PBoxRun_IMAGE_EXE(const strEXEFileName, strFileValue: String; ts: TTabSheet; lblInfo: TLabel; OnPEProcessDestroyCallback: TNotifyEvent);
 begin
   FTabsheet                   := ts;
@@ -125,6 +130,16 @@ begin
   { 创建 EXE 进程，并隐藏窗体 }
   ShellExecute(Application.MainForm.Handle, 'Open', PChar(strEXEFileName), nil, nil, SW_HIDE);
   // DelayTime(200);
+end;
+
+{ 销毁 EXE 窗体 }
+procedure FreeExeForm;
+var
+  hProcess: Cardinal;
+begin
+  hProcess := OpenProcess(PROCESS_TERMINATE, False, Application.MainForm.Tag);
+  TerminateProcess(hProcess, 0);
+  Application.MainForm.Tag := 0;
 end;
 
 end.

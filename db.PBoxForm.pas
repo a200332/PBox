@@ -113,7 +113,7 @@ type
     procedure FillParamBlank;
     { 点击父模块时，动态创建子模块 }
     procedure OnParentModuleButtonClick(Sender: TObject);
-    { 创建所有子模块对话框窗体 }
+    { 创建显示所有子模块对话框窗体 }
     procedure CreateSubModulesFormDialog(const strPModuleName: string); overload;
     procedure CreateSubModulesFormDialog(const mmItem: TMenuItem); overload;
     { 列表显示风格，创建子模块 DLL 窗体 }
@@ -131,7 +131,7 @@ type
     { 获取垂直位置最大间隔 }
     function GetMaxInstance: Integer;
     { 销毁 Dll 窗体 }
-    procedure DestoryDllForm;
+    procedure FreeDllForm;
     procedure OnAdapterDrawItem(Sender: TObject; ACanvas: TCanvas; ARect: TRect; Selected: Boolean);
     procedure OnAdapterIPClick(Sender: TObject);
     function GetCurrentAdapterIP: String;
@@ -164,7 +164,7 @@ begin
   if ShowConfigForm(FlstAllDll, FAdoCNN) then
   begin
     Hide;
-    DestoryDllForm;
+    FreeDllForm;
     ReCreate;
     Show;
   end;
@@ -343,7 +343,10 @@ begin
   if strPEFileName = '' then
     Exit;
 
-  { 运行 exe 文件 }
+  { 设置 DLL 搜索路径 }
+  SetDllSearchPath;
+
+  { 运行 EXE 文件 }
   if LangType = ltEXE then
   begin
     if (CompareText(ExtractFileExt(strPEFileName), '.exe') = 0) or (CompareText(ExtractFileExt(strPEFileName), '.msc') = 0) then
@@ -353,17 +356,18 @@ begin
     end;
   end;
 
-  { 设置 DLL 搜索路径 }
-  SetDllSearchPath;
-
   { 运行 DELPHI DLL 窗体 }
   if LangType = ltDelphi then
+  begin
     PBoxRun_DelphiDll(FDelphiDllForm, strPEFileName, tsDll, FAdoCNN, OnDelphiDllFormDestoryCallback);
+    Exit;
+  end;
 
   { 运行 VC DLL 窗体 }
   if LangType = ltVC then
   begin
     PBoxRun_VCDll(strPEFileName, rzpgcntrlAll, tsDll, OnVCDllFormDestoryCallback);
+    Exit;
   end;
 end;
 
@@ -382,7 +386,7 @@ begin
   lblInfo.Caption := strTip;
 
   { 销毁上一次创建的 Dll 窗体 }
-  DestoryDllForm;
+  FreeDllForm;
 
   { 创建新的 Dll 窗体 }
   LangType := TLangType(StrToInt(FlstAllDll.ValueFromIndex[TMenuItem(Sender).Tag].Split([';'])[6]));
@@ -662,9 +666,9 @@ end;
 { 扫描插件目录 }
 procedure TfrmPBox.ScanPlugins;
 begin
-  { 设置 DLL 搜索路径 }
-  SetDllSearchPath;
-
+//  { 设置 DLL 搜索路径 }
+//  SetDllSearchPath;
+//
   if not DirectoryExists(ExtractFilePath(ParamStr(0)) + 'plugins') then
     Exit;
 
@@ -823,36 +827,24 @@ begin
 end;
 
 { 销毁 Dll/EXE 窗体 }
-procedure TfrmPBox.DestoryDllForm;
-var
-  hProcess: Cardinal;
+procedure TfrmPBox.FreeDllForm;
 begin
   { 是否有 EXE 窗体存在 }
   if Application.MainForm.Tag <> 0 then
-  begin
-    hProcess := OpenProcess(PROCESS_TERMINATE, False, Application.MainForm.Tag);
-    TerminateProcess(hProcess, 0);
-    Application.MainForm.Tag := 0;
-  end;
+    FreeExeForm;
 
   { 是否有 VC Dll 窗体存在 }
   if Application.Tag <> 0 then
-  begin
-    { 关闭窗体 }
     FreeVCDllForm;
-  end;
 
   { 是否有 Delphi Dll 窗体存在 }
   if FDelphiDllForm <> nil then
-  begin
-    { 关闭窗体 }
-    CloseDelphiDllForm;
-  end;
+    FreeDelphiDllForm;
 end;
 
 procedure TfrmPBox.FormDestroy(Sender: TObject);
 begin
-  DestoryDllForm;
+  FreeDllForm;
   FlstAllDll.Free;
 end;
 
@@ -970,11 +962,11 @@ begin
 
   for I := 0 to mmMainMenu.Items.Count - 1 do
   begin
-    if CompareText(mmMainMenu.Items.Items[I].Caption, strPMouleName) = 0 then
+    if SameText(mmMainMenu.Items.Items[I].Caption, strPMouleName) then
     begin
       for J := 0 to mmMainMenu.Items.Items[I].Count - 1 do
       begin
-        if CompareText(mmMainMenu.Items.Items[I].Items[J].Caption, strSMouleName) = 0 then
+        if SameText(mmMainMenu.Items.Items[I].Items[J].Caption, strSMouleName) then
         begin
           mmItem := mmMainMenu.Items.Items[I].Items[J];
           Break;
@@ -987,7 +979,7 @@ begin
   OnMenuItemClick(mmItem);
 end;
 
-{ 创建所有子模块对话框窗体 }
+{ 创建显示所有子模块对话框窗体 }
 procedure TfrmPBox.CreateSubModulesFormDialog(const mmItem: TMenuItem);
 const
   c_intCols         = 5;
@@ -1034,7 +1026,7 @@ begin
   pnlModuleDialog.Visible := True;
 end;
 
-{ 创建所有子模块对话框窗体 }
+{ 创建显示所有子模块对话框窗体 }
 procedure TfrmPBox.CreateSubModulesFormDialog(const strPModuleName: string);
 var
   I: Integer;

@@ -11,7 +11,7 @@ uses Winapi.Windows, Winapi.Messages, System.Classes, Vcl.Forms, Vcl.Graphics, V
 procedure PBoxRun_DelphiDll(var DllForm: TForm; const strPEFileName: String; tsDllForm: TTabSheet; ADOCNN: TADOConnection; OnDelphiDllFormDestroyCallback: TNotifyEvent);
 
 { 关闭 DELPHI DLL 窗体 }
-procedure CloseDelphiDllForm;
+procedure FreeDelphiDllForm;
 
 implementation
 
@@ -21,7 +21,7 @@ var
   FbDelphiFormDllDestory         : Boolean      = False;
 
   { 关闭 DELPHI DLL 窗体 }
-procedure CloseDelphiDllForm;
+procedure FreeDelphiDllForm;
 begin
   if FhDelphiFormDll = 0 then
     Exit;
