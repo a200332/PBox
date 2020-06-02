@@ -48,6 +48,7 @@ extern "C" __declspec(dllexport) void db_ShowDllForm_Plugins(TVCDllType* spFileT
  strIconFileName   ：图标文件；可为空，在 PBox 配置中，选择图标；
  strClassName      ：DLL 主窗体的类名；
  strWindowName     ：DLL 主窗体的标题名；
+ show              ：显示/隐藏窗体；
 ```
 
 ## 五：特色功能

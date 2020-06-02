@@ -49,6 +49,7 @@ extern "C" __declspec(dllexport) void db_ShowDllForm_Plugins(TVCDllType* spFileT
  strIconFileName   £ºIcon file; can be empty. In PBox configuration, select the icon; 
  strClassName      £ºDLL Main form class name£»
  strWindowName     £ºDLL Main form title name£»
+ show              £ºshow/hide dll main form£»
 ```
 
 ## V. Features 
