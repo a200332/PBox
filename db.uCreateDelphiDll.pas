@@ -5,7 +5,7 @@ unit db.uCreateDelphiDll;
 
 interface
 
-uses Winapi.Windows, Winapi.Messages, System.Classes, Vcl.Forms, Vcl.Graphics, Vcl.ComCtrls, Vcl.Controls, Data.Win.ADODB, db.uCommon;
+uses Winapi.Windows, Winapi.Messages, System.Classes, SysUtils, Vcl.Forms, Vcl.Graphics, Vcl.ComCtrls, Vcl.Controls, Data.Win.ADODB, db.uCommon;
 
 { 运行 DELPHI DLL 窗体 }
 procedure PBoxRun_DelphiDll(const strPEFileName: String; tsDllForm: TTabSheet; ADOCNN: TADOConnection; OnDelphiDllFormDestroyCallback: TNotifyEvent);
@@ -21,6 +21,11 @@ var
   FbDelphiFormDllDestory         : Boolean      = False;
   FhDelphiDllModule              : HMODULE      = 0;
   FDelphiDllForm                 : TForm        = nil;
+
+procedure DLog(const strLog: String);
+begin
+  OutputDebugString(PChar(Format('%s  %s', [FormatDateTime('YYYY-MM-DD hh:mm:ss', Now), strLog])));
+end;
 
 { 非用户触发，程序调用强制关闭 DELPHI DLL 窗体时 }
 procedure FreeDelphiDllForm;
@@ -40,7 +45,7 @@ begin
   end;
 end;
 
-{ 用户触发，点击了关闭按钮时，需时时检查，Delphi Dll 窗体是否关闭了，如果关闭了，变量复位 }
+{ 用户触发，点击了关闭按钮时，需时时检查，Delphi DLL 窗体是否关闭了，如果关闭了，变量复位 }
 procedure tmrCheckDelphiFormDllDestory(hWnd: hWnd; uMsg, idEvent: UINT; dwTime: DWORD); stdcall;
 begin
   if not IsWindowVisible(FhDelphiFormDll) then
@@ -74,7 +79,6 @@ end;
 { 运行 DELPHI DLL 窗体 }
 procedure PBoxRun_DelphiDll(const strPEFileName: String; tsDllForm: TTabSheet; ADOCNN: TADOConnection; OnDelphiDllFormDestroyCallback: TNotifyEvent);
 var
-  // hLib                             : HMODULE;
   ShowDllForm                      : Tdb_ShowDllForm_Plugins_Delphi;
   frm                              : TFormClass;
   strParamModuleName, strModuleName: PAnsiChar;
@@ -83,13 +87,12 @@ begin
   FhDelphiDllModule := LoadLibrary(PChar(strPEFileName));
   ShowDllForm       := GetProcAddress(FhDelphiDllModule, c_strDllExportName);
   ShowDllForm(frm, strParamModuleName, strModuleName, strIconFileName);
-  FDelphiDllForm             := frm.Create(nil);
-  FDelphiDllForm.BorderIcons := [biSystemMenu];
-  FDelphiDllForm.Position    := poDesigned;
-  FDelphiDllForm.BorderStyle := bsSingle;
-  FDelphiDllForm.Color       := clWhite;
-  FDelphiDllForm.Anchors     := [akLeft, akTop, akRight, akBottom];
-  // DllForm.Tag                     := FhDelphiDllModule;                                                                    // 将 hLib 放在 DllForm 的 tag 中，卸载时需要用到
+  FDelphiDllForm                  := frm.Create(nil);
+  FDelphiDllForm.BorderIcons      := [biSystemMenu];
+  FDelphiDllForm.Position         := poDesigned;
+  FDelphiDllForm.BorderStyle      := bsSingle;
+  FDelphiDllForm.Color            := clWhite;
+  FDelphiDllForm.Anchors          := [akLeft, akTop, akRight, akBottom];
   FhDelphiFormDll                 := FDelphiDllForm.Handle;                                                                       // 保存下窗体句柄
   FOnDelphiDllFormDestroyCallback := OnDelphiDllFormDestroyCallback;                                                              // Dll 窗体销毁时，回调主窗体事件
   CheckDllFormDatabase(FDelphiDllForm, ADOCNN);                                                                                   // 数据库检查

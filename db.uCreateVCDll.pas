@@ -1,4 +1,7 @@
 unit db.uCreateVCDll;
+{
+  创建 VC DLG/MFC DLL 窗体
+}
 
 interface
 
@@ -27,7 +30,12 @@ var
   FbExit                     : Boolean = False;
   FOnVCDllFormDestroyCallback: TNotifyEvent;
 
-  { 解决 dll 中，当 Dll 窗体获取焦点，主窗体变成非激活状态 }
+procedure DLog(const strLog: String);
+begin
+  OutputDebugString(PChar(Format('%s  %s', [FormatDateTime('YYYY-MM-DD hh:mm:ss', Now), strLog])));
+end;
+
+{ 解决 dll 中，当 Dll 窗体获取焦点，主窗体变成非激活状态 }
 function NewDllFormProc(hWnd: THandle; msg: UINT; wParam: Cardinal; lParam: Cardinal): Integer; stdcall;
 begin
   { 如果子窗体获取焦点时，激活主窗体 }

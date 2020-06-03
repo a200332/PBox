@@ -12,14 +12,14 @@ uses
   db.uCommon in 'db.uCommon.pas',
   db.uCreateDelphiDll in 'db.uCreateDelphiDll.pas',
   db.uCreateEXE in 'db.uCreateEXE.pas',
+  db.uCreateVCDll in 'db.uCreateVCDll.pas',
   db.PBoxForm in 'db.PBoxForm.pas' {frmPBox},
   db.ConfigForm in 'db.ConfigForm.pas' {frmConfig},
   db.AddEXE in 'db.AddEXE.pas' {frmAddEXE},
   db.DBConfig in 'db.DBConfig.pas' {DBConfig},
   db.LoginForm in 'db.LoginForm.pas' {frmLogin},
   db.AboutForm in 'db.AboutForm.pas' {frmAbout},
-  db.DonateForm in 'db.DonateForm.pas' {frmDonate},
-  db.uCreateVCDll in 'db.uCreateVCDll.pas';
+  db.DonateForm in 'db.DonateForm.pas' {frmDonate};
 
 {$R *.res}
 

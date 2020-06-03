@@ -6,7 +6,7 @@
         <MainSource>PBox.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Release</Config>
-        <Platform Condition="'$(Platform)'==''">Win64</Platform>
+        <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>3</TargetedPlatforms>
         <AppType>Application</AppType>
     </PropertyGroup>
@@ -160,6 +160,7 @@
         <DCCReference Include="db.uCommon.pas"/>
         <DCCReference Include="db.uCreateDelphiDll.pas"/>
         <DCCReference Include="db.uCreateEXE.pas"/>
+        <DCCReference Include="db.uCreateVCDll.pas"/>
         <DCCReference Include="db.PBoxForm.pas">
             <Form>frmPBox</Form>
         </DCCReference>
@@ -183,7 +184,6 @@
             <Form>frmDonate</Form>
             <FormType>dfm</FormType>
         </DCCReference>
-        <DCCReference Include="db.uCreateVCDll.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

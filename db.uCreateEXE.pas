@@ -23,7 +23,12 @@ var
   FlblInfo                   : TLabel;
   FOnPEProcessDestroyCallback: TNotifyEvent;
 
-  { 进程关闭后，变量复位 }
+procedure DLog(const strLog: String);
+begin
+  OutputDebugString(PChar(Format('%s  %s', [FormatDateTime('YYYY-MM-DD hh:mm:ss', Now), strLog])));
+end;
+
+{ 进程关闭后，变量复位 }
 procedure EndExeForm(hWnd: hWnd; uMsg, idEvent: UINT; dwTime: DWORD); stdcall;
 var
   intPID: DWORD;
