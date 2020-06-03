@@ -3,8 +3,9 @@ unit uMain;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, {$IFDEF DX12} DX12.D3D11, DX12.D3DCommon, DX12.DXGI, DX12.DXGI1_2, {$ELSE} Winapi.D3D11, Winapi.D3DX9, Winapi.Direct3D9, Winapi.D3DCommon, Winapi.DXGI, Winapi.DXGI1_2, {$ENDIF} System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Imaging.jpeg, Vcl.Imaging.pngimage, db.uCommon,
-  Vcl.Menus;
+  Winapi.Windows, Winapi.Messages, {$IFDEF DX12} DX12.D3D11, DX12.D3DCommon, DX12.DXGI, DX12.DXGI1_2, {$ELSE} Winapi.D3D11, Winapi.D3DX9, Winapi.Direct3D9, Winapi.D3DCommon, Winapi.DXGI, Winapi.DXGI1_2, {$ENDIF}
+  System.SysUtils, System.Variants, System.Classes, System.IOUtils, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Menus, Vcl.Imaging.jpeg, Vcl.Imaging.pngimage,
+  db.uCommon;
 
 type
   TSnapType = (stGDI, stDX, stDXGI);
@@ -47,6 +48,7 @@ type
     { 销毁热键 }
     procedure FreeHotkey;
     procedure ClearFormRect;
+    procedure imgPos;
   protected
     { 热键相应消息 }
     procedure WMHOTKEY(var Msg: TWMHOTKEY); message wm_hotkey;
@@ -96,6 +98,8 @@ end;
 procedure TfrmSnapScreen.btnDXClick(Sender: TObject);
 begin
   FSnapType := stDX;
+  ShowFullScreen(Handle);
+  HideMainForm;
 end;
 
 procedure TfrmSnapScreen.btnDXGIClick(Sender: TObject);
@@ -283,6 +287,20 @@ begin
   end;
 end;
 
+procedure TfrmSnapScreen.imgPos;
+begin
+  if (imgSnap.Picture.Bitmap.Width < imgSnap.Parent.Width) and (imgSnap.Picture.Bitmap.Height < imgSnap.Parent.Height) then
+  begin
+    imgSnap.Left := (imgSnap.Parent.Width - imgSnap.Width) div 2;
+    imgSnap.Top  := (imgSnap.Parent.Height - imgSnap.Height) div 2;
+  end
+  else
+  begin
+    imgSnap.Left := 0;
+    imgSnap.Top  := 0;
+  end;
+end;
+
 { GDI 截图 }
 procedure TfrmSnapScreen.SnapGDI(const x1, y1, x2, y2: Integer);
 var
@@ -295,9 +313,10 @@ begin
     cvsTemp.Handle      := GetDC(0);
     bmpSnap.PixelFormat := pf32bit;
     bmpSnap.Width       := abs(x2 - x1);
-    bmpSnap.height      := abs(y2 - y1);
+    bmpSnap.Height      := abs(y2 - y1);
     bmpSnap.Canvas.CopyRect(bmpSnap.Canvas.ClipRect, cvsTemp, Rect(x1, y1, x2, y2));
     imgSnap.Picture.Bitmap.Assign(bmpSnap);
+    imgPos;
   finally
     DeleteDC(cvsTemp.Handle);
     cvsTemp.Free;
@@ -308,61 +327,66 @@ end;
 { DX 截图 }
 procedure TfrmSnapScreen.SnapDX(const x1, y1, x2, y2: Integer);
 var
-  hr        : HRESULT;
-  pD3D      : IDirect3D9;
-  D3DPP     : D3DPRESENT_PARAMETERS;
-  Mode      : TD3DDisplayMode;
-  surf      : IDirect3DSurface9;
-  pD3DDevice: IDirect3DDevice9;
-  rct       : TRect;
+  hr                : HRESULT;
+  pD3D              : IDirect3D9;
+  D3DPP             : D3DPRESENT_PARAMETERS;
+  Mode              : TD3DDisplayMode;
+  surf              : IDirect3DSurface9;
+  pD3DDevice        : IDirect3DDevice9;
+  rct               : TRect;
+  strTempBmpFileName: String;
 begin
   pD3D := Direct3DCreate9(D3D_SDK_VERSION);
   if pD3D = nil then
   begin
+    MessageBox(Handle, '获取 DX9 接口失败，无法截图', c_strTitle, MB_ICONQUESTION or MB_OK);
     Exit;
   end;
 
+  zeromemory(@D3DPP, Sizeof(D3DPRESENT_PARAMETERS));
   D3DPP.Windowed         := True;
   D3DPP.SwapEffect       := D3DSWAPEFFECT_DISCARD;
   D3DPP.BackBufferFormat := D3DFMT_UNKNOWN;
   hr                     := pD3D.CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, Handle, D3DCREATE_SOFTWARE_VERTEXPROCESSING, @D3DPP, pD3DDevice);
   if Failed(hr) then
   begin
+    MessageBox(Handle, '获取 DX9 接口失败，无法截图', c_strTitle, MB_ICONQUESTION or MB_OK);
     Exit;
   end;
 
   hr := pD3DDevice.GetDisplayMode(0, Mode);
   if Failed(hr) then
   begin
+    MessageBox(Handle, '获取 DX9 接口失败，无法截图', c_strTitle, MB_ICONQUESTION or MB_OK);
     Exit;
   end;
 
-  hr := pD3DDevice.CreateOffscreenPlainSurface(Mode.Width, Mode.height, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, surf, nil);
+  hr := pD3DDevice.CreateOffscreenPlainSurface(Mode.Width, Mode.Height, D3DFMT_A8R8G8B8, D3DPOOL_SCRATCH, surf, nil);
   if Failed(hr) then
   begin
+    MessageBox(Handle, '获取 DX9 接口失败，无法截图', c_strTitle, MB_ICONQUESTION or MB_OK);
     Exit;
   end;
 
-  hr := pD3DDevice.GetFrontBufferData(9, surf);
+  hr := pD3DDevice.GetFrontBufferData(0, surf);
   if Failed(hr) then
   begin
-    surf._Release;
+    MessageBox(Handle, '获取 DX9 接口失败，无法截图', c_strTitle, MB_ICONQUESTION or MB_OK);
     Exit;
   end;
 
-  rct := Rect(x1, y1, x2, y2);
-  hr  := D3DXSaveSurfaceToFile('c:\tmp.bmp', D3DXIFF_BMP, surf, nil, @rct);
+  rct                := Rect(x1, y1, x2, y2);
+  strTempBmpFileName := TPath.GetTempPath + 'tmp.bmp';
+  hr                 := D3DXSaveSurfaceToFile(PChar(strTempBmpFileName), D3DXIFF_BMP, surf, nil, @rct);
   if Failed(hr) then
   begin
-    surf._Release;
+    MessageBox(Handle, '获取 DX9 接口失败，无法截图', c_strTitle, MB_ICONQUESTION or MB_OK);
     Exit;
   end;
 
-  imgSnap.Picture.LoadFromFile('c:\tmp.bmp');
-  DeleteFile('c:\tmp.bmp');
-  surf._Release;
-  pD3DDevice._Release;
-  pD3D._Release;
+  imgSnap.Picture.LoadFromFile(strTempBmpFileName);
+  imgPos;
+  DeleteFile(strTempBmpFileName);
 end;
 
 { DXGI 截图 }
@@ -435,10 +459,10 @@ begin
         bmpTemp.PixelFormat := pf32bit;
         bmpSnap.PixelFormat := pf32bit;
         bmpSnap.Width       := abs(x2 - x1);
-        bmpSnap.height      := abs(y2 - y1);
+        bmpSnap.Height      := abs(y2 - y1);
         bmpTemp.Width       := Desc.Width;
-        bmpTemp.height      := Desc.height;
-        SetBitmapBits(bmpTemp.Handle, Desc.Width * Desc.height * 4, ScreenRes.PData);
+        bmpTemp.Height      := Desc.Height;
+        SetBitmapBits(bmpTemp.Handle, Desc.Width * Desc.Height * 4, ScreenRes.PData);
         bmpSnap.Canvas.CopyRect(bmpSnap.Canvas.ClipRect, bmpTemp.Canvas, Rect(x1, y1, x2, y2));
         imgSnap.Picture.Bitmap.Assign(bmpSnap);
       finally
