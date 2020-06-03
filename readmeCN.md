@@ -7,27 +7,27 @@
     支持 Delphi DLL、VC DLL 窗体; 
 
 ## 二：开发平台
-    Delphi10.4、WIN10X64 下开发；
-    无需安装任何第三方控件；
-    WIN7X64、WIN10X64下测试通过；支持X86、X64;
+    Delphi10.4、WIN10X64 下开发
+    无需安装任何第三方控件
+    WIN7X64、WIN10X64下测试通过；支持X86、X64
     邮箱：dbyoung@sina.com
     QQ群：101611228
 
 ## 三：使用方法
 ### Delphi：
-* Delphi 原 EXE 工程文件，修改为 Dll 工程。输出导出函数就可以了，原有代码不用作任何修改。
-* 把编译后的 Dll 文件放置到 plugins 目录下就可以了。
-* 示例：Module\SysSPath
+* Delphi 原 EXE 工程文件，修改为 Dll 工程。输出导出函数就可以了，原有代码不用作任何修改；
+* 把编译后的 Dll 文件放置到 plugins 目录下就可以了；
+* 示例：Module\SysSPath；
 * Delphi 函数声明：
 ```
  procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strSubModuleName, strIconFileName: PAnsiChar); stdcall;
 ```
 ### VC2017
-* VC 原 EXE(基于对话框) 工程文件，不作任何修改。新建 dll.cpp 文件，输出导出函数就可以了。原有代码不用任何修改。
-* VC 原 EXE(基于 MFC  ) 工程文件，需要少许修改。
-* 把编译后的 Dll 文件放置到 plugins 目录下就可以了。
-* 示例(基于对话框)：DOC\VC\Dialog\Notepad2
-* 示例(基于MFC   )：DOC\VC\MFCDLL\mpc-be
+* VC 原 EXE(基于对话框) 工程文件，不作任何修改。新建 dll.cpp 文件，输出导出函数就可以了。原有代码不用任何修改；
+* VC 原 EXE(基于 MFC  ) 工程文件，需要少许修改；
+* 把编译后的 Dll 文件放置到 plugins 目录下就可以了；
+* 示例(基于对话框)：DOC\VC\Dialog\Notepad2；
+* 示例(基于MFC   )：DOC\VC\MFCDLL\mpc-be；
 * VC2017 函数声明：
 ```
 enum TVCDllType {vtDialog, vtMFC};
@@ -58,10 +58,10 @@ extern "C" __declspec(dllexport) void db_ShowDllForm_Plugins(TVCDllType* spFileT
 ```
 
 ## 五：特色功能
-    界面支持，菜单方式显示、按钮（对话框）方式显示、列表视方式显示;
-    PBox 还支持将一个 EXE 窗体程序显示在我们的窗体中;
-    支持窗体类名动态变化的 EXE 程序;
-    支持 x86 EXE 调用 x64 EXE，x64 EXE 调用 x86 EXE;
+    界面支持，菜单方式显示、按钮（对话框）方式显示、列表视方式显示；
+    PBox 还支持将一个 EXE 窗体程序显示在我们的窗体中；
+    支持窗体类名动态变化的 EXE 程序；
+    支持 x86 EXE 调用 x64 EXE，x64 EXE 调用 x86 EXE；
     
 ## 六：注意事项
     多文档窗体标题，当窗体最大化时，标题栏标题为 "主窗体标题 - [子窗体标题]"，非最大化时，标题栏标题为："主窗体标题 - 子窗体标题"
@@ -70,3 +70,7 @@ extern "C" __declspec(dllexport) void db_ShowDllForm_Plugins(TVCDllType* spFileT
 ## 七：接下来工作：
     添加数据库支持（由于本人对数据库不熟悉，所以开发较慢，又是业余时间开发）;
 
+## 八：待解决的问题：
+* VC MFC DLL 的支持；
+* QT DLL 的支持；
+* DLL 窗体支持文件拖放；
