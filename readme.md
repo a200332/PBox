@@ -1,4 +1,4 @@
-# PBox is a modular development platform based on Dll Form
+# PBox is a modular development platform based on DLL Form
 
 - [¼òÌåÖÐÎÄ](readmeCN.md)
 
@@ -40,7 +40,7 @@ extern "C" __declspec(dllexport) void db_ShowDllForm_Plugins(TVCDllType* spFileT
 ```
  procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strSubModuleName, strIconFileName: PAnsiChar); stdcall;
 
- frm                 £ºDll main form class name in Delphi;
+ frm                 £ºDLL main form class name in Delphi;
  strParentModuleName £ºParent module name;  
  strSubModuleName    £ºSub module name;  
  strIconFileName     £ºIcon file; can be empty. In PBox configuration, select the icon;  
@@ -55,7 +55,7 @@ extern "C" __declspec(dllexport) void db_ShowDllForm_Plugins(TVCDllType* spFileT
  strIconFileName   £ºIcon file; can be empty. In PBox configuration, select the icon; 
  strClassName      £ºDLL Main form class name;
  strWindowName     £ºDLL Main form title name;
- show              £ºshow/hide dll main form;
+ show              £ºshow/hide DLL main form;
 ```
 
 ## V. Features 

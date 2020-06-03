@@ -1,4 +1,4 @@
-# PBox 是一个基于 Dll 动态库窗体的模块化开发平台
+# PBox 是一个基于 DLL 动态库窗体的模块化开发平台
 
 - [English](readme.md)
 
@@ -15,8 +15,8 @@
 
 ## 三：使用方法
 ### Delphi：
-* Delphi 原 EXE 工程文件，修改为 Dll 工程。输出导出函数就可以了，原有代码不用作任何修改；
-* 把编译后的 Dll 文件放置到 plugins 目录下就可以了；
+* Delphi 原 EXE 工程文件，修改为 DLL 工程。输出导出函数就可以了，原有代码不用作任何修改；
+* 把编译后的 DLL 文件放置到 plugins 目录下就可以了；
 * 示例：Module\SysSPath；
 * Delphi 函数声明：
 ```
@@ -25,7 +25,7 @@
 ### VC2017
 * VC 原 EXE(基于对话框) 工程文件，不作任何修改。新建 dll.cpp 文件，输出导出函数就可以了。原有代码不用任何修改；
 * VC 原 EXE(基于 MFC  ) 工程文件，需要少许修改；
-* 把编译后的 Dll 文件放置到 plugins 目录下就可以了；
+* 把编译后的 DLL 文件放置到 plugins 目录下就可以了；
 * 示例(基于对话框)：DOC\VC\Dialog\Notepad2；
 * 示例(基于MFC   )：DOC\VC\MFCDLL\mpc-be；
 * VC2017 函数声明：
@@ -39,7 +39,7 @@ extern "C" __declspec(dllexport) void db_ShowDllForm_Plugins(TVCDllType* spFileT
 ```
  procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strSubModuleName, strIconFileName: PAnsiChar); stdcall;
 
- frm                 ：Delphi 中 Dll 主窗体类名；
+ frm                 ：Delphi 中 DLL 主窗体类名；
  strParentModuleName ：父模块名称；
  strSubModuleName    ：子模块名称；
  strIconFileName     ：图标文件；可为空，在 PBox 配置中，选择图标；
@@ -73,4 +73,4 @@ extern "C" __declspec(dllexport) void db_ShowDllForm_Plugins(TVCDllType* spFileT
 ## 八：待解决的问题：
 * VC MFC DLL 的支持；
 * QT DLL 的支持；
-* DLL 窗体支持文件拖放；
+* DLL/EXE 窗体支持文件拖放；
