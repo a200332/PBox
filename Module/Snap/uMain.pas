@@ -354,6 +354,7 @@ begin
     Exit;
   end;
 
+  { 多个显示屏咋办？ }
   hr := pD3DDevice.GetDisplayMode(0, Mode);
   if Failed(hr) then
   begin
