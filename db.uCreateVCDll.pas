@@ -143,6 +143,9 @@ end;
 { 销毁 VC DLL 窗体 }
 procedure FreeVCDllForm(const bExit: Boolean = False);
 begin
+  if Application.Tag = 0 then
+    Exit;
+
   FbExit := bExit;
 
   { 释放窗体 }

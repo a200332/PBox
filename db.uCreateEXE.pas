@@ -36,6 +36,7 @@ begin
     Exit;
 
   KillTimer(Application.MainForm.Handle, $2000);
+  Application.MainForm.Tag := 0;
   FOnPEProcessDestroyCallback(nil);
 end;
 
@@ -137,6 +138,9 @@ procedure FreeExeForm;
 var
   hProcess: Cardinal;
 begin
+  if Application.MainForm.Tag = 0 then
+    Exit;
+
   hProcess := OpenProcess(PROCESS_TERMINATE, False, Application.MainForm.Tag);
   TerminateProcess(hProcess, 0);
   Application.MainForm.Tag := 0;

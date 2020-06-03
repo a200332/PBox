@@ -67,16 +67,15 @@ type
     procedure pnlTimeClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
-    FlstAllDll    : THashedStringList;
-    FUIShowStyle  : TShowStyle;
-    FbMaxForm     : Boolean;
-    FDelphiDllForm: TForm;
-    FintBakRow    : Integer;
+    FlstAllDll  : THashedStringList;
+    FUIShowStyle: TShowStyle;
+    FbMaxForm   : Boolean;
+    FintBakRow  : Integer;
     procedure ShowPageTabView(const bShow: Boolean = False);
     procedure ReadConfigUI;
     { 扫描 EXE 文件，读取配置文件 }
     procedure ScanPlugins_EXE;
-    { 扫描 Dll 文件，仅限于插件目录(plugins) }
+    { 扫描 DLL 文件，仅限于插件目录(plugins) }
     procedure ScanPlugins_Dll;
     { 扫描插件目录 }
     procedure ScanPlugins;
@@ -84,20 +83,16 @@ type
     procedure CreateModuleMenu;
     { 点击菜单 }
     procedure OnMenuItemClick(Sender: TObject);
-    { 创建新的 Dll 窗体 }
+    { 创建新的 DLL 窗体 }
     procedure CreateDllForm(const strPEFileName: String; const LangType: TLangType = ltDelphi);
     { 系统配置 }
     procedure OnSysConfig(Sender: TObject);
-    { Delphi Dll Form 窗体关闭事件 }
-    procedure OnDelphiDllFormDestoryCallback(Sender: TObject);
-    { VC DLG Dll Form 窗体关闭事件 }
-    procedure OnVCDllFormDestoryCallback(Sender: TObject);
-    { EXE 程序关闭回调 }
-    procedure OnPEProcessDestroyCallback(Sender: TObject);
+    { DLL/EXE Form 窗体关闭事件回调 }
+    procedure OnDllFormDestoryCallback(Sender: TObject);
     { 获取 EXE 文件的图标 }
     function GetExeFileIcon(const strFileName: String): Integer; overload;
     function GetExeFileIcon(const strEXEInfo, strFileName: string): Integer; overload;
-    { 获取 Dll 文件的图标 }
+    { 获取 DLL 文件的图标 }
     function GetDllFileIcon(const strPModuleName, strSModuleName, strIconFileName: string): Integer;
     function ReadDllIconFromConfig(const strPModule, strSModule: string): Integer;
     procedure ReCreate;
@@ -130,7 +125,7 @@ type
     procedure OnSubModuleListClick(Sender: TObject);
     { 获取垂直位置最大间隔 }
     function GetMaxInstance: Integer;
-    { 销毁 Dll 窗体 }
+    { 销毁 DLL 窗体 }
     procedure FreeDllForm;
     procedure OnAdapterDrawItem(Sender: TObject; ACanvas: TCanvas; ARect: TRect; Selected: Boolean);
     procedure OnAdapterIPClick(Sender: TObject);
@@ -298,11 +293,9 @@ begin
   end;
 end;
 
-{ EXE 程序关闭回调 }
-procedure TfrmPBox.OnPEProcessDestroyCallback(Sender: TObject);
+{ DLL / EXE Form 窗体关闭事件回调 }
+procedure TfrmPBox.OnDllFormDestoryCallback(Sender: TObject);
 begin
-  Application.MainForm.Tag := 0;
-
   lblInfo.Caption := '';
   if FUIShowStyle = ssButton then
     rzpgcntrlAll.ActivePageIndex := 0
@@ -310,34 +303,7 @@ begin
     rzpgcntrlAll.ActivePageIndex := 1;
 end;
 
-{ Delphi Dll Form 窗体关闭事件 }
-procedure TfrmPBox.OnDelphiDllFormDestoryCallback(Sender: TObject);
-begin
-  if FDelphiDllForm <> nil then
-  begin
-    FreeLibrary(FDelphiDllForm.Tag);
-    FDelphiDllForm := nil;
-
-    lblInfo.Caption := '';
-    if FUIShowStyle = ssButton then
-      rzpgcntrlAll.ActivePageIndex := 0
-    else if FUIShowStyle = ssList then
-      rzpgcntrlAll.ActivePageIndex := 1;
-  end;
-end;
-
-{ VC Dll Form 窗体关闭事件 }
-procedure TfrmPBox.OnVCDllFormDestoryCallback(Sender: TObject);
-begin
-  { 界面还原 }
-  lblInfo.Caption := '';
-  if FUIShowStyle = ssButton then
-    rzpgcntrlAll.ActivePageIndex := 0
-  else if FUIShowStyle = ssList then
-    rzpgcntrlAll.ActivePageIndex := 1;
-end;
-
-{ 创建新的 Dll 窗体 }
+{ 创建新的 DLL 窗体 }
 procedure TfrmPBox.CreateDllForm(const strPEFileName: String; const LangType: TLangType = ltDelphi);
 begin
   if strPEFileName = '' then
@@ -351,7 +317,7 @@ begin
   begin
     if (CompareText(ExtractFileExt(strPEFileName), '.exe') = 0) or (CompareText(ExtractFileExt(strPEFileName), '.msc') = 0) then
     begin
-      PBoxRun_IMAGE_EXE(strPEFileName, FlstAllDll.Values[strPEFileName], tsDll, lblInfo, OnPEProcessDestroyCallback);
+      PBoxRun_IMAGE_EXE(strPEFileName, FlstAllDll.Values[strPEFileName], tsDll, lblInfo, OnDllFormDestoryCallback);
       Exit;
     end;
   end;
@@ -359,14 +325,14 @@ begin
   { 运行 DELPHI DLL 窗体 }
   if LangType = ltDelphi then
   begin
-    PBoxRun_DelphiDll(FDelphiDllForm, strPEFileName, tsDll, FAdoCNN, OnDelphiDllFormDestoryCallback);
+    PBoxRun_DelphiDll(strPEFileName, tsDll, FAdoCNN, OnDllFormDestoryCallback);
     Exit;
   end;
 
   { 运行 VC DLL 窗体 }
   if LangType = ltVC then
   begin
-    PBoxRun_VCDll(strPEFileName, rzpgcntrlAll, tsDll, OnVCDllFormDestoryCallback);
+    PBoxRun_VCDll(strPEFileName, rzpgcntrlAll, tsDll, OnDllFormDestoryCallback);
     Exit;
   end;
 end;
@@ -385,10 +351,10 @@ begin
 
   lblInfo.Caption := strTip;
 
-  { 销毁上一次创建的 Dll 窗体 }
+  { 销毁上一次创建的 DLL 窗体 }
   FreeDllForm;
 
-  { 创建新的 Dll 窗体 }
+  { 创建新的 DLL 窗体 }
   LangType := TLangType(StrToInt(FlstAllDll.ValueFromIndex[TMenuItem(Sender).Tag].Split([';'])[6]));
   CreateDllForm(FlstAllDll.Names[TMenuItem(Sender).Tag], LangType);
 end;
@@ -521,7 +487,7 @@ begin
   end;
 end;
 
-{ 获取 Dll 文件的图标 }
+{ 获取 DLL 文件的图标 }
 function TfrmPBox.GetDllFileIcon(const strPModuleName, strSModuleName, strIconFileName: string): Integer;
 var
   strCurrIconFileName: String;
@@ -558,6 +524,7 @@ begin
   end;
 end;
 
+{ 扫描 DLL 文件，仅限于插件目录(plugins) }
 procedure TfrmPBox.ScanPlugins_Dll;
 var
   hDll                                           : HMODULE;
@@ -575,7 +542,6 @@ var
 begin
   lstTemp := TStringList.Create;
   try
-    { 扫描 Dll 文件，仅限于插件目录(plugins) }
     SearchPlugInsDllFile(lstTemp);
     Count := lstTemp.Count;
     if Count <= 0 then
@@ -602,7 +568,7 @@ begin
           Continue;
         end;
 
-        { 获取 Dll 参数 }
+        { 获取 DLL 参数 }
         strVCClassName  := '';
         strVCWindowName := '';
         LangType        := ltVC;
@@ -666,13 +632,10 @@ end;
 { 扫描插件目录 }
 procedure TfrmPBox.ScanPlugins;
 begin
-//  { 设置 DLL 搜索路径 }
-//  SetDllSearchPath;
-//
   if not DirectoryExists(ExtractFilePath(ParamStr(0)) + 'plugins') then
     Exit;
 
-  { 扫描 Dll 文件，添加到列表；当前插件目录 (plugins) }
+  { 扫描 DLL 文件，添加到列表；当前插件目录 (plugins) }
   ScanPlugins_Dll;
 
   { 扫描 EXE 文件，添加到列表；读取配置文件 }
@@ -744,7 +707,6 @@ var
   I, J: Integer;
 begin
   FUIShowStyle        := GetShowStyle;
-  FDelphiDllForm      := nil;
   clbrPModule.Visible := False;
   pnlWeb.Visible      := False;
   lblInfo.Caption     := '';
@@ -793,7 +755,7 @@ end;
 
 procedure TfrmPBox.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  { 是否有 VC Dll 窗体存在 }
+  { 是否有 VC DLL 窗体存在 }
   if Application.Tag <> 0 then
   begin
     { 关闭窗体 }
@@ -826,20 +788,17 @@ begin
     pnlDBLClick(nil);
 end;
 
-{ 销毁 Dll/EXE 窗体 }
+{ 销毁 DLL / EXE 窗体 }
 procedure TfrmPBox.FreeDllForm;
 begin
-  { 是否有 EXE 窗体存在 }
-  if Application.MainForm.Tag <> 0 then
-    FreeExeForm;
+  { 销毁 EXE 窗体 }
+  FreeExeForm;
 
-  { 是否有 VC Dll 窗体存在 }
-  if Application.Tag <> 0 then
-    FreeVCDllForm;
+  { 销毁 VC DLL 窗体 }
+  FreeVCDllForm;
 
-  { 是否有 Delphi Dll 窗体存在 }
-  if FDelphiDllForm <> nil then
-    FreeDelphiDllForm;
+  { 销毁 Delphi DLL 窗体 }
+  FreeDelphiDllForm;
 end;
 
 procedure TfrmPBox.FormDestroy(Sender: TObject);
@@ -854,10 +813,10 @@ var
 begin
   Result := True;
 
-  { 判断是否是 Dll 的窗体句柄 }
+  { 判断是否是 DLL 的窗体句柄 }
   if GetParent(hDllForm) = 0 then
   begin
-    { 更改 Dll 窗体大小 }
+    { 更改 DLL 窗体大小 }
     GetWindowRect(hParentHandle, rctClient);
     SetWindowPos(hDllForm, hParentHandle, 0, 0, rctClient.Width, rctClient.Height, SWP_NOZORDER + SWP_NOACTIVATE);
   end;
@@ -865,7 +824,7 @@ end;
 
 procedure TfrmPBox.FormResize(Sender: TObject);
 begin
-  { 更改 Dll 窗体大小 }
+  { 更改 DLL 窗体大小 }
   EnumChildWindows(Handle, @EnumChildFunc, tsDll.Handle);
 
   if FUIShowStyle = ssButton then
