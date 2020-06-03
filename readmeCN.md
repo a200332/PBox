@@ -23,11 +23,11 @@
  procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strSubModuleName, strIconFileName: PAnsiChar); stdcall;
 ```
 ### VC2017
-* VC 原 EXE(基于对话框) 工程文件，不作任何修改。新建 dll.cpp 文件，输出导出函数就可以了。原有代码不用任何修改；
-* VC 原 EXE(基于 MFC  ) 工程文件，需要少许修改；
+* VC 原 EXE，基于对话框，不作任何修改。新建 dll.cpp 文件，输出导出函数就可以了；
+* VC 原 EXE，基于 MFC  ，需要少许修改；
 * 把编译后的 DLL 文件放置到 plugins 目录下就可以了；
 * 示例(基于对话框)：DOC\VC\Dialog\Notepad2；
-* 示例(基于MFC   )：DOC\VC\MFCDLL\mpc-be；
+* 示例(基于MFC    )：DOC\VC\MFCDLL\mpc-be；
 * VC2017 函数声明：
 ```
 enum TVCDllType {vtDialog, vtMFC};
@@ -71,6 +71,6 @@ extern "C" __declspec(dllexport) void db_ShowDllForm_Plugins(TVCDllType* spFileT
     添加数据库支持（由于本人对数据库不熟悉，所以开发较慢，又是业余时间开发）;
 
 ## 八：待解决的问题：
-* VC MFC DLL 的支持；
-* QT DLL 的支持；
+* VC MFC DLL 窗体的支持；
+* QT DLL 窗体的支持；
 * DLL/EXE 窗体支持文件拖放；
