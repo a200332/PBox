@@ -24,10 +24,10 @@
 ```
 ### VC2017
 * VC original EXE(base on Dialog) project£¬without any modifitication¡£new a dll.cpp file£¬output export function;
-* VC original EXE(base on MFC    ) project£¬need a little modify code;
+* VC original EXE(base on    MFC) project£¬need a little modify code;
 * Put the compiled DLL file in the plugins directory;
 * Example(base on Dialog)£ºDOC\VC\Dialog\Notepad2;
-* Example(base on MFC    )£ºDOC\VC\MFCDLL\mpc-be;
+* Example(base on    MFC)£ºDOC\VC\MFCDLL\mpc-be;
 * VC2017 function declaration:  
 ```
 enum TVCDllType {vtDialog, vtMFC};
