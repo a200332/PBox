@@ -106,9 +106,6 @@ procedure TfrmFullScreen.DeleteRect;
 var
   rgn1, rgn2: THandle;
 begin
-  if (Fpt1.X = Fpt2.X) and (Fpt1.Y = Fpt2.Y) then
-    Exit;
-
   rgn1 := CreateRectRgn(0, 0, Width, Height);
   rgn2 := CreateRectRgn(Fpt1.X, Fpt1.Y, Fpt2.X, Fpt2.Y);
   CombineRGN(rgn1, rgn1, rgn2, RGN_XOR);
@@ -119,9 +116,19 @@ end;
 
 procedure TfrmFullScreen.DrawRect(const pt1, pt2: TPoint);
 begin
-  DeleteRect;
+  if (Fpt1.X = pt1.X) and (Fpt1.Y = pt1.Y) and (Fpt2.X = pt2.X) and (Fpt2.Y = pt2.Y) then
+    Exit;
+
+  { 选择截图区域 }
   Fpt1 := pt1;
   Fpt2 := pt2;
+  DeleteRect;
+
+  { 画红色外框 }
+  Fcvs.pen.Color   := clRed;
+  Fcvs.pen.Width   := 2;
+  Fcvs.brush.Style := bsClear;
+  Fcvs.Rectangle(pt1.X + 1, pt1.Y + 1, pt2.X - 1, pt2.Y - 1);
 end;
 
 end.
