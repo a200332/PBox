@@ -296,7 +296,8 @@ end;
 { DLL / EXE Form 窗体关闭事件回调 }
 procedure TfrmPBox.OnDllFormDestoryCallback(Sender: TObject);
 begin
-  lblInfo.Caption := '';
+  if not g_bCreateNewDllForm then
+    lblInfo.Caption := '';
   if FUIShowStyle = ssButton then
     rzpgcntrlAll.ActivePageIndex := 0
   else if FUIShowStyle = ssList then
@@ -349,13 +350,12 @@ begin
   if SameText(strTip, lblInfo.Caption) then
     Exit;
 
-  lblInfo.Caption := strTip;
-
   { 销毁上一次创建的 DLL 窗体 }
   FreeDllForm;
 
   { 创建新的 DLL 窗体 }
-  LangType := TLangType(StrToInt(FlstAllDll.ValueFromIndex[TMenuItem(Sender).Tag].Split([';'])[6]));
+  lblInfo.Caption := strTip;
+  LangType        := TLangType(StrToInt(FlstAllDll.ValueFromIndex[TMenuItem(Sender).Tag].Split([';'])[6]));
   CreateDllForm(FlstAllDll.Names[TMenuItem(Sender).Tag], LangType);
 end;
 

@@ -3,8 +3,8 @@ unit db.uCommon;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, Winapi.ShellAPI, Winapi.IpRtrMib, Winapi.ImageHlp, Winapi.TlHelp32, Winapi.IpHlpApi, Winapi.IpTypes, Winapi.WinSock, 
-  System.SysUtils, System.Types, System.StrUtils, System.Classes, System.IniFiles, System.Math, System.IOUtils, 
+  Winapi.Windows, Winapi.Messages, Winapi.ShellAPI, Winapi.IpRtrMib, Winapi.ImageHlp, Winapi.TlHelp32, Winapi.IpHlpApi, Winapi.IpTypes, Winapi.WinSock,
+  System.SysUtils, System.Types, System.StrUtils, System.Classes, System.IniFiles, System.Math, System.IOUtils,
   Vcl.Forms, Vcl.Graphics, Vcl.Controls, Data.Win.ADODB, IdIPWatch, db.uNetworkManager, FlyUtils.CnXXX.Common, FlyUtils.AES;
 
 type
@@ -93,6 +93,9 @@ type
     UsnJournalID: UInt64;
     DeleteFlags: Cardinal;
   end;
+
+var
+  g_bCreateNewDllForm: Boolean = False;
 
   { 只允许运行一个实例 }
 procedure OnlyOneRunInstance;

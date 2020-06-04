@@ -10,7 +10,7 @@ uses Winapi.Windows, Winapi.Messages, System.Classes, SysUtils, Vcl.Forms, Vcl.G
 { 运行 DELPHI DLL 窗体 }
 procedure PBoxRun_DelphiDll(const strPEFileName: String; tsDllForm: TTabSheet; ADOCNN: TADOConnection; OnDelphiDllFormDestroyCallback: TNotifyEvent);
 
-{ 关闭 DELPHI DLL 窗体 }
+{ 非用户触发，程序调用强制关闭 DELPHI DLL 窗体 }
 procedure FreeDelphiDllForm;
 
 implementation
@@ -27,6 +27,23 @@ begin
   OutputDebugString(PChar(Format('%s  %s', [FormatDateTime('YYYY-MM-DD hh:mm:ss', Now), strLog])));
 end;
 
+{ DLL 窗体释放完毕，释放资源并变量复位 }
+function FreeAndRest: Boolean;
+begin
+  Result := False;
+  if not IsWindowVisible(FhDelphiFormDll) then
+  begin
+    KillTimer(Application.MainForm.Handle, $3000);
+    FreeLibrary(FhDelphiDllModule);
+    g_bCreateNewDllForm := False;
+    FOnDelphiDllFormDestroyCallback(nil);
+    FDelphiDllForm         := nil;
+    FbDelphiFormDllDestory := True;
+    FhDelphiFormDll        := 0;
+    Result                 := True;
+  end;
+end;
+
 { 非用户触发，程序调用强制关闭 DELPHI DLL 窗体时 }
 procedure FreeDelphiDllForm;
 begin
@@ -40,23 +57,15 @@ begin
   while True do
   begin
     Application.ProcessMessages;
-    if FbDelphiFormDllDestory then
-      Break
+    if FreeAndRest then
+      Break;
   end;
 end;
 
 { 用户触发，点击了关闭按钮时，需时时检查，Delphi DLL 窗体是否关闭了，如果关闭了，变量复位 }
 procedure tmrCheckDelphiFormDllDestory(hWnd: hWnd; uMsg, idEvent: UINT; dwTime: DWORD); stdcall;
 begin
-  if not IsWindowVisible(FhDelphiFormDll) then
-  begin
-    KillTimer(Application.MainForm.Handle, $3000);
-    FreeLibrary(FhDelphiDllModule);
-    FOnDelphiDllFormDestroyCallback(nil);
-    FDelphiDllForm         := nil;
-    FbDelphiFormDllDestory := True;
-    FhDelphiFormDll        := 0;
-  end;
+  FreeAndRest;
 end;
 
 { 挂接 ADOCNN }

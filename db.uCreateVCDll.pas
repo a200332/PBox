@@ -10,7 +10,7 @@ uses Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, Vcl.Forms
 { 运行 VC DLL 窗体 }
 procedure PBoxRun_VCDll(const strVCDllFileName: String; pgAll: TPageControl; tsDll: TTabSheet; OnVCDllFormDestroyCallback: TNotifyEvent);
 
-{ 销毁 VC DLL 窗体 }
+{ 非用户触发，程序调用强制关闭 VC DLL 窗体 }
 procedure FreeVCDllForm(const bExit: Boolean = False);
 
 implementation
@@ -106,6 +106,7 @@ begin
   FstrCreateDllFileName       := strVCDllFileName;
   FbExit                      := False;
   FOnVCDllFormDestroyCallback := OnVCDllFormDestroyCallback;
+  g_bCreateNewDllForm         := False;
 
   { 获取参数 }
   hDll := LoadLibrary(PChar(strVCDllFileName));
@@ -148,13 +149,14 @@ begin
   end;
 end;
 
-{ 销毁 VC DLL 窗体 }
+{ 非用户触发，程序调用强制关闭 VC DLL 窗体 }
 procedure FreeVCDllForm(const bExit: Boolean = False);
 begin
   if Application.Tag = 0 then
     Exit;
 
-  FbExit := bExit;
+  FbExit              := bExit;
+  g_bCreateNewDllForm := True;
 
   { 释放窗体 }
   SendMessage(Application.Tag, WM_SYSCOMMAND, SC_CLOSE, 0);

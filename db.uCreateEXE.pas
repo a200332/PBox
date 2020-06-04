@@ -10,7 +10,7 @@ uses Winapi.Windows, Winapi.ShellAPI, System.Win.Registry, System.SysUtils, Syst
 { 运行 EXE 文件 }
 procedure PBoxRun_IMAGE_EXE(const strEXEFileName, strFileValue: String; ts: TTabSheet; lblInfo: TLabel; OnPEProcessDestroyCallback: TNotifyEvent);
 
-{ 销毁 EXE 窗体 }
+{ 非用户触发，程序调用强制关闭 EXE 窗体 }
 procedure FreeExeForm;
 
 implementation
@@ -28,7 +28,7 @@ begin
   OutputDebugString(PChar(Format('%s  %s', [FormatDateTime('YYYY-MM-DD hh:mm:ss', Now), strLog])));
 end;
 
-{ 进程关闭后，变量复位 }
+{ 用户触发，点击了关闭按钮时，需时时检查，进程关闭后，变量复位 }
 procedure EndExeForm(hWnd: hWnd; uMsg, idEvent: UINT; dwTime: DWORD); stdcall;
 var
   intPID: DWORD;
@@ -42,6 +42,7 @@ begin
 
   KillTimer(Application.MainForm.Handle, $2000);
   Application.MainForm.Tag := 0;
+  g_bCreateNewDllForm      := False;
   FOnPEProcessDestroyCallback(nil);
 end;
 
@@ -135,10 +136,9 @@ begin
 
   { 创建 EXE 进程，并隐藏窗体 }
   ShellExecute(Application.MainForm.Handle, 'Open', PChar(strEXEFileName), nil, nil, SW_HIDE);
-  // DelayTime(200);
 end;
 
-{ 销毁 EXE 窗体 }
+{ 非用户触发，程序调用强制关闭 EXE 窗体 }
 procedure FreeExeForm;
 var
   hProcess: Cardinal;
