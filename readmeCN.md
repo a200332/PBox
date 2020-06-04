@@ -27,6 +27,7 @@
 * VC 原 EXE，基于   MFC，需要少许修改；
 * 把编译后的 DLL 文件放置到 plugins 目录下就可以了；
 * 示例(基于对话框)：DOC\VC\Dialog\Notepad2；
+* 示例(基于对话框)：DOC\VC\Dialog\7zFM
 * 示例(基于   MFC)：DOC\VC\MFCDLL\mpc-be；
 * VC2017 函数声明：
 ```

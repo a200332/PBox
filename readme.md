@@ -27,6 +27,7 @@
 * VC original EXE(base on    MFC) project£¬need a little modify code;
 * Put the compiled DLL file in the plugins directory;
 * Example(base on Dialog)£ºDOC\VC\Dialog\Notepad2;
+* Example(base on Dialog)£ºDOC\VC\Dialog\7zFM
 * Example(base on    MFC)£ºDOC\VC\MFCDLL\mpc-be;
 * VC2017 function declaration:  
 ```
