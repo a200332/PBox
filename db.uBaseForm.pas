@@ -3,7 +3,8 @@ unit db.uBaseForm;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, System.iniFiles, System.Types, Vcl.Menus, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.ExtCtrls, db.uCommon;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, System.iniFiles, System.Types, Vcl.ComCtrls, Vcl.Menus, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.ExtCtrls,
+  JvComponentBase, JvDragDrop, db.uCommon;
 
 const
   WM_FORMSIZE = WM_USER + $1000;
@@ -32,6 +33,7 @@ type
     FbCloseToTray       : Boolean;
     FTrayIcon           : TTrayIcon;
     FTrayIconPMenu      : TPopupMenu;
+    Fjvdrgdrp           : TJvDragDrop;
     procedure OnCloseClick(Sender: TObject);
     procedure OnMaxClick(Sender: TObject);
     procedure OnMinClick(Sender: TObject);
@@ -71,7 +73,7 @@ type
     procedure MultisScreenOnMax;
     { 从最大化还原窗体大小 }
     procedure FormRestoreSize;
-    // procedure WMNCHITTEST(var msg: TWMNCHITTEST); message WM_NCHITTEST;
+    procedure OnFileDrop(Sender: TObject; hWnd: THandle);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -316,6 +318,12 @@ begin
 
   { 初始化系统按钮 }
   InitSysButton;
+
+  Fjvdrgdrp                    := TJvDragDrop.Create(Self);
+  Fjvdrgdrp.AcceptDrag         := True;
+  Fjvdrgdrp.DropTarget         := Self;
+  Fjvdrgdrp.AllowDropElevation := True;
+  Fjvdrgdrp.OnDrop             := OnFileDrop;
 end;
 
 destructor TUIBaseForm.Destroy;
@@ -325,7 +333,7 @@ begin
   FbtnMin.Free;
   FpnlTitle.Free;
   FTrayIcon.Free;
-
+  Fjvdrgdrp.Free;
   inherited;
 end;
 
@@ -390,6 +398,30 @@ procedure TUIBaseForm.OnConfigClick(Sender: TObject);
 begin
   if Assigned(FOnConfig) then
     FOnConfig(FbtnConfig);
+end;
+
+function EnumChildFunc(hDllForm: THandle; hParentHandle: THandle): Boolean; stdcall;
+begin
+  Result := True;
+
+  { 判断是否是 DLL 的窗体句柄 }
+  if GetParent(hDllForm) = 0 then
+  begin
+    PostMessage(hDllForm, WM_DROPFILES, hParentHandle, 0);
+  end;
+end;
+
+procedure TUIBaseForm.OnFileDrop(Sender: TObject; hWnd: THandle);
+begin
+  { 必须有创建的 DLL 窗体存在 }
+  if TPageControl(FindComponent('rzpgcntrlAll')).ActivePageIndex <> 2 then
+    Exit;
+
+  { EXE 文件，接收鼠标拖放消息 }
+  if Application.MainForm.tag <> 0 then
+  begin
+    EnumChildWindows(Handle, @EnumChildFunc, hWnd);
+  end;
 end;
 
 procedure TUIBaseForm.OnFullClick(Sender: TObject);

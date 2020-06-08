@@ -62,6 +62,7 @@ begin
   if hEXEFormHandle <> 0 then
   begin
     KillTimer(Application.MainForm.Handle, $1000);
+    DelayTime(200); // —” ± 500∫¡√Î
     GetWindowThreadProcessId(hEXEFormHandle, intPID);
     Application.MainForm.Tag := intPID;
 
@@ -76,7 +77,6 @@ begin
     RemoveMenu(GetSystemMenu(hEXEFormHandle, False), 0, MF_BYPOSITION);                                                                                    // …æ≥˝“∆∂Ø≤Àµ•
     SetWindowLong(hEXEFormHandle, GWL_STYLE, Integer(WS_CAPTION OR WS_POPUP OR WS_VISIBLE OR WS_CLIPSIBLINGS OR WS_CLIPCHILDREN OR WS_SYSMENU));           // $96C80000);                                                                        // $96000000
     SetWindowLong(hEXEFormHandle, GWL_EXSTYLE, Integer(WS_EX_LEFT OR WS_EX_LTRREADING OR WS_EX_DLGMODALFRAME OR WS_EX_WINDOWEDGE OR WS_EX_CONTROLPARENT)); // $00010000);                                                                              // $00010101
-    DelayTime(200);                                                                                                                                        // —” ± 500∫¡√Î
     ShowWindow(hEXEFormHandle, SW_SHOWNORMAL);                                                                                                             // œ‘ æ¥∞ÃÂ
     Application.MainForm.Height := Application.MainForm.Height + 1;
     Application.MainForm.Height := Application.MainForm.Height - 1;
