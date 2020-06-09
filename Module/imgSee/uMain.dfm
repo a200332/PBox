@@ -15,8 +15,9 @@ object frmImageSee: TfrmImageSee
   OldCreateOrder = False
   Position = poScreenCenter
   OnClose = FormClose
-  OnCreate = FormCreate
   OnMouseWheel = FormMouseWheel
+  OnResize = FormResize
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object pgcSee: TPageControl
@@ -24,7 +25,7 @@ object frmImageSee: TfrmImageSee
     Top = 0
     Width = 1249
     Height = 694
-    ActivePage = tsView
+    ActivePage = tsBrowse
     Align = alClient
     TabOrder = 0
     object tsBrowse: TTabSheet

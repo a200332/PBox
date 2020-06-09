@@ -21,8 +21,9 @@ type
     procedure shltrvwImageChange(Sender: TObject; Node: TTreeNode);
     procedure imgViewDblClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure FormCreate(Sender: TObject);
     procedure FormMouseWheel(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+    procedure FormShow(Sender: TObject);
+    procedure FormResize(Sender: TObject);
   private
     FbStretch: Boolean;
     procedure FreeThumbImageList;
@@ -32,6 +33,7 @@ type
     procedure imgDBLClick(Sender: TObject);
     function SetPanelTop: Integer;
     function SetPanelLeft: Integer;
+    procedure FirstLoadImage(const strFileName: string);
   public
     { Public declarations }
   end;
@@ -174,7 +176,6 @@ procedure TfrmImageSee.imgDBLClick(Sender: TObject);
 var
   strPathName: String;
   strFileName: String;
-  bmp        : TBitmap;
 begin
   if TWinControl(Sender).Tag = 0 then
   begin
@@ -185,25 +186,8 @@ begin
   else
   begin
     strFileName := TImage(Sender).Parent.Hint;
-    bmp         := TBitmap.Create;
-    try
-      LoadOriImage(strFileName, bmp);
-      if FbStretch then
-      begin
-        imgView.Top    := 0;
-        imgView.Left   := 0;
-        imgView.Width  := imgView.Parent.Width - 65;
-        imgView.Height := imgView.Parent.Height - 85;
-      end;
-      imgView.Stretch  := FbStretch;
-      imgView.AutoSize := not FbStretch;
-      imgView.Picture.Bitmap.Assign(bmp);
-      imgView.Hint           := strFileName;
-      imgView.ShowHint       := False;
-      pgcSee.ActivePageIndex := 1;
-    finally
-      bmp.Free;
-    end;
+    FirstLoadImage(strFileName);
+    pgcSee.ActivePageIndex := 1;
   end;
 end;
 
@@ -409,19 +393,50 @@ begin
   Action := caFree;
 end;
 
-procedure TfrmImageSee.FormCreate(Sender: TObject);
+procedure TfrmImageSee.FirstLoadImage(const strFileName: string);
+var
+  bmp: TBitmap;
+begin
+  bmp := TBitmap.Create;
+  try
+    if FileExists(strFileName) then
+    begin
+      LoadOriImage(strFileName, bmp);
+      imgView.Hint     := strFileName;
+      imgView.Stretch  := FbStretch;
+      imgView.AutoSize := not FbStretch;
+      if FbStretch then
+      begin
+        imgView.Left   := 0;
+        imgView.Top    := 0;
+        imgView.Width  := imgView.Parent.Width - 4;
+        imgView.Height := imgView.Parent.Height - 4;
+      end;
+      imgView.Picture.Bitmap.Assign(bmp);
+    end;
+  finally
+    bmp.Free;
+  end;
+end;
+
+procedure TfrmImageSee.FormShow(Sender: TObject);
 var
   intIndex: Integer;
   strPath : String;
-  bmp     : TBitmap;
+  I       : Integer;
 begin
+  for I := 0 to pgcSee.PageCount - 1 do
+  begin
+    pgcSee.Pages[I].TabVisible := False;
+  end;
+
   with TIniFile.Create(string(GetConfigFileName)) do
   begin
     FbStretch := ReadBool('imgSee', 'Stretch', True);
     intIndex  := ReadInteger('imgSee', 'ActiveIndex', 0);
+    strPath   := ReadString('imgSee', 'Path', '');
     if intIndex = 0 then
     begin
-      strPath := ReadString('imgSee', 'Path', '');
       if DirectoryExists(strPath) then
       begin
         shltrvwImage.Path := strPath;
@@ -431,27 +446,14 @@ begin
     end
     else
     begin
-      bmp := TBitmap.Create;
-      try
-        strPath := ReadString('imgSee', 'Path', '');
-        if FileExists(strPath) then
-        begin
-          LoadOriImage(strPath, bmp);
-          imgView.Hint     := strPath;
-          imgView.Stretch  := FbStretch;
-          imgView.AutoSize := not FbStretch;
-          if FbStretch then
-          begin
-            imgView.Left   := 0;
-            imgView.Top    := 0;
-            imgView.Width  := imgView.Parent.Width - 65;
-            imgView.Height := imgView.Parent.Height - 85;
-          end;
-          imgView.Picture.Bitmap.Assign(bmp);
-          pgcSee.ActivePageIndex := 1;
-        end;
-      finally
-        bmp.Free;
+      if (Trim(strPath) <> '') and (FileExists(strPath)) then
+      begin
+        FirstLoadImage(strPath);
+        pgcSee.ActivePageIndex := 1;
+      end
+      else
+      begin
+        pgcSee.ActivePageIndex := 0;
       end;
     end;
 
@@ -465,6 +467,30 @@ begin
     scrlbxView.Perform(WM_VSCROLL, SB_LINEDOWN, 0)
   else
     scrlbxView.Perform(WM_VSCROLL, SB_LINEUP, 0);
+end;
+
+procedure TfrmImageSee.FormResize(Sender: TObject);
+var
+  I, Count: Integer;
+begin
+  if FbStretch then
+  begin
+    imgView.Left   := 0;
+    imgView.Top    := 0;
+    imgView.Width  := imgView.Parent.Width - 4;
+    imgView.Height := imgView.Parent.Height - 4;
+  end;
+
+  { 一行最多可以显示的缩略 Panel 数目 }
+  Count := scrlbxSee.Width div (c_intThumbWidth + c_intXBetween);
+  for I := 0 to scrlbxSee.ComponentCount - 1 do
+  begin
+    if scrlbxSee.Components[I] is TPanel then
+    begin
+      TPanel(scrlbxSee.Components[I]).Top  := c_intYBetween + (I div Count) * (c_intThumbHeight + c_intYBetween);
+      TPanel(scrlbxSee.Components[I]).Left := c_intXBetween + (I mod Count) * (c_intThumbWidth + c_intXBetween);
+    end;
+  end;
 end;
 
 end.
