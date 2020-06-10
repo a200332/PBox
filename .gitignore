@@ -35,3 +35,4 @@ Win32
 /bin/Win64/plugins/Notepad++/config.xml
 /bin/Win32/plugins/whatinstartup/WhatInStartup.cfg
 /bin/Win64/plugins/whatinstartup/WhatInStartup.cfg
+*.dcu

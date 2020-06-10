@@ -3,9 +3,8 @@ unit uMain;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, {$IFDEF DX12} DX12.D3D11, DX12.D3DCommon, DX12.DXGI, DX12.DXGI1_2, {$ELSE} Winapi.D3D11, Winapi.D3DX9, Winapi.Direct3D9, Winapi.D3DCommon, Winapi.DXGI, Winapi.DXGI1_2, {$ENDIF}
-  System.SysUtils, System.Variants, System.Classes, System.IOUtils, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Menus, Vcl.Imaging.jpeg, Vcl.Imaging.pngimage,
-  db.uCommon;
+  Winapi.Windows, Winapi.Messages, Winapi.D3DX9, Winapi.Direct3D9, System.SysUtils, System.Classes, System.IOUtils, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Menus, Vcl.Imaging.jpeg, Vcl.Imaging.pngimage,
+  Execute.DesktopDuplicationAPI, db.uCommon;
 
 type
   TSnapType = (stGDI, stDX, stDXGI);
@@ -32,17 +31,11 @@ type
     procedure mniGDIWindowClick(Sender: TObject);
     procedure tmrPosTimer(Sender: TObject);
   private
-    FSnapType           : TSnapType;
-    FDevice             : ID3D11Device;
-    FContext            : ID3D11DeviceContext;
-    FFeatureLevel       : TD3D_FEATURE_LEVEL;
-    FOutput             : {$IFDEF DX12} TDXGI_OUTPUT_DESC {$ELSE} TDXGIOutputDesc {$ENDIF};
-    FDuplicate          : IDXGIOutputDuplication;
-    FbGetDuplicateScreen: Boolean;
-    FcvsGDIWindow       : TCanvas;
-    FintBackHandle      : THandle;
-    FrctBackForm        : TRect;
-    function CreateDuplicateOutput: Boolean;
+    FSnapType     : TSnapType;
+    FDuplication  : TDesktopDuplicationWrapper;
+    FcvsGDIWindow : TCanvas;
+    FintBackHandle: THandle;
+    FrctBackForm  : TRect;
     { 注册热键 }
     procedure RegHotkey;
     { 销毁热键 }
@@ -105,6 +98,8 @@ end;
 procedure TfrmSnapScreen.btnDXGIClick(Sender: TObject);
 begin
   FSnapType := stDXGI;
+  ShowFullScreen(Handle);
+  HideMainForm;
 end;
 
 procedure TfrmSnapScreen.btnGDIClick(Sender: TObject);
@@ -147,59 +142,17 @@ begin
   end;
 end;
 
-function TfrmSnapScreen.CreateDuplicateOutput: Boolean;
-var
-  intRet     : Integer;
-  GI         : IDXGIDevice;
-  GA         : IDXGIAdapter;
-  GO         : IDXGIOutput;
-  DXGIOutput1: IDXGIOutput1;
-begin
-  Result := False;
-{$IFDEF DX12}
-  intRet := D3D11CreateDevice(nil, D3D_DRIVER_TYPE_HARDWARE, 0, Ord(D3D11_CREATE_DEVICE_SINGLETHREADED), nil, 0, D3D11_SDK_VERSION, FDevice, FFeatureLevel, @FContext);
-{$ELSE}
-  intRet := D3D11CreateDevice(nil, D3D_DRIVER_TYPE_HARDWARE, 0, Ord(D3D11_CREATE_DEVICE_SINGLETHREADED), nil, 0, D3D11_SDK_VERSION, FDevice, FFeatureLevel, FContext);
-{$ENDIF}
-  if Failed(intRet) then
-    Exit;
-
-  intRet := FDevice.QueryInterface(IID_IDXGIDevice, GI);
-  if Failed(intRet) then
-    Exit;
-
-  intRet := GI.GetParent(IID_IDXGIAdapter, Pointer(GA));
-  if Failed(intRet) then
-    Exit;
-
-  intRet := GA.EnumOutputs(0, GO);
-  if Failed(intRet) then
-    Exit;
-
-  intRet := GO.GetDesc(FOutput);
-  if Failed(intRet) then
-    Exit;
-
-  intRet := GO.QueryInterface(IID_IDXGIOutput1, DXGIOutput1);
-  if Failed(intRet) then
-    Exit;
-
-  intRet := DXGIOutput1.DuplicateOutput(FDevice, FDuplicate);
-  if Failed(intRet) then
-    Exit;
-
-  Result := True;
-end;
-
 procedure TfrmSnapScreen.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   DeleteDC(FcvsGDIWindow.Handle);
   FcvsGDIWindow.Free;
+  FDuplication.Free;
   Action := caFree;
 end;
 
 procedure TfrmSnapScreen.FormCreate(Sender: TObject);
 begin
+  FDuplication         := TDesktopDuplicationWrapper.create;
   btnDXGI.Enabled      := Win32MajorVersion > 6;
   FcvsGDIWindow        := TCanvas.create;
   FcvsGDIWindow.Handle := GetDC(0);
@@ -393,89 +346,32 @@ end;
 { DXGI 截图 }
 procedure TfrmSnapScreen.SnapDXGI(const x1, y1, x2, y2: Integer);
 var
-  intRet   : Integer;
-  FrameInfo: {$IFDEF DX12} TDXGI_OUTDUPL_FRAME_INFO {$ELSE}DXGI_OUTDUPL_FRAME_INFO {$ENDIF};
-  Resource : IDXGIResource;
-  Texture  : ID3D11Texture2D;
-  Desc     : TD3D11_TEXTURE2D_DESC;
-  Copy     : ID3D11Texture2D;
-  ScreenRes: TD3D11_MAPPED_SUBRESOURCE;
-  bmpTemp  : TBitmap;
-  bmpSnap  : TBitmap;
+  bmpTemp: TBitmap;
+  bmpSnap: TBitmap;
 begin
-  if not FbGetDuplicateScreen then
-    FbGetDuplicateScreen := CreateDuplicateOutput;
-
-  if not FbGetDuplicateScreen then
+  if FDuplication = nil then
   begin
     MessageBox(Handle, '获取 DXGI 接口失败，无法截图', c_strTitle, MB_ICONQUESTION or MB_OK);
     Exit;
   end;
 
-  if FDuplicate = nil then
+  if FDuplication.GetFrame then
   begin
-    MessageBox(Handle, '获取 DXGI 接口失败，无法截图', c_strTitle, MB_ICONQUESTION or MB_OK);
-    Exit;
-  end;
-
-  intRet := FDuplicate.AcquireNextFrame(10, FrameInfo, Resource);
-  if Failed(intRet) then
-  begin
-    MessageBox(Handle, '获取 DXGI 接口失败，无法截图', c_strTitle, MB_ICONQUESTION or MB_OK);
-    Exit;
-  end;
-
-  try
-    if (FrameInfo.TotalMetadataBufferSize <= 0) then
-    begin
-      MessageBox(Handle, '获取 DXGI 接口失败，无法截图', c_strTitle, MB_ICONQUESTION or MB_OK);
-      Exit;
-    end;
-
-    intRet := Resource.QueryInterface(IID_ID3D11Texture2D, Texture);
-    if Failed(intRet) then
-    begin
-      MessageBox(Handle, '获取 DXGI 接口失败，无法截图', c_strTitle, MB_ICONQUESTION or MB_OK);
-      Exit;
-    end;
-
-    Texture.GetDesc(Desc);
-    Desc.BindFlags      := 0;
-    Desc.CPUAccessFlags := Ord(D3D11_CPU_ACCESS_READ) or Ord(D3D11_CPU_ACCESS_WRITE);
-    Desc.Usage          := D3D11_USAGE_STAGING;
-    Desc.MiscFlags      := 0;
-    intRet              := FDevice.CreateTexture2D(Desc, nil, Copy);
-    if Failed(intRet) then
-    begin
-      MessageBox(Handle, '获取 DXGI 接口失败，无法截图', c_strTitle, MB_ICONQUESTION or MB_OK);
-      Exit;
-    end;
-
-    FContext.CopyResource(Copy, Texture);
-    FContext.Map(Copy, 0, D3D11_MAP_READ_WRITE, 0, ScreenRes);
+    bmpTemp := TBitmap.create;
+    bmpSnap := TBitmap.create;
     try
-      bmpTemp := TBitmap.create;
-      bmpSnap := TBitmap.create;
-      try
-        bmpTemp.PixelFormat := pf32bit;
-        bmpSnap.PixelFormat := pf32bit;
-        bmpSnap.Width       := abs(x2 - x1);
-        bmpSnap.Height      := abs(y2 - y1);
-        bmpTemp.Width       := Desc.Width;
-        bmpTemp.Height      := Desc.Height;
-        SetBitmapBits(bmpTemp.Handle, Desc.Width * Desc.Height * 4, ScreenRes.PData);
-        bmpSnap.Canvas.CopyRect(bmpSnap.Canvas.ClipRect, bmpTemp.Canvas, Rect(x1, y1, x2, y2));
-        imgSnap.Picture.Bitmap.Assign(bmpSnap);
-      finally
-        bmpTemp.Free;
-        bmpSnap.Free;
-      end;
+      FDuplication.DrawFrame(bmpTemp);
+      bmpSnap.PixelFormat := pf32bit;
+      bmpSnap.Width       := abs(x2 - x1);
+      bmpSnap.Height      := abs(y2 - y1);
+      bmpSnap.Canvas.CopyRect(bmpSnap.Canvas.ClipRect, bmpTemp.Canvas, Rect(x1, y1, x2, y2));
+      imgSnap.Picture.Bitmap.Assign(bmpSnap);
     finally
-      Texture := nil;
+      bmpTemp.Free;
+      bmpSnap.Free;
     end;
-  finally
-    FDuplicate.ReleaseFrame();
   end;
+
 end;
 
 end.
