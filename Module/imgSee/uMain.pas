@@ -3,7 +3,7 @@ unit uMain;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, Winapi.GDIPAPI, Winapi.GDIPOBJ, System.SysUtils, System.Variants, System.Classes, System.IOUtils, System.Types, System.IniFiles,
+  Winapi.Windows, Winapi.Messages, Winapi.GDIPAPI, Winapi.GDIPOBJ, System.SysUtils, System.Variants, System.Classes, System.IOUtils, System.Types, System.IniFiles, System.Math,
   Vcl.Imaging.jpeg, Vcl.Imaging.pngimage, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, ShellCtrls, Vcl.ExtCtrls, Vcl.Menus, db.uCommon;
 
 type
@@ -34,6 +34,7 @@ type
     function SetPanelTop: Integer;
     function SetPanelLeft: Integer;
     procedure FirstLoadImage(const strFileName: string);
+    procedure StretchZoom(const bmp: TBitmap; const bStretch: Boolean = True);
   public
     { Public declarations }
   end;
@@ -393,6 +394,46 @@ begin
   Action := caFree;
 end;
 
+procedure TfrmImageSee.StretchZoom(const bmp: TBitmap; const bStretch: Boolean = True);
+var
+  wZoom, hZoom: Single;
+begin
+  if bStretch then
+  begin
+    imgView.Stretch  := True;
+    imgView.AutoSize := False;
+    wZoom            := (imgView.Parent.Width - 8) / bmp.Width;
+    hZoom            := (imgView.Parent.Height - 12) / bmp.Height;
+    if wZoom < hZoom then
+    begin
+      imgView.Width  := Round(bmp.Width * wZoom);
+      imgView.Height := imgView.Width * Round(bmp.Height / bmp.Width);
+    end
+    else
+    begin
+      imgView.Height := Round(bmp.Height * hZoom);
+      imgView.Width  := imgView.Height * Round(bmp.Width / bmp.Height);
+    end;
+    imgView.Left := (imgView.Parent.Width - imgView.Width) div 2;
+    imgView.Top  := (imgView.Parent.Height - imgView.Height) div 2;
+  end
+  else
+  begin
+    imgView.Stretch  := False;
+    imgView.AutoSize := True;
+    if (bmp.Width > imgView.Parent.Width - 8) or (bmp.Height > imgView.Parent.Height - 8) then
+    begin
+      imgView.Top  := 0;
+      imgView.Left := 0;
+    end
+    else
+    begin
+      imgView.Left := (imgView.Parent.Width - imgView.Width) div 2;
+      imgView.Top  := (imgView.Parent.Height - imgView.Height) div 2;
+    end;
+  end;
+end;
+
 procedure TfrmImageSee.FirstLoadImage(const strFileName: string);
 var
   bmp: TBitmap;
@@ -405,13 +446,7 @@ begin
       imgView.Hint     := strFileName;
       imgView.Stretch  := FbStretch;
       imgView.AutoSize := not FbStretch;
-      if FbStretch then
-      begin
-        imgView.Left   := 0;
-        imgView.Top    := 0;
-        imgView.Width  := imgView.Parent.Width - 4;
-        imgView.Height := imgView.Parent.Height - 4;
-      end;
+      StretchZoom(bmp, FbStretch);
       imgView.Picture.Bitmap.Assign(bmp);
     end;
   finally
@@ -441,8 +476,8 @@ begin
       begin
         shltrvwImage.Path := strPath;
         shltrvwImageChange(Sender, nil);
-        pgcSee.ActivePageIndex := 0;
       end;
+      pgcSee.ActivePageIndex := 0;
     end
     else
     begin
@@ -473,13 +508,7 @@ procedure TfrmImageSee.FormResize(Sender: TObject);
 var
   I, Count: Integer;
 begin
-  if FbStretch then
-  begin
-    imgView.Left   := 0;
-    imgView.Top    := 0;
-    imgView.Width  := imgView.Parent.Width - 4;
-    imgView.Height := imgView.Parent.Height - 4;
-  end;
+  StretchZoom(imgView.Picture.Bitmap, FbStretch);
 
   { 一行最多可以显示的缩略 Panel 数目 }
   Count := scrlbxSee.Width div (c_intThumbWidth + c_intXBetween);

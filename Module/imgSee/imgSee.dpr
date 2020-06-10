@@ -5,7 +5,7 @@ library imgSee;
 {$IFEND}
 
 uses
-  uFirstUnit,
+  uFirstUnit in 'uFirstUnit.pas',
   System.SysUtils,
   System.Classes,
   uMain in 'uMain.pas' {frmImageSee};
@@ -16,5 +16,4 @@ exports
   db_ShowDllForm_Plugins;
 
 begin
-
 end.
