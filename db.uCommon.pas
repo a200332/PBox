@@ -3,7 +3,7 @@ unit db.uCommon;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, Winapi.ShellAPI, Winapi.IpRtrMib, Winapi.ImageHlp, Winapi.TlHelp32, Winapi.IpHlpApi, Winapi.IpTypes, Winapi.WinSock,
+  Winapi.Windows, Winapi.Messages, Winapi.ShellAPI, Winapi.IpRtrMib, Winapi.ImageHlp, Winapi.TlHelp32, Winapi.IpHlpApi, Winapi.IpTypes, Winapi.WinSock, Winapi.GDIPOBJ, Winapi.GDIPAPI,
   System.SysUtils, System.Types, System.StrUtils, System.Classes, System.IniFiles, System.Math, System.IOUtils,
   Vcl.Forms, Vcl.Graphics, Vcl.Controls, Data.Win.ADODB, IdIPWatch, db.uNetworkManager, FlyUtils.CnXXX.Common, FlyUtils.AES;
 
@@ -194,6 +194,12 @@ function CheckProcessExist(const intPID: DWORD): Boolean;
 
 { 获取控件高度 }
 function GetLabelHeight(const strFontName: string; const intFontSize: Integer): Integer;
+
+{ DLL 中初始化 GDIPLUS DLL }
+procedure InitGDIPlus;
+
+{ DLL 中销毁 GDIPLUS DLL }
+procedure FreeGDIPlus;
 
 implementation
 
@@ -1346,6 +1352,32 @@ begin
   finally
     FreeMem(Adapters);
   end;
+end;
+
+{ DLL 中初始化 GDIPLUS DLL }
+procedure InitGDIPlus;
+begin
+  StartupInput.DebugEventCallback       := nil;
+  StartupInput.SuppressBackgroundThread := False;
+  StartupInput.SuppressExternalCodecs   := False;
+  StartupInput.GdiplusVersion           := 1;
+  GdiplusStartup(gdiplusToken, @StartupInput, nil);
+end;
+
+{ DLL 中销毁 GDIPLUS DLL }
+procedure FreeGDIPlus;
+begin
+  if Assigned(GenericSansSerifFontFamily) then
+    GenericSansSerifFontFamily.Free;
+  if Assigned(GenericSerifFontFamily) then
+    GenericSerifFontFamily.Free;
+  if Assigned(GenericMonospaceFontFamily) then
+    GenericMonospaceFontFamily.Free;
+  if Assigned(GenericTypographicStringFormatBuffer) then
+    GenericTypographicStringFormatBuffer.Free;
+  if Assigned(GenericDefaultStringFormatBuffer) then
+    GenericDefaultStringFormatBuffer.Free;
+  GdiplusShutdown(gdiplusToken);
 end;
 
 end.

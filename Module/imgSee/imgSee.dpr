@@ -5,7 +5,6 @@ library imgSee;
 {$IFEND}
 
 uses
-  uFirstUnit in 'uFirstUnit.pas',
   System.SysUtils,
   System.Classes,
   uMain in 'uMain.pas' {frmImageSee};

@@ -24,6 +24,8 @@ type
     procedure FormMouseWheel(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
     procedure FormShow(Sender: TObject);
     procedure FormResize(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
     FbStretch: Boolean;
     procedure FreeThumbImageList;
@@ -392,6 +394,16 @@ begin
     Free;
   end;
   Action := caFree;
+end;
+
+procedure TfrmImageSee.FormCreate(Sender: TObject);
+begin
+  InitGDIPlus;
+end;
+
+procedure TfrmImageSee.FormDestroy(Sender: TObject);
+begin
+  FreeGDIPlus;
 end;
 
 procedure TfrmImageSee.StretchZoom(const bmp: TBitmap; const bStretch: Boolean = True);

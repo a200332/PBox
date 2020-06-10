@@ -15,6 +15,8 @@ object frmImageSee: TfrmImageSee
   OldCreateOrder = False
   Position = poScreenCenter
   OnClose = FormClose
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnMouseWheel = FormMouseWheel
   OnResize = FormResize
   OnShow = FormShow
@@ -30,10 +32,6 @@ object frmImageSee: TfrmImageSee
     TabOrder = 0
     object tsBrowse: TTabSheet
       Caption = #22270#20687#27983#35272
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         1241
         666)
