@@ -7,7 +7,7 @@
     Support Delphi DLL、VC DLL Form; 
 
 ## II. Development platform
-    Delphi10.4、WIN10X64
+    Delphi10.3、WIN10X64
     Do not install any third-party controls
     WIN7X64、WIN10X64 test pass;Support X86、X64
     Email��dbyoung@sina.com

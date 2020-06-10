@@ -7,7 +7,7 @@
     支持 Delphi DLL、VC DLL 窗体; 
 
 ## 二：开发平台
-    Delphi10.4、WIN10X64 下开发
+    Delphi10.3、WIN10X64 下开发
     无需安装任何第三方控件
     WIN7X64、WIN10X64下测试通过；支持X86、X64
     邮箱：dbyoung@sina.com
