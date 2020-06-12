@@ -27,7 +27,7 @@ object frmImageSee: TfrmImageSee
     Top = 0
     Width = 1249
     Height = 694
-    ActivePage = tsBrowse
+    ActivePage = tsView
     Align = alClient
     TabOrder = 0
     object tsBrowse: TTabSheet
@@ -72,10 +72,6 @@ object frmImageSee: TfrmImageSee
     object tsView: TTabSheet
       Caption = #22270#20687#26597#30475
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object scrlbxView: TScrollBox
         Left = 0
         Top = 0

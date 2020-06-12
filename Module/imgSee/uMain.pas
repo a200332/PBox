@@ -28,6 +28,7 @@ type
     procedure FormDestroy(Sender: TObject);
   private
     FbStretch: Boolean;
+    FintIndex: Integer;
     procedure FreeThumbImageList;
     procedure CreateThumbImageList(const strFolder: string);
     procedure CreateThumbImagePanel(const ImageList: TStringList; const bDir: Boolean = False); overload;
@@ -46,6 +47,9 @@ procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, s
 implementation
 
 {$R *.dfm}
+
+const
+  c_strimgSeeCaption = 'imgSee v2.0';
 
 procedure db_ShowDllForm_Plugins(var frm: TFormClass; var strParentModuleName, strModuleName, strIconFileName: PAnsiChar); stdcall;
 begin
@@ -185,12 +189,14 @@ begin
     strPathName       := TPanel(Sender).Hint;
     shltrvwImage.Path := strPathName;
     shltrvwImage.OnChange(nil, nil);
+    Caption := c_strimgSeeCaption + '    ' + strPathName;
   end
   else
   begin
     strFileName := TImage(Sender).Parent.Hint;
     FirstLoadImage(strFileName);
     pgcSee.ActivePageIndex := 1;
+    Caption                := c_strimgSeeCaption + '    ' + strFileName;
   end;
 end;
 
@@ -379,6 +385,7 @@ begin
   if not SameText(ExtractFilePath(imgView.Hint), shltrvwImage.Path) then
   begin
     shltrvwImage.Path := ExtractFilePath(imgView.Hint);
+    Caption           := c_strimgSeeCaption + '    ' + shltrvwImage.Path;
   end;
 end;
 
@@ -503,17 +510,9 @@ begin
         pgcSee.ActivePageIndex := 0;
       end;
     end;
-
+    Caption := c_strimgSeeCaption + '    ' + strPath;
     Free;
   end;
-end;
-
-procedure TfrmImageSee.FormMouseWheel(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
-begin
-  if WheelDelta < 0 then
-    scrlbxView.Perform(WM_VSCROLL, SB_LINEDOWN, 0)
-  else
-    scrlbxView.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
 procedure TfrmImageSee.FormResize(Sender: TObject);
@@ -530,6 +529,59 @@ begin
     begin
       TPanel(scrlbxSee.Components[I]).Top  := c_intYBetween + (I div Count) * (c_intThumbHeight + c_intYBetween);
       TPanel(scrlbxSee.Components[I]).Left := c_intXBetween + (I mod Count) * (c_intThumbWidth + c_intXBetween);
+    end;
+  end;
+end;
+
+procedure TfrmImageSee.FormMouseWheel(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+var
+  jpgArr          : TStringDynArray;
+  bmpArr          : TStringDynArray;
+  pngArr          : TStringDynArray;
+  lstImage        : TStringList;
+  strFolder       : String;
+  strFileName     : String;
+  strImageFileName: String;
+begin
+  // if WheelDelta < 0 then
+  // scrlbxView.Perform(WM_VSCROLL, SB_LINEDOWN, 0)
+  // else
+  // scrlbxView.Perform(WM_VSCROLL, SB_LINEUP, 0);
+
+  Handled          := True;
+  strImageFileName := imgView.Hint;
+  if pgcSee.ActivePageIndex = 1 then
+  begin
+    lstImage := TStringList.Create;
+    try
+      strFolder := ExtractFilePath(strImageFileName);
+      jpgArr    := TDirectory.GetFiles(strFolder, '*.jpg', TSearchOption.soTopDirectoryOnly);
+      bmpArr    := TDirectory.GetFiles(strFolder, '*.bmp', TSearchOption.soTopDirectoryOnly);
+      pngArr    := TDirectory.GetFiles(strFolder, '*.png', TSearchOption.soTopDirectoryOnly);
+      for strFileName in jpgArr do
+        lstImage.Add(strFileName);
+      for strFileName in bmpArr do
+        lstImage.Add(strFileName);
+      for strFileName in pngArr do
+        lstImage.Add(strFileName);
+      FintIndex := lstImage.IndexOf(strImageFileName);
+      if WheelDelta < 0 then
+      begin
+        inc(FintIndex);
+        if FintIndex >= lstImage.Count - 1 then
+          FintIndex := lstImage.Count - 1;
+      end
+      else
+      begin
+        Dec(FintIndex);
+        if FintIndex < 0 then
+          FintIndex := 0;
+      end;
+      strImageFileName := lstImage.Strings[FintIndex];
+      FirstLoadImage(strImageFileName);
+      Caption := c_strimgSeeCaption + '    ' + strImageFileName;
+    finally
+      lstImage.Free;
     end;
   end;
 end;
