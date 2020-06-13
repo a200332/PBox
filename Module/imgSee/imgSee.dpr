@@ -7,7 +7,8 @@ library imgSee;
 uses
   System.SysUtils,
   System.Classes,
-  uMain in 'uMain.pas' {frmImageSee};
+  uMainForm in 'uMainForm.pas' {frmImageSee},
+  uSlideShowForm in 'uSlideShowForm.pas' {frmSlideShow};
 
 {$R *.res}
 

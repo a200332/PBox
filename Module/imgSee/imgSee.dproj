@@ -156,8 +156,12 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="uMain.pas">
+        <DCCReference Include="uMainForm.pas">
             <Form>frmImageSee</Form>
+        </DCCReference>
+        <DCCReference Include="uSlideShowForm.pas">
+            <Form>frmSlideShow</Form>
+            <FormType>dfm</FormType>
         </DCCReference>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
@@ -202,7 +206,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Win32\Debug\imgSee.dll" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="..\..\bin\Win32\plugins\imgSee.dll" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>imgSee.dll</RemoteName>
                         <Overwrite>true</Overwrite>
