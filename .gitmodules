@@ -10,3 +10,6 @@
 [submodule "3rdparty/DelphiDX12"]
 	path = 3rdparty/DelphiDX12
 	url = https://github.com/CMCHTPC/DelphiDX12.git
+[submodule "3rdparty/jcl"]
+	path = 3rdparty/jcl
+	url = https://github.com/project-jedi/jcl.git
