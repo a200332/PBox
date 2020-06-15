@@ -13,6 +13,4 @@
 [submodule "3rdparty/jcl"]
 	path = 3rdparty/jcl
 	url = https://github.com/project-jedi/jcl.git
-[submodule "3rdparty/jvcl"]
-	path = 3rdparty/jvcl
-	url = https://github.com/project-jedi/jvcl.git
+
